@@ -1,5 +1,5 @@
 'use client'
-
+import { Analytics } from "@vercel/analytics/next"
 import * as React from 'react'
 import {
   ThemeProvider as NextThemesProvider,
