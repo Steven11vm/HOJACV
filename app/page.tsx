@@ -42,7 +42,15 @@ import {
   Moon,
   Menu,
   X,
+  FileText,
 } from "lucide-react"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { ScrollArea } from "@/components/ui/scroll-area"
 export default function CVPage() {
   const [activeSection, setActiveSection] = useState("hero")
   const [isDark, setIsDark] = useState(false)
@@ -217,39 +225,118 @@ export default function CVPage() {
     return () => io.disconnect()
   }, [experiences.length])
 
-  const projects = [
+  type ProjectDoc = {
+    architecture?: string[]
+    technicalDecisions?: string[]
+    problemsSolved?: string[]
+  }
+  type Project = {
+    title: string
+    description: string
+    tech: string[]
+    link?: string
+    featured: boolean
+    doc?: ProjectDoc
+  }
+  const [docProject, setDocProject] = useState<Project | null>(null)
+
+  const projects: Project[] = [
     {
       title: "CHAT BOT CON IA-GENERADOR DE BEATS",
       description:
         "Plataforma innovadora con inteligencia artificial para generación de música y beats personalizados",
       tech: ["Python", "Node.js", "App.js", "Api-gemini", "AI/ML"],
-      link: "https://opiumm-na1igd6vs-svillamizarm-4880s-projects.vercel.app/",
+      link: "https://opiumm-gray.vercel.app/",
       featured: true,
+      doc: {
+        architecture: [
+          "Frontend en React/Next con interfaz de chat y controles de generación.",
+          "Backend en Node.js para orquestar llamadas a APIs de IA.",
+          "Integración con API Gemini para procesamiento de lenguaje natural y generación de contenido.",
+          "Pipeline de audio: generación de beats vía modelos/servicios de IA y reproducción en cliente.",
+        ],
+        technicalDecisions: [
+          "Uso de API Gemini para respuestas conversacionales y contexto de generación musical.",
+          "Separación entre capa de chat (NLU) y capa de generación de audio para escalar por partes.",
+          "Node.js como puente entre frontend y APIs externas para ocultar claves y manejar rate limits.",
+        ],
+        problemsSolved: [
+          "Unificar chat y generación de beats en una sola experiencia sin cambiar de aplicación.",
+          "Manejo de latencia en generación de audio con feedback visual y estados de carga.",
+          "Persistencia de preferencias de usuario (estilo, BPM) entre sesiones.",
+        ],
+      },
     },
     {
       title: "SaaS sistemas de inventario y ventas",
       description:
         "Aplicación web para gestión de inventario, control de stock y ventas. Desarrollada con React, Node.js y HTML.",
       tech: ["HTML", "React", "Node.js", "CSS", "JavaScript"],
-      link: "https://saas-bg2o29gbf-svillamizarm-4880s-projects.vercel.app/login",
+      link: "https://saas-beta-peach.vercel.app/",
       featured: true,
-    },  
-     {
+      doc: {
+        architecture: [
+          "SPA en React con vistas: inventario, ventas, reportes y configuración.",
+          "API REST en Node.js para CRUD de productos, movimientos y ventas.",
+          "Base de datos (SQL o NoSQL según despliegue) para productos, stock y transacciones.",
+        ],
+        technicalDecisions: [
+          "React para reutilización de componentes (tablas, formularios, modales) en todas las secciones.",
+          "API REST stateless para permitir futura app móvil o integraciones.",
+          "Validación en backend y frontend para evitar datos inconsistentes en stock.",
+        ],
+        problemsSolved: [
+          "Sincronización de stock en tiempo real al registrar ventas o entradas/salidas.",
+          "Evitar ventas por encima del stock disponible con validaciones y mensajes claros.",
+          "Reportes de ventas e inventario exportables o visualizables en dashboard.",
+        ],
+      },
+    },
+    {
       title: "Dashboard profesional tipo empresarial",
       description:
         "Sistema empresarial con análisis de empleados, reportes, generación de Excel y PDF. Desarrollado con React, Node.js y HTML.",
       tech: ["HTML", "React", "Node.js", "CSS", "JavaScript", "Excel", "PDF"],
-      link: "https://empresarial-kf1w8k459-svillamizarm-4880s-projects.vercel.app/",
+      link: "https://empresarial-omega.vercel.app/",
       featured: true,
+      doc: {
+        architecture: [
+          "Frontend React con dashboards, tablas y gráficos (ej. Recharts).",
+          "Backend Node.js con endpoints para empleados, reportes y generación de archivos.",
+          "Generación de Excel y PDF en servidor (librerías como xlsx, pdf-lib o puppeteer) y descarga por el cliente.",
+        ],
+        technicalDecisions: [
+          "Generación de Excel/PDF en backend para no sobrecargar el navegador y garantizar formato uniforme.",
+          "Gráficos en el cliente con datos agregados desde la API para mejor tiempo de respuesta.",
+          "Autenticación y roles para restringir acceso a reportes sensibles.",
+        ],
+        problemsSolved: [
+          "Reportes pesados (muchos empleados/datos) sin bloquear la UI mediante jobs o streaming.",
+          "Formato consistente de Excel y PDF para auditorías y presentaciones.",
+          "Análisis de datos de empleados (KPIs, tendencias) con visualizaciones claras.",
+        ],
+      },
     },
-    
-    
     {
       title: "BARBERIA-ORION",
       description: "Plataforma web moderna para gestión de citas y servicios de barbería",
       tech: ["React", "Tailwind CSS", "Framer Motion"],
       link: "#",
       featured: false,
+      doc: {
+        architecture: [
+          "Aplicación React con vistas de servicios, disponibilidad y reservas.",
+          "Estilos con Tailwind y animaciones con Framer Motion para UX fluida.",
+        ],
+        technicalDecisions: [
+          "Framer Motion para transiciones y micro-interacciones que refuercen la marca.",
+          "Diseño responsivo primero para uso en móvil en punto de venta o por clientes.",
+        ],
+        problemsSolved: [
+          "Visualización clara de horarios y servicios para reducir no-shows.",
+          "Experiencia de reserva rápida y accesible desde cualquier dispositivo.",
+        ],
+      },
     },
     {
       title: "ORAL-PLUS Y APP ORAL-PLUS",
@@ -258,21 +345,69 @@ export default function CVPage() {
       tech: ["JavaScript", "HTML","Php", "Css", "SQL", "Android"],
       link: "https://oral-plus.com/index.html",
       featured: true,
+      doc: {
+        architecture: [
+          "Sitio web con PHP en el servidor, HTML/CSS/JS en el frontend.",
+          "App Android nativa o híbrida para catálogo y pagos.",
+          "Base de datos SQL compartida para productos, usuarios y facturas.",
+        ],
+        technicalDecisions: [
+          "PHP para backend web y lógica de negocio en el servidor.",
+          "App móvil para llegar a clientes que prefieren comprar desde el teléfono.",
+          "Un solo modelo de datos para facturas en web y app para consistencia.",
+        ],
+        problemsSolved: [
+          "Pago de facturas y compra de productos desde web y app con el mismo usuario.",
+          "Sincronización de inventario y precios entre canal web y móvil.",
+          "Experiencia de compra segura y clara para productos bucales.",
+        ],
+      },
     },
     {
       title: "HOJA DE VIDA DIGITAL",
-      description: "Pagian web donde se mueestra mis habilidades y proyectos",
+      description: "Página web donde se muestran mis habilidades y proyectos",
       tech: ["React", "Tailwind CSS", "Framer Motion"],
       link: "https://cv-steven.vercel.app/",
       featured: true,
+      doc: {
+        architecture: [
+          "Next.js App Router con una página principal (page.tsx) y componentes reutilizables.",
+          "UI con Radix UI + Tailwind CSS; tema claro/oscuro persistido en localStorage.",
+          "Secciones: Hero, Sobre mí, Experiencia, Habilidades, Proyectos (con documentación técnica), Contacto.",
+        ],
+        technicalDecisions: [
+          "Single Page con scroll y navegación por anclas para evitar recargas y mejor UX.",
+          "Intersection Observer para animaciones al scroll (experiencia, proyectos) sin librerías pesadas.",
+          "Documentación técnica por proyecto en modal (Dialog) para no saturar la vista.",
+        ],
+        problemsSolved: [
+          "Mostrar muchos proyectos sin saturar: destacados + grid secundario y doc técnica bajo demanda.",
+          "Rendimiento en móvil: animaciones con CSS/RAF y lazy de imágenes con Next/Image.",
+          "Accesibilidad: tema claro/oscuro, menú móvil y botones con labels.",
+        ],
+      },
     },
     {
       title: "PROYECTOS EMPRESARIALES PRIVADOS",
       description: "Sistemas empresariales personalizados con visualización de datos en tiempo real",
       tech: ["Python", "JavaScript", "MySQL"],
       featured: false,
+      doc: {
+        architecture: [
+          "Backend en Python (Flask/Django o similar) para lógica y APIs.",
+          "Frontend en JavaScript para dashboards y visualización en tiempo real.",
+          "MySQL como almacenamiento transaccional y para reportes.",
+        ],
+        technicalDecisions: [
+          "Python para integraciones, scripts y procesamiento de datos empresariales.",
+          "Visualización en tiempo real mediante WebSockets o polling según requisitos.",
+        ],
+        problemsSolved: [
+          "Datos en tiempo real para monitoreo y toma de decisiones.",
+          "Sistemas a medida que se integran con procesos internos del cliente.",
+        ],
+      },
     },
-    
   ]
 
   // Proyectos: efecto "cohetes" al entrar en vista (romper la 4.ª pared)
@@ -781,11 +916,22 @@ export default function CVPage() {
                               </span>
                             ))}
                           </div>
-                          <div className="mt-auto">
+                          <div className="mt-auto flex flex-wrap gap-2">
+                            {project.doc && (
+                              <Button
+                                size="lg"
+                                variant="outline"
+                                className="min-h-[2.75rem] border-border touch-manipulation sm:min-h-0"
+                                onClick={() => setDocProject(project)}
+                              >
+                                <FileText className="mr-2 h-4 w-4" />
+                                Documentación técnica
+                              </Button>
+                            )}
                             {project.link ? (
                               <Button
                                 size="lg"
-                                className="w-full min-h-[2.75rem] bg-primary text-primary-foreground hover:bg-primary/90 group/btn touch-manipulation sm:w-auto sm:min-h-0"
+                                className="w-full min-h-[2.75rem] bg-primary text-primary-foreground hover:bg-primary/90 group/btn touch-manipulation sm:w-auto sm:min-h-0 sm:flex-1 sm:flex-initial"
                                 asChild
                               >
                                 <a href={project.link} target="_blank" rel="noopener noreferrer">
@@ -862,23 +1008,36 @@ export default function CVPage() {
                           </span>
                         )}
                       </div>
-                      {project.link ? (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="w-full min-h-[2.5rem] border-primary/30 text-foreground hover:bg-primary/5 hover:border-primary/50 touch-manipulation sm:min-h-0"
-                          asChild
-                        >
-                          <a href={project.link} target="_blank" rel="noopener noreferrer">
-                            <ExternalLink className="mr-1.5 h-3.5 w-3.5" />
-                            Ver proyecto
-                          </a>
-                        </Button>
-                      ) : (
-                        <Button variant="outline" size="sm" className="w-full" disabled>
-                          Proyecto privado
-                        </Button>
-                      )}
+                      <div className="flex flex-wrap gap-1.5">
+                        {project.doc && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="min-h-[2.5rem] text-muted-foreground hover:text-foreground touch-manipulation sm:min-h-0"
+                            onClick={() => setDocProject(project)}
+                          >
+                            <FileText className="mr-1 h-3.5 w-3.5" />
+                            Doc. técnica
+                          </Button>
+                        )}
+                        {project.link ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1 min-h-[2.5rem] border-primary/30 text-foreground hover:bg-primary/5 hover:border-primary/50 touch-manipulation sm:min-h-0"
+                            asChild
+                          >
+                            <a href={project.link} target="_blank" rel="noopener noreferrer">
+                              <ExternalLink className="mr-1.5 h-3.5 w-3.5" />
+                              Ver proyecto
+                            </a>
+                          </Button>
+                        ) : (
+                          <Button variant="outline" size="sm" className="flex-1" disabled>
+                            Proyecto privado
+                          </Button>
+                        )}
+                      </div>
                     </Card>
                     </div>
                   )
@@ -936,6 +1095,63 @@ export default function CVPage() {
           </div>
         </footer>
       </div>
+
+      {/* Modal de documentación técnica */}
+      <Dialog open={!!docProject} onOpenChange={(open) => !open && setDocProject(null)}>
+        <DialogContent className="max-h-[85dvh] max-w-2xl gap-0 sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-xl">
+              <FileText className="h-5 w-5 text-primary" />
+              {docProject?.title}
+            </DialogTitle>
+          </DialogHeader>
+          {docProject?.doc && (
+            <ScrollArea className="max-h-[60dvh] pr-4">
+              <div className="space-y-6 pt-2">
+                {docProject.doc.architecture && docProject.doc.architecture.length > 0 && (
+                  <div>
+                    <h4 className="mb-2 flex items-center gap-2 font-semibold text-foreground">
+                      <Layers className="h-4 w-4 text-primary" />
+                      Arquitectura
+                    </h4>
+                    <ul className="list-inside list-disc space-y-1 text-sm text-muted-foreground">
+                      {docProject.doc.architecture.map((item, i) => (
+                        <li key={i}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {docProject.doc.technicalDecisions && docProject.doc.technicalDecisions.length > 0 && (
+                  <div>
+                    <h4 className="mb-2 flex items-center gap-2 font-semibold text-foreground">
+                      <Code className="h-4 w-4 text-primary" />
+                      Decisiones técnicas
+                    </h4>
+                    <ul className="list-inside list-disc space-y-1 text-sm text-muted-foreground">
+                      {docProject.doc.technicalDecisions.map((item, i) => (
+                        <li key={i}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {docProject.doc.problemsSolved && docProject.doc.problemsSolved.length > 0 && (
+                  <div>
+                    <h4 className="mb-2 flex items-center gap-2 font-semibold text-foreground">
+                      <CheckCircle2 className="h-4 w-4 text-primary" />
+                      Problemas resueltos
+                    </h4>
+                    <ul className="list-inside list-disc space-y-1 text-sm text-muted-foreground">
+                      {docProject.doc.problemsSolved.map((item, i) => (
+                        <li key={i}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </ScrollArea>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <style jsx>{`
         @keyframes floatCode {
