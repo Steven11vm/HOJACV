@@ -108,11 +108,27 @@
   html {
     -webkit-text-size-adjust: 100%;
     -webkit-tap-highlight-color: transparent;
+    overflow-x: hidden;
+    /* Evitar doble scrollbar: solo body hace scroll */
+    overflow-y: hidden;
+    height: 100%;
   }
   body {
     @apply bg-background text-foreground antialiased;
     overflow-x: hidden;
+    overflow-y: auto;
+    height: 100%;
+    margin: 0;
   }
+}
+
+/* Ocultar scrollbar nativa en ScrollArea de Radix (evita doble scrollbar en modales) */
+[data-slot="scroll-area-viewport"] {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+[data-slot="scroll-area-viewport"]::-webkit-scrollbar {
+  display: none;
 }
 
 /* Safe area para móviles con notch / barra de estado */
@@ -169,6 +185,136 @@
 
 .animate-scale-in {
   animation: scale-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Modal de idioma: animaciones desde los lados */
+@keyframes lang-modal-scale {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.7);
+  }
+  70% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.03);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes lang-slide-from-left {
+  0% {
+    opacity: 0;
+    transform: translateX(-120px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes lang-slide-from-right {
+  0% {
+    opacity: 0;
+    transform: translateX(120px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes lang-fade-slide-down {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-lang-modal {
+  animation: lang-modal-scale 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.animate-lang-title {
+  animation: lang-fade-slide-down 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+}
+
+.animate-lang-subtitle {
+  animation: lang-fade-slide-down 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+}
+
+.animate-lang-btn-left {
+  animation: lang-slide-from-left 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.25s both;
+}
+
+.animate-lang-btn-right {
+  animation: lang-slide-from-right 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.35s both;
+}
+
+/* Landing page: animaciones desde los lados en toda la página */
+@keyframes landing-slide-from-left {
+  from {
+    opacity: 0;
+    transform: translateX(-80px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes landing-slide-from-right {
+  from {
+    opacity: 0;
+    transform: translateX(80px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes landing-slide-from-top {
+  from {
+    opacity: 0;
+    transform: translateY(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes landing-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-landing-left {
+  animation: landing-slide-from-left 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-landing-right {
+  animation: landing-slide-from-right 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-landing-top {
+  animation: landing-slide-from-top 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-landing-fade-up {
+  animation: landing-fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 /* Elegant hover effect with subtle elevation */

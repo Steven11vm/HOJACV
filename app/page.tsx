@@ -3,7 +3,7 @@
  * @author STEVEN VILLAMIZAR MENDOZA
  */
 "use client"
-import { useState, useEffect, useRef, useCallback } from "react"
+import { useState, useEffect, useRef } from "react"
 import Image from "next/image"
 import { Card } from "@/components/ui/card"
 
@@ -24,7 +24,6 @@ import {
   Briefcase,
   GraduationCap,
   User,
-  Rocket,
   Sparkles,
   Zap,
   TrendingUp,
@@ -51,21 +50,49 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { translations, type Lang, LANG_KEY } from "@/lib/translations"
+import { Globe } from "lucide-react"
+import { WaveSeparator } from "@/components/wave-separator"
 export default function CVPage() {
   const [activeSection, setActiveSection] = useState("hero")
   const [isDark, setIsDark] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [visibleExpIndexes, setVisibleExpIndexes] = useState<Set<number>>(new Set())
+  const [visibleProjectIndexes, setVisibleProjectIndexes] = useState<Set<number>>(new Set())
   const [projectsInView, setProjectsInView] = useState(false)
+  const [aboutInView, setAboutInView] = useState(false)
+  const [experienceInView, setExperienceInView] = useState(false)
+  const [skillsInView, setSkillsInView] = useState(false)
+  const [contactInView, setContactInView] = useState(false)
+  const [lang, setLang] = useState<Lang>("es")
+  const [showLangModal, setShowLangModal] = useState(false)
   const sectionRefs = useRef<{ [key: string]: HTMLElement | null }>({})
   const experienceCardRefs = useRef<(HTMLDivElement | null)[]>([])
+  const projectCardRefs = useRef<(HTMLDivElement | null)[]>([])
   const projectsSectionRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     setIsVisible(true)
     setIsDark(document.documentElement.classList.contains("dark"))
   }, [])
+
+  // Modal de idioma al entrar: si no hay preferencia guardada, mostrar
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    const saved = localStorage.getItem(LANG_KEY) as Lang | null
+    if (saved === "es" || saved === "en") {
+      setLang(saved)
+    } else {
+      setShowLangModal(true)
+    }
+  }, [])
+
+  const selectLanguage = (l: Lang) => {
+    setLang(l)
+    localStorage.setItem(LANG_KEY, l)
+    setShowLangModal(false)
+  }
 
   const toggleTheme = () => {
     const next = !document.documentElement.classList.contains("dark")
@@ -129,76 +156,10 @@ export default function CVPage() {
     { name: "Git", logo: `${CDN}/git/git-original.svg` },
     { name: "Android", logo: `${CDN}/android/android-original.svg` },
   ]
-  const skillsSectionRef = useRef<HTMLDivElement>(null)
-  const orbsRef = useRef<(HTMLDivElement | null)[]>([])
-  const [orbDeltas, setOrbDeltas] = useState<{ x: number; y: number }[]>(() => skills.map(() => ({ x: 0, y: 0 })))
-  const mouseRef = useRef({ x: 0, y: 0 })
-  const rafRef = useRef<number | null>(null)
 
-  const onSkillsMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    mouseRef.current = { x: e.clientX, y: e.clientY }
-    if (rafRef.current == null) {
-      rafRef.current = requestAnimationFrame(() => {
-        rafRef.current = null
-        const refs = orbsRef.current
-        const mx = mouseRef.current.x
-        const my = mouseRef.current.y
-        const newDeltas = refs.map((el) => {
-          if (!el) return { x: 0, y: 0 }
-          const r = el.getBoundingClientRect()
-          const ox = r.left + r.width / 2
-          const oy = r.top + r.height / 2
-          const dx = ox - mx
-          const dy = oy - my
-          const d = Math.hypot(dx, dy) || 1
-          const force = Math.min(24, 1200 / (d + 40))
-          const ux = dx / d
-          const uy = dy / d
-          return { x: ux * force, y: uy * force }
-        })
-        setOrbDeltas(newDeltas)
-      })
-    }
-  }, [])
-
-  const onSkillsMouseLeave = useCallback(() => {
-    setOrbDeltas((prev) => prev.map(() => ({ x: 0, y: 0 })))
-  }, [])
-
-  const experiences = [
-    {
-      title: "Desarrollador Full Stack Senior",
-      company: "Empresa Actual",
-      period: "2025 - Presente",
-      description:
-        "Liderazgo técnico en desarrollo de aplicaciones web escalables, arquitectura de sistemas y mentoría de equipos.",
-      achievements: ["Arquitectura de sistemas", "Mentoría técnica", "Optimización de rendimiento"],
-      tech: ["React", "Node.js", "TypeScript", "AI Integration"],
-    },
-    {
-      title: "Desarrollador de Software",
-      company: "Empresa Actual",
-      period: "2025 - Presente",
-      description:
-        "Desarrollo y mantenimiento de aplicaciones web con integración de Inteligencia Artificial.",
-      achievements: ["Integración de IA", "Optimización de procesos", "Nuevas funcionalidades"],
-      tech: ["JavaScript", "Python", "AI/ML", "Web Development"],
-    },
-    {
-      title: "Desarrollador Frontend",
-      period: "2020 - 2025",
-      description: "Desarrollo de interfaces modernas y responsivas con enfoque en UX/UI.",
-      achievements: ["Interfaces responsivas", "Optimización UX", "Mejora de rendimiento"],
-      tech: ["React", "Tailwind CSS", "TypeScript"],
-    },
-    {
-      title: "Desarrollador Junior",
-      period: "2019 - 2025",
-      description: "Desarrollo de funcionalidades web y colaboración en proyectos ágiles.",
-      achievements: ["Aprendizaje continuo", "Colaboración en equipo", "Desarrollo ágil"],
-      tech: ["JavaScript", "HTML", "CSS", "Git"],
-    },
-  ]
+  const t = translations[lang]
+  const experiences = t.experiences
+  const projects = t.projectsData
 
   // Animación al scroll: experiencia (aparecen al bajar)
   useEffect(() => {
@@ -226,191 +187,21 @@ export default function CVPage() {
   }, [experiences.length])
 
   type ProjectDoc = {
-    architecture?: string[]
-    technicalDecisions?: string[]
-    problemsSolved?: string[]
+    architecture?: readonly string[]
+    technicalDecisions?: readonly string[]
+    problemsSolved?: readonly string[]
   }
   type Project = {
     title: string
     description: string
-    tech: string[]
+    tech: readonly string[]
     link?: string
     featured: boolean
     doc?: ProjectDoc
   }
   const [docProject, setDocProject] = useState<Project | null>(null)
 
-  const projects: Project[] = [
-    {
-      title: "CHAT BOT CON IA-GENERADOR DE BEATS",
-      description:
-        "Plataforma innovadora con inteligencia artificial para generación de música y beats personalizados",
-      tech: ["Python", "Node.js", "App.js", "Api-gemini", "AI/ML"],
-      link: "https://opiumm-gray.vercel.app/",
-      featured: true,
-      doc: {
-        architecture: [
-          "Frontend en React/Next con interfaz de chat y controles de generación.",
-          "Backend en Node.js para orquestar llamadas a APIs de IA.",
-          "Integración con API Gemini para procesamiento de lenguaje natural y generación de contenido.",
-          "Pipeline de audio: generación de beats vía modelos/servicios de IA y reproducción en cliente.",
-        ],
-        technicalDecisions: [
-          "Uso de API Gemini para respuestas conversacionales y contexto de generación musical.",
-          "Separación entre capa de chat (NLU) y capa de generación de audio para escalar por partes.",
-          "Node.js como puente entre frontend y APIs externas para ocultar claves y manejar rate limits.",
-        ],
-        problemsSolved: [
-          "Unificar chat y generación de beats en una sola experiencia sin cambiar de aplicación.",
-          "Manejo de latencia en generación de audio con feedback visual y estados de carga.",
-          "Persistencia de preferencias de usuario (estilo, BPM) entre sesiones.",
-        ],
-      },
-    },
-    {
-      title: "SaaS sistemas de inventario y ventas",
-      description:
-        "Aplicación web para gestión de inventario, control de stock y ventas. Desarrollada con React, Node.js y HTML.",
-      tech: ["HTML", "React", "Node.js", "CSS", "JavaScript"],
-      link: "https://saas-beta-peach.vercel.app/",
-      featured: true,
-      doc: {
-        architecture: [
-          "SPA en React con vistas: inventario, ventas, reportes y configuración.",
-          "API REST en Node.js para CRUD de productos, movimientos y ventas.",
-          "Base de datos (SQL o NoSQL según despliegue) para productos, stock y transacciones.",
-        ],
-        technicalDecisions: [
-          "React para reutilización de componentes (tablas, formularios, modales) en todas las secciones.",
-          "API REST stateless para permitir futura app móvil o integraciones.",
-          "Validación en backend y frontend para evitar datos inconsistentes en stock.",
-        ],
-        problemsSolved: [
-          "Sincronización de stock en tiempo real al registrar ventas o entradas/salidas.",
-          "Evitar ventas por encima del stock disponible con validaciones y mensajes claros.",
-          "Reportes de ventas e inventario exportables o visualizables en dashboard.",
-        ],
-      },
-    },
-    {
-      title: "Dashboard profesional tipo empresarial",
-      description:
-        "Sistema empresarial con análisis de empleados, reportes, generación de Excel y PDF. Desarrollado con React, Node.js y HTML.",
-      tech: ["HTML", "React", "Node.js", "CSS", "JavaScript", "Excel", "PDF"],
-      link: "https://empresarial-omega.vercel.app/",
-      featured: true,
-      doc: {
-        architecture: [
-          "Frontend React con dashboards, tablas y gráficos (ej. Recharts).",
-          "Backend Node.js con endpoints para empleados, reportes y generación de archivos.",
-          "Generación de Excel y PDF en servidor (librerías como xlsx, pdf-lib o puppeteer) y descarga por el cliente.",
-        ],
-        technicalDecisions: [
-          "Generación de Excel/PDF en backend para no sobrecargar el navegador y garantizar formato uniforme.",
-          "Gráficos en el cliente con datos agregados desde la API para mejor tiempo de respuesta.",
-          "Autenticación y roles para restringir acceso a reportes sensibles.",
-        ],
-        problemsSolved: [
-          "Reportes pesados (muchos empleados/datos) sin bloquear la UI mediante jobs o streaming.",
-          "Formato consistente de Excel y PDF para auditorías y presentaciones.",
-          "Análisis de datos de empleados (KPIs, tendencias) con visualizaciones claras.",
-        ],
-      },
-    },
-    {
-      title: "BARBERIA-ORION",
-      description: "Plataforma web moderna para gestión de citas y servicios de barbería",
-      tech: ["React", "Tailwind CSS", "Framer Motion"],
-      link: "#",
-      featured: false,
-      doc: {
-        architecture: [
-          "Aplicación React con vistas de servicios, disponibilidad y reservas.",
-          "Estilos con Tailwind y animaciones con Framer Motion para UX fluida.",
-        ],
-        technicalDecisions: [
-          "Framer Motion para transiciones y micro-interacciones que refuercen la marca.",
-          "Diseño responsivo primero para uso en móvil en punto de venta o por clientes.",
-        ],
-        problemsSolved: [
-          "Visualización clara de horarios y servicios para reducir no-shows.",
-          "Experiencia de reserva rápida y accesible desde cualquier dispositivo.",
-        ],
-      },
-    },
-    {
-      title: "ORAL-PLUS Y APP ORAL-PLUS",
-      description:
-        "Solución completa web y móvil para la venta de productos bucales y pago de facturas",
-      tech: ["JavaScript", "HTML","Php", "Css", "SQL", "Android"],
-      link: "https://oral-plus.com/index.html",
-      featured: true,
-      doc: {
-        architecture: [
-          "Sitio web con PHP en el servidor, HTML/CSS/JS en el frontend.",
-          "App Android nativa o híbrida para catálogo y pagos.",
-          "Base de datos SQL compartida para productos, usuarios y facturas.",
-        ],
-        technicalDecisions: [
-          "PHP para backend web y lógica de negocio en el servidor.",
-          "App móvil para llegar a clientes que prefieren comprar desde el teléfono.",
-          "Un solo modelo de datos para facturas en web y app para consistencia.",
-        ],
-        problemsSolved: [
-          "Pago de facturas y compra de productos desde web y app con el mismo usuario.",
-          "Sincronización de inventario y precios entre canal web y móvil.",
-          "Experiencia de compra segura y clara para productos bucales.",
-        ],
-      },
-    },
-    {
-      title: "HOJA DE VIDA DIGITAL",
-      description: "Página web donde se muestran mis habilidades y proyectos",
-      tech: ["React", "Tailwind CSS", "Framer Motion"],
-      link: "https://cv-steven.vercel.app/",
-      featured: true,
-      doc: {
-        architecture: [
-          "Next.js App Router con una página principal (page.tsx) y componentes reutilizables.",
-          "UI con Radix UI + Tailwind CSS; tema claro/oscuro persistido en localStorage.",
-          "Secciones: Hero, Sobre mí, Experiencia, Habilidades, Proyectos (con documentación técnica), Contacto.",
-        ],
-        technicalDecisions: [
-          "Single Page con scroll y navegación por anclas para evitar recargas y mejor UX.",
-          "Intersection Observer para animaciones al scroll (experiencia, proyectos) sin librerías pesadas.",
-          "Documentación técnica por proyecto en modal (Dialog) para no saturar la vista.",
-        ],
-        problemsSolved: [
-          "Mostrar muchos proyectos sin saturar: destacados + grid secundario y doc técnica bajo demanda.",
-          "Rendimiento en móvil: animaciones con CSS/RAF y lazy de imágenes con Next/Image.",
-          "Accesibilidad: tema claro/oscuro, menú móvil y botones con labels.",
-        ],
-      },
-    },
-    {
-      title: "PROYECTOS EMPRESARIALES PRIVADOS",
-      description: "Sistemas empresariales personalizados con visualización de datos en tiempo real",
-      tech: ["Python", "JavaScript", "MySQL"],
-      featured: false,
-      doc: {
-        architecture: [
-          "Backend en Python (Flask/Django o similar) para lógica y APIs.",
-          "Frontend en JavaScript para dashboards y visualización en tiempo real.",
-          "MySQL como almacenamiento transaccional y para reportes.",
-        ],
-        technicalDecisions: [
-          "Python para integraciones, scripts y procesamiento de datos empresariales.",
-          "Visualización en tiempo real mediante WebSockets o polling según requisitos.",
-        ],
-        problemsSolved: [
-          "Datos en tiempo real para monitoreo y toma de decisiones.",
-          "Sistemas a medida que se integran con procesos internos del cliente.",
-        ],
-      },
-    },
-  ]
-
-  // Proyectos: efecto "cohetes" al entrar en vista (romper la 4.ª pared)
+  // Proyectos: animación al scroll (como experiencia)
   useEffect(() => {
     const el = projectsSectionRef.current
     if (!el) return
@@ -424,11 +215,49 @@ export default function CVPage() {
     return () => io.disconnect()
   }, [])
 
+  // Project cards: animación al entrar en vista (como experience)
+  useEffect(() => {
+    const refs = projectCardRefs.current
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const idx = refs.findIndex((r) => r === entry.target)
+          if (idx === -1) return
+          setVisibleProjectIndexes((prev) => {
+            const next = new Set(prev)
+            if (entry.isIntersecting) next.add(idx)
+            else next.delete(idx)
+            return next
+          })
+        })
+      },
+      { rootMargin: "-30px 0px -30px 0px", threshold: 0.08 }
+    )
+    refs.forEach((el) => el && io.observe(el))
+    return () => io.disconnect()
+  }, [projects.length])
+
+  // About, Experience, Skills, Contact: animaciones al entrar en vista
+  useEffect(() => {
+    const refs = [sectionRefs.current.about, sectionRefs.current.experience, sectionRefs.current.skills, sectionRefs.current.contact]
+    const setters = [setAboutInView, setExperienceInView, setSkillsInView, setContactInView]
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const idx = refs.findIndex((r) => r === entry.target)
+          if (idx >= 0 && entry.isIntersecting) setters[idx](true)
+        })
+      },
+      { rootMargin: "-50px 0px -50px 0px", threshold: 0.08 }
+    )
+    refs.forEach((el) => el && io.observe(el))
+    return () => io.disconnect()
+  }, [])
+
   const stats = [
-    { label: "Años de Experiencia", value: "1+", icon: TrendingUp },
-    { label: "Proyectos Completados", value: "20+", icon: Target },
-    { label: "Tecnologías Dominadas", value: "17+", icon: Brain },
-  
+    { label: t.stats.years, value: "1+", icon: TrendingUp },
+    { label: t.stats.projects, value: "20+", icon: Target },
+    { label: t.stats.tech, value: "17+", icon: Brain },
   ]
 
   return (
@@ -443,18 +272,58 @@ export default function CVPage() {
       />
       <FloatingCode />
 
-      {/* Barra de navegación: menú hamburguesa en móvil */}
-      <header className="fixed left-0 right-0 top-0 z-50 border-b border-border bg-card/95 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-card/80 safe-area-top">
+      {/* Modal de idioma al entrar - animaciones desde los lados */}
+      <Dialog open={showLangModal} onOpenChange={(open) => !open && setShowLangModal(false)}>
+        <DialogContent
+          className="max-w-md gap-6 sm:max-w-lg data-[state=open]:!animate-lang-modal"
+        >
+          <DialogHeader className="overflow-hidden">
+            <DialogTitle className="flex items-center gap-2 text-xl sm:text-2xl animate-lang-title">
+              <Globe className="h-6 w-6 text-primary" />
+              <span>{translations.es.langModal.title} / {translations.en.langModal.title}</span>
+            </DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground animate-lang-subtitle">
+            {translations.es.langModal.subtitle}<br />
+            <span className="text-muted-foreground/80">{translations.en.langModal.subtitle}</span>
+          </p>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 overflow-hidden">
+            <Button
+              size="lg"
+              variant={lang === "es" ? "default" : "outline"}
+              className="min-h-[4rem] text-lg font-semibold animate-lang-btn-left transition-all duration-300 hover:scale-105 hover:shadow-lg"
+              onClick={() => selectLanguage("es")}
+            >
+              🇪🇸 {t.langModal.spanish}
+            </Button>
+            <Button
+              size="lg"
+              variant={lang === "en" ? "default" : "outline"}
+              className="min-h-[4rem] text-lg font-semibold animate-lang-btn-right transition-all duration-300 hover:scale-105 hover:shadow-lg"
+              onClick={() => selectLanguage("en")}
+            >
+              🇺🇸 {t.langModal.english}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Barra de navegación: entra desde arriba */}
+      <header
+        className={`fixed left-0 right-0 top-0 z-50 border-b border-border bg-card/95 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-card/80 safe-area-top transition-all duration-700 ${
+          isVisible ? "translate-y-0 opacity-100" : "-translate-y-4 opacity-0"
+        }`}
+      >
         <div className="mx-auto flex h-14 min-h-[3.5rem] max-w-7xl items-center justify-between gap-2 px-3 sm:px-6">
           <span className="truncate text-sm font-semibold text-foreground sm:text-base">Steven Villamizar</span>
           <nav className="hidden items-center gap-0.5 md:flex md:gap-1">
             {[
-              { id: "hero", label: "Inicio" },
-              { id: "about", label: "Sobre Mí" },
-              { id: "experience", label: "Experiencia" },
-              { id: "skills", label: "Habilidades" },
-              { id: "projects", label: "Proyectos" },
-              { id: "contact", label: "Contacto" },
+              { id: "hero", label: t.nav.home },
+              { id: "about", label: t.nav.about },
+              { id: "experience", label: t.nav.experience },
+              { id: "skills", label: t.nav.skills },
+              { id: "projects", label: t.nav.projects },
+              { id: "contact", label: t.nav.contact },
             ].map(({ id, label }) => (
               <button
                 key={id}
@@ -473,9 +342,18 @@ export default function CVPage() {
           <div className="flex shrink-0 items-center gap-1">
             <button
               type="button"
+              onClick={() => setShowLangModal(true)}
+              className="flex h-10 w-10 min-h-[2.5rem] min-w-[2.5rem] items-center justify-center rounded-lg border border-border bg-transparent text-foreground transition-colors hover:bg-muted touch-manipulation"
+              aria-label={lang === "es" ? "Cambiar a inglés" : "Switch to Spanish"}
+              title={lang === "es" ? "English" : "Español"}
+            >
+              <Globe className="h-5 w-5" />
+            </button>
+            <button
+              type="button"
               onClick={toggleTheme}
               className="flex h-10 w-10 min-h-[2.5rem] min-w-[2.5rem] items-center justify-center rounded-lg border border-border bg-transparent text-foreground transition-colors hover:bg-muted touch-manipulation"
-              aria-label={isDark ? "Activar modo claro" : "Activar modo oscuro"}
+              aria-label={isDark ? t.aria.lightMode : t.aria.darkMode}
             >
               {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </button>
@@ -483,7 +361,7 @@ export default function CVPage() {
               type="button"
               onClick={() => setMobileMenuOpen((o) => !o)}
               className="flex h-10 w-10 min-h-[2.5rem] min-w-[2.5rem] items-center justify-center rounded-lg border border-border bg-transparent text-foreground transition-colors hover:bg-muted md:hidden touch-manipulation"
-              aria-label={mobileMenuOpen ? "Cerrar menú" : "Abrir menú"}
+              aria-label={mobileMenuOpen ? t.aria.closeMenu : t.aria.openMenu}
             >
               {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
@@ -496,12 +374,12 @@ export default function CVPage() {
         >
           <nav className="flex flex-col p-3 pb-4">
             {[
-              { id: "hero", label: "Inicio" },
-              { id: "about", label: "Sobre Mí" },
-              { id: "experience", label: "Experiencia" },
-              { id: "skills", label: "Habilidades" },
-              { id: "projects", label: "Proyectos" },
-              { id: "contact", label: "Contacto" },
+              { id: "hero", label: t.nav.home },
+              { id: "about", label: t.nav.about },
+              { id: "experience", label: t.nav.experience },
+              { id: "skills", label: t.nav.skills },
+              { id: "projects", label: t.nav.projects },
+              { id: "contact", label: t.nav.contact },
             ].map(({ id, label }) => (
               <button
                 key={id}
@@ -530,8 +408,8 @@ export default function CVPage() {
         >
           <div className="mx-auto grid w-full max-w-7xl items-center gap-8 sm:gap-12 lg:grid-cols-2 lg:gap-16">
             <div
-              className={`order-2 lg:order-1 transition-all duration-1000 ${
-                isVisible ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
+              className={`order-2 lg:order-1 transition-all duration-1000 ease-out ${
+                isVisible ? "translate-x-0 opacity-100" : "-translate-x-20 opacity-0"
               }`}
             >
               <div className="mb-6 flex items-center gap-2 font-mono text-sm text-muted-foreground">
@@ -547,10 +425,10 @@ export default function CVPage() {
               </p>
               <div className="mb-6 flex items-center gap-2 text-muted-foreground">
                 <Sparkles className="h-5 w-5 text-primary" />
-                <span className="text-base font-medium">Innovación & Tecnología</span>
+                <span className="text-base font-medium">{t.hero.tagline}</span>
               </div>
               <p className="mb-8 max-w-xl text-muted-foreground leading-relaxed">
-                Desarrollador apasionado por crear soluciones tecnológicas innovadoras.
+                {t.hero.intro}
               </p>
               <div className="mb-6 grid grid-cols-3 gap-2 sm:mb-8 sm:gap-4">
                 {stats.map(({ label, value, icon: Icon }, idx) => (
@@ -568,7 +446,7 @@ export default function CVPage() {
                 <Button size="lg" className="min-h-[2.75rem] bg-primary text-primary-foreground hover:bg-primary/90 touch-manipulation sm:min-h-0" asChild>
                   <a href="mailto:Stevenvilla10@gmail.com">
                     <Mail className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-                    Contratar Ahora
+                    {t.hero.hireNow}
                   </a>
                 </Button>
                 <a href="/CV/Hoja de vida.pdf" download="Steven_Villamizar_CV.pdf" style={{ textDecoration: "none" }}>
@@ -578,7 +456,7 @@ export default function CVPage() {
                     className="min-h-[2.75rem] border-primary/40 bg-transparent text-foreground hover:bg-muted hover:border-primary/60 touch-manipulation sm:min-h-0"
                   >
                     <Download className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-                    Descargar CV
+                    {t.hero.downloadCV}
                   </Button>
                 </a>
               </div>
@@ -601,8 +479,8 @@ export default function CVPage() {
             </div>
             {/* Solo foto del gato, más grande */}
             <div
-              className={`order-1 flex justify-center lg:order-2 transition-all duration-1000 delay-150 ${
-                isVisible ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
+              className={`order-1 flex justify-center lg:order-2 transition-all duration-1000 ease-out delay-200 ${
+                isVisible ? "translate-x-0 opacity-100" : "translate-x-20 opacity-0"
               }`}
             >
               <Card className="w-full max-w-[200px] overflow-hidden border-border bg-card shadow-lg transition-shadow hover:shadow-xl sm:max-w-[260px] lg:max-w-[300px]">
@@ -618,33 +496,47 @@ export default function CVPage() {
                   />
                 </div>
                 <div className="border-t border-border bg-muted/50 px-4 py-3 text-center">
-                  <p className="text-sm font-medium text-foreground">¡Hola! Mi compañero de código</p>
+                  <p className="text-sm font-medium text-foreground">{t.hero.catCard}</p>
                 </div>
               </Card>
             </div>
           </div>
-          <div className="absolute bottom-4 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-1 sm:flex sm:bottom-6">
-            <span className="text-xs uppercase tracking-wider text-muted-foreground">Scroll</span>
+          <div
+            className={`absolute bottom-4 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-1 sm:flex sm:bottom-6 transition-all duration-700 delay-500 ${
+              isVisible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
+            }`}
+          >
+            <span className="text-xs uppercase tracking-wider text-muted-foreground">{t.hero.scroll}</span>
             <div className="flex h-8 w-5 justify-center rounded-full border-2 border-border p-1.5">
               <div className="h-2 w-1 animate-bounce rounded-full bg-primary" />
             </div>
           </div>
         </section>
 
-        {/* Sobre Mí */}
+        <WaveSeparator variant="down" isDark={isDark} />
+
+        {/* Sobre Mí — entra desde los lados */}
         <section
           ref={(el) => {
             sectionRefs.current.about = el
           }}
-          className="relative py-12 px-4 sm:py-16 sm:px-6 md:py-20"
+          className={`relative py-12 px-4 sm:py-16 sm:px-6 md:py-20 ${isDark ? "bg-muted/10" : "bg-muted/30"}`}
         >
           <div className="mx-auto max-w-6xl">
-            <div className="mb-10 text-center sm:mb-16">
-              <h2 className="mb-4 text-3xl font-bold text-foreground sm:text-4xl md:text-5xl">Sobre Mí</h2>
+            <div
+              className={`mb-10 text-center sm:mb-16 transition-all duration-700 delay-100 ${
+                aboutInView ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+              }`}
+            >
+              <h2 className="mb-4 text-3xl font-bold text-foreground sm:text-4xl md:text-5xl">{t.about.title}</h2>
               <div className="mx-auto mb-6 h-1 w-20 bg-primary" />
             </div>
             <div className="grid items-start gap-8 lg:grid-cols-2 lg:gap-12">
-              <div className="space-y-4 sm:space-y-6">
+              <div
+                className={`space-y-4 sm:space-y-6 transition-all duration-700 delay-150 ${
+                  aboutInView ? "translate-x-0 opacity-100" : "-translate-x-16 opacity-0"
+                }`}
+              >
                 <Card className="border-border bg-card p-4 shadow-sm sm:p-6 md:p-8">
                   <div className="mb-6 flex flex-col items-center gap-4 sm:flex-row sm:items-start">
                     <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-xl border-2 border-border shadow-md sm:h-32 sm:w-32">
@@ -660,30 +552,30 @@ export default function CVPage() {
                     <div className="min-w-0 flex-1 text-center sm:text-left">
                       <h3 className="mb-2 flex flex-wrap items-center justify-center gap-3 text-2xl font-bold text-foreground sm:justify-start">
                         <Zap className="h-7 w-7 text-primary" />
-                        Perfil Profesional
+                        {t.about.professionalProfile}
                       </h3>
                       <p className="text-sm text-muted-foreground">Steven Villamizar Mendoza</p>
                     </div>
                   </div>
                   <p className="mb-4 leading-relaxed text-muted-foreground">
-                    Soy <span className="font-semibold text-foreground">Steven Villamizar Mendoza</span>, tecnólogo en Análisis y Desarrollo de Software con más de{" "}
-                    <span className="font-semibold text-foreground">1 año de experiencia</span> creando soluciones tecnológicas innovadoras.
+                    {t.about.bio1} <span className="font-semibold text-foreground">Steven Villamizar Mendoza</span>{t.about.bio1b}{" "}
+                    <span className="font-semibold text-foreground">{t.about.bio1c}</span> {t.about.bio1d}
                   </p>
                   <p className="mb-4 leading-relaxed text-muted-foreground">
-                    Soy tecnoologo en analisis y desarrollo de software {" "}
-                    <span className="font-semibold text-foreground">Trabajando actualmente en la empresa ORAL-PLUS(SKY S.A.S)
-                      </span> y trabajo como desarrollador profesional.
+                    {t.about.bio2}{" "}
+                    <span className="font-semibold text-foreground">{t.about.bio2b}
+                      </span> {t.about.bio2c}
                   </p>
                   <p className="leading-relaxed text-muted-foreground">
-                    Mi enfoque: código limpio, escalable y soluciones que generen valor real para las empresas ,la innovacion y al creatividad de siempre querer hacer las cosas nuevas y diferentes.
+                    {t.about.bio3}
                   </p>
                 </Card>
                 <div className="grid grid-cols-2 gap-3 sm:gap-4">
                   {[
-                    { icon: MapPin, text: "Medellín, Colombia" },
+                    { icon: MapPin, text: t.about.info.location },
                     { icon: Phone, text: "304 646 7135" },
                     { icon: Mail, text: "Stevenvilla10@gmail.com" },
-                    { icon: GraduationCap, text: "Tecnólogo ADSO" },
+                    { icon: GraduationCap, text: t.about.info.degree },
                   ].map(({ icon: Icon, text }, idx) => (
                     <Card
                       key={idx}
@@ -695,30 +587,29 @@ export default function CVPage() {
                   ))}
                 </div>
               </div>
-              <div className="space-y-4 sm:space-y-6">
+              <div
+                className={`space-y-4 sm:space-y-6 transition-all duration-700 delay-200 ${
+                  aboutInView ? "translate-x-0 opacity-100" : "translate-x-16 opacity-0"
+                }`}
+              >
                 <Card className="border-border bg-muted/50 p-4 shadow-sm sm:p-6 md:p-8">
                   <div className="space-y-4 text-center">
                     <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-2xl bg-primary">
                       <Target className="h-12 w-12 text-primary-foreground" />
                     </div>
-                    <h3 className="text-2xl font-bold text-foreground">Mi Misión</h3>
+                    <h3 className="text-2xl font-bold text-foreground">{t.about.missionTitle}</h3>
                     <p className="leading-relaxed text-muted-foreground">
-                      Transformar ideas complejas en soluciones tecnológicas elegantes que impulsen el crecimiento empresarial.
+                      {t.about.missionText}
                     </p>
                   </div>
                 </Card>
                 <Card className="border-border bg-card p-4 shadow-sm sm:p-6 md:p-8">
                   <h3 className="mb-4 flex items-center gap-3 text-lg font-bold text-foreground sm:text-xl">
                     <Brain className="h-6 w-6 text-primary" />
-                    Por qué trabajar conmigo
+                    {t.about.whyWork}
                   </h3>
                   <ul className="space-y-3">
-                    {[
-                      "Experiencia probada en proyectos reales",
-                      "Compromiso con la calidad y excelencia",
-                      "Aprendizaje continuo y adaptabilidad",
-                      "Enfoque en resultados y valor empresarial",
-                    ].map((item, idx) => (
+                    {t.about.whyItems.map((item, idx) => (
                       <li key={idx} className="flex items-center gap-3 text-muted-foreground">
                         <CheckCircle2 className="h-5 w-5 shrink-0 text-primary" />
                         <span>{item}</span>
@@ -731,7 +622,9 @@ export default function CVPage() {
           </div>
         </section>
 
-        {/* Experiencia — grid de 2 columnas con animación al scroll */}
+        <WaveSeparator variant="up" isDark={isDark} />
+
+        {/* Experiencia — cards entran desde los lados (izq/der alternos) */}
         <section
           ref={(el) => {
             sectionRefs.current.experience = el
@@ -739,8 +632,12 @@ export default function CVPage() {
           className="relative py-12 px-4 sm:py-16 sm:px-6 md:py-20"
         >
           <div className="mx-auto max-w-6xl">
-            <div className="mb-10 text-center sm:mb-16">
-              <h2 className="mb-4 text-3xl font-bold text-foreground sm:text-4xl md:text-5xl">Experiencia</h2>
+            <div
+              className={`mb-10 text-center sm:mb-16 transition-all duration-700 ${
+                experienceInView ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+              }`}
+            >
+              <h2 className="mb-4 text-3xl font-bold text-foreground sm:text-4xl md:text-5xl">{t.experience.title}</h2>
               <div className="mx-auto mb-6 h-1 w-20 bg-primary" />
             </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
@@ -753,7 +650,12 @@ export default function CVPage() {
                   className="transition-all duration-700 ease-out"
                   style={{
                     opacity: visibleExpIndexes.has(idx) ? 1 : 0,
-                    transform: visibleExpIndexes.has(idx) ? "translateY(0)" : "translateY(28px)",
+                    transform: visibleExpIndexes.has(idx)
+                      ? "translateX(0)"
+                      : idx % 2 === 0
+                        ? "translateX(-60px)"
+                        : "translateX(60px)",
+                    transitionDelay: visibleExpIndexes.has(idx) ? `${(idx % 2) * 80}ms` : "0ms",
                   }}
                 >
                   <Card className="h-full border-border bg-card p-4 shadow-sm transition-all hover:border-primary/20 hover:shadow-md sm:p-6 md:p-8">
@@ -770,7 +672,7 @@ export default function CVPage() {
                     </div>
                     <p className="mb-4 text-sm leading-relaxed text-muted-foreground sm:text-base">{exp.description}</p>
                     <div className="mb-4">
-                      <h4 className="mb-2 text-xs font-semibold text-muted-foreground sm:text-sm">Logros</h4>
+                      <h4 className="mb-2 text-xs font-semibold text-muted-foreground sm:text-sm">{t.experience.achievements}</h4>
                       <ul className="space-y-1">
                         {exp.achievements.map((achievement, i) => (
                           <li key={i} className="flex items-center gap-2 text-xs text-muted-foreground sm:text-sm">
@@ -794,303 +696,235 @@ export default function CVPage() {
           </div>
         </section>
 
-        {/* Habilidades — bolitas con logos y física con el mouse */}
+        <WaveSeparator variant="small" isDark={isDark} />
+
+        {/* Habilidades — entran desde los lados con efecto de dispersión */}
         <section
           ref={(el) => {
             sectionRefs.current.skills = el
           }}
-          className="relative py-12 px-4 sm:py-16 sm:px-6 md:py-20"
+          className={`relative py-12 px-4 sm:py-16 sm:px-6 md:py-20 ${isDark ? "bg-muted/10" : "bg-muted/20"}`}
         >
           <div className="mx-auto max-w-6xl">
-            <div className="mb-10 text-center sm:mb-16">
-              <h2 className="mb-4 text-3xl font-bold text-foreground sm:text-4xl md:text-5xl">Habilidades</h2>
+            <div
+              className={`mb-10 text-center sm:mb-16 transition-all duration-700 ${
+                skillsInView ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+              }`}
+            >
+              <h2 className="mb-4 text-3xl font-bold text-foreground sm:text-4xl md:text-5xl">{t.skills.title}</h2>
               <div className="mx-auto mb-6 h-1 w-20 bg-primary" />
             </div>
-            <div
-              ref={skillsSectionRef}
-              onMouseMove={onSkillsMouseMove}
-              onMouseLeave={onSkillsMouseLeave}
-              className="flex flex-wrap justify-center gap-6 sm:gap-8 md:gap-10"
-            >
+            <div className="flex flex-wrap justify-center gap-6 sm:gap-8 md:gap-10">
               {skills.map((skill, idx) => (
                 <div
                   key={skill.name}
-                  ref={(el) => {
-                    orbsRef.current[idx] = el
-                  }}
-                  className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border-2 border-border bg-card shadow-md transition-shadow duration-200 hover:shadow-lg sm:h-16 sm:w-16 md:h-[4.5rem] md:w-[4.5rem]"
-                  style={{
-                    transform: `translate(${orbDeltas[idx]?.x ?? 0}px, ${orbDeltas[idx]?.y ?? 0}px)`,
-                    transition: "transform 0.15s ease-out, box-shadow 0.2s ease",
-                  }}
-                  title={skill.name}
+                  className={`transition-all duration-700 ease-out ${
+                    skillsInView ? "translate-x-0 opacity-100" : idx % 2 === 0 ? "-translate-x-12 opacity-0" : "translate-x-12 opacity-0"
+                  }`}
+                  style={{ transitionDelay: skillsInView ? `${idx * 50}ms` : "0ms" }}
                 >
-                  <img
-                    src={skill.logo}
-                    alt={skill.name}
-                    className="h-7 w-7 object-contain sm:h-8 sm:w-8 md:h-9 md:w-9"
-                    width={36}
-                    height={36}
-                  />
+                  <div
+                    className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border-2 border-border bg-card shadow-md transition-shadow duration-200 hover:shadow-lg sm:h-16 sm:w-16 md:h-[4.5rem] md:w-[4.5rem]"
+                    title={skill.name}
+                  >
+                    <img
+                      src={skill.logo}
+                      alt={skill.name}
+                      className="h-7 w-7 object-contain sm:h-8 sm:w-8 md:h-9 md:w-9"
+                      width={36}
+                      height={36}
+                    />
+                  </div>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* Proyectos — romper la 4.ª pared: llegan como cohetes desde lejos */}
+        <WaveSeparator variant="down" isDark={isDark} className="h-20 sm:h-28 md:h-36 lg:h-44" />
+
+        {/* Proyectos — mismo estilo que Experiencia */}
         <section
           ref={(el) => {
             sectionRefs.current.projects = el
           }}
-          className="relative border-t border-border bg-muted/20 py-12 px-4 sm:py-16 sm:px-6 md:py-20 overflow-hidden"
+          className={`relative py-12 px-4 sm:py-16 sm:px-6 md:py-20 ${isDark ? "bg-card/60" : "bg-primary/[0.06]"}`}
         >
-          <div
-            ref={projectsSectionRef}
-            className="mx-auto max-w-7xl"
-            style={{ perspective: "1400px" }}
-          >
-            <div className="mb-8 text-center sm:mb-14">
+          <div ref={projectsSectionRef} className="mx-auto max-w-6xl">
+            <div
+              className={`mb-10 text-center sm:mb-16 transition-all duration-700 ${
+                projectsInView ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+              }`}
+            >
               <p className="mb-2 text-xs font-medium uppercase tracking-widest text-primary sm:text-sm">
-                Portafolio
+                {t.projects.portfolio}
               </p>
-              <h2 className="mb-3 text-2xl font-bold tracking-tight text-foreground sm:text-4xl md:text-5xl">
-                Proyectos destacados
+              <h2 className="mb-4 text-3xl font-bold text-foreground sm:text-4xl md:text-5xl">
+                {t.projects.title}
               </h2>
               <p className="mx-auto max-w-2xl text-sm text-muted-foreground sm:text-base">
-                Soluciones reales desarrolladas con las mejores prácticas y tecnologías actuales.
+                {t.projects.subtitle}
               </p>
-              <div className="mx-auto mt-6 h-1 w-16 bg-primary" />
+              <div className="mx-auto mt-6 h-1 w-20 bg-primary" />
             </div>
 
-            {/* Proyectos destacados — entran como cohetes */}
-            <div className="mb-8 space-y-4 sm:mb-10 sm:space-y-6" style={{ perspectiveOrigin: "50% 20%" }}>
-              {projects
-                .filter((p) => p.featured)
-                .map((project, idx) => {
-                  const globalIdx = projects.findIndex((p) => p === project)
-                  return (
-                    <div
-                      key={globalIdx}
-                      style={{
-                        transformStyle: "preserve-3d",
-                        transform: projectsInView
-                          ? "scale(1) translateZ(0) rotateX(0deg)"
-                          : "scale(0.12) translateZ(-900px) rotateX(12deg)",
-                        opacity: projectsInView ? 1 : 0,
-                        transition: "transform 1s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.7s ease-out",
-                        transitionDelay: `${idx * 120}ms`,
-                      }}
-                    >
-                      <Card
-                        className="group relative overflow-hidden border-border bg-card shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/30"
-                      >
-                      <div className="flex flex-col lg:flex-row lg:items-stretch">
-                        <div className="flex shrink-0 items-center justify-center border-b border-border bg-muted/40 px-4 py-4 sm:px-8 sm:py-6 lg:w-48 lg:border-b-0 lg:border-r">
-                          <span className="font-mono text-3xl font-bold tabular-nums text-primary/25 group-hover:text-primary/40 sm:text-5xl">
-                            {String(globalIdx + 1).padStart(2, "0")}
-                          </span>
-                        </div>
-                        <div className="flex flex-1 flex-col p-4 sm:p-6 md:p-8">
-                          <div className="mb-3 flex flex-wrap items-center gap-2">
-                            <Badge className="bg-primary/10 text-primary border-primary/20 font-medium">
-                              Destacado
-                            </Badge>
-                            <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                              Proyecto {globalIdx + 1}
-                            </span>
-                          </div>
-                          <h3 className="mb-3 text-lg font-bold text-foreground sm:text-xl md:text-2xl group-hover:text-primary transition-colors">
-                            {project.title}
-                          </h3>
-                          <p className="mb-4 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:mb-5 sm:text-base">
-                            {project.description}
-                          </p>
-                          <div className="mb-4 flex flex-wrap gap-1.5 sm:mb-6 sm:gap-2">
-                            {project.tech.map((tech, i) => (
-                              <span
-                                key={i}
-                                className="rounded-md border border-border bg-muted/60 px-2 py-0.5 font-mono text-[10px] font-medium text-foreground sm:px-2.5 sm:py-1 sm:text-xs"
-                              >
-                                {tech}
-                              </span>
-                            ))}
-                          </div>
-                          <div className="mt-auto flex flex-wrap gap-2">
-                            {project.doc && (
-                              <Button
-                                size="lg"
-                                variant="outline"
-                                className="min-h-[2.75rem] border-border touch-manipulation sm:min-h-0"
-                                onClick={() => setDocProject(project)}
-                              >
-                                <FileText className="mr-2 h-4 w-4" />
-                                Documentación técnica
-                              </Button>
-                            )}
-                            {project.link ? (
-                              <Button
-                                size="lg"
-                                className="w-full min-h-[2.75rem] bg-primary text-primary-foreground hover:bg-primary/90 group/btn touch-manipulation sm:w-auto sm:min-h-0 sm:flex-1 sm:flex-initial"
-                                asChild
-                              >
-                                <a href={project.link} target="_blank" rel="noopener noreferrer">
-                                  Ver proyecto
-                                  <ExternalLink className="ml-2 h-4 w-4 transition-transform group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
-                                </a>
-                              </Button>
-                            ) : (
-                              <Button size="lg" variant="outline" className="w-full min-h-[2.75rem] touch-manipulation sm:w-auto sm:min-h-0" disabled>
-                                Proyecto privado
-                              </Button>
-                            )}
-                          </div>
-                        </div>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
+              {projects.map((project, idx) => (
+                <div
+                  key={idx}
+                  ref={(el) => {
+                    projectCardRefs.current[idx] = el
+                  }}
+                  className="transition-all duration-700 ease-out"
+                  style={{
+                    opacity: visibleProjectIndexes.has(idx) ? 1 : 0,
+                    transform: visibleProjectIndexes.has(idx)
+                      ? "translateX(0)"
+                      : idx % 2 === 0
+                        ? "translateX(-60px)"
+                        : "translateX(60px)",
+                    transitionDelay: visibleProjectIndexes.has(idx) ? `${(idx % 2) * 80}ms` : "0ms",
+                  }}
+                >
+                  <Card className="h-full border-border bg-card p-4 shadow-sm transition-all hover:border-primary/20 hover:shadow-md sm:p-6 md:p-8">
+                    <div className="mb-3 flex flex-col sm:mb-4 sm:flex-row sm:items-start sm:justify-between sm:gap-2">
+                      <div>
+                        <h3 className="mb-2 text-base font-bold text-foreground sm:text-xl">
+                          {project.title}
+                        </h3>
+                        {project.featured && (
+                          <Badge className="mb-2 bg-primary/10 text-primary border-primary/20 font-medium">
+                            {t.projects.featured}
+                          </Badge>
+                        )}
                       </div>
-                    </Card>
+                      <span className="font-mono text-2xl font-bold tabular-nums text-primary/20 sm:text-3xl">
+                        {String(idx + 1).padStart(2, "0")}
+                      </span>
                     </div>
-                  )
-                })}
-            </div>
-
-            {/* Resto de proyectos — grid compacto, también como cohetes */}
-            <div className="mb-4 flex items-center gap-3">
-              <div className="h-px flex-1 bg-border" />
-              <span className="text-sm font-medium text-muted-foreground">Más proyectos</span>
-              <div className="h-px flex-1 bg-border" />
-            </div>
-            <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3" style={{ perspectiveOrigin: "50% 30%" }}>
-              {projects
-                .filter((p) => !p.featured)
-                .map((project, idx) => {
-                  const globalIdx = projects.findIndex((p) => p === project)
-                  const rocketIdx = projects.filter((p) => p.featured).length + idx
-                  return (
-                    <div
-                      key={globalIdx}
-                      style={{
-                        transformStyle: "preserve-3d",
-                        transform: projectsInView
-                          ? "scale(1) translateZ(0) rotateX(0deg)"
-                          : "scale(0.15) translateZ(-700px) rotateX(8deg)",
-                        opacity: projectsInView ? 1 : 0,
-                        transition: "transform 0.95s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.6s ease-out",
-                        transitionDelay: `${rocketIdx * 100}ms`,
-                      }}
-                    >
-                      <Card
-                        className="group relative overflow-hidden border-border bg-card p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:border-primary/20 sm:p-5"
-                      >
-                      <div className="mb-3 flex items-start justify-between gap-2">
-                        <span className="font-mono text-2xl font-bold tabular-nums text-primary/20 group-hover:text-primary/35">
-                          {String(globalIdx + 1).padStart(2, "0")}
-                        </span>
-                        <Rocket className="h-5 w-5 shrink-0 text-primary/60" />
-                      </div>
-                      <h3 className="mb-2 text-sm font-bold leading-snug text-foreground group-hover:text-primary transition-colors sm:text-base">
-                        {project.title}
-                      </h3>
-                      <p className="mb-3 line-clamp-2 text-xs leading-relaxed text-muted-foreground sm:mb-4 sm:text-sm">
-                        {project.description}
-                      </p>
-                      <div className="mb-4 flex flex-wrap gap-1.5">
-                        {project.tech.slice(0, 4).map((tech, i) => (
-                          <span
-                            key={i}
-                            className="rounded border border-border bg-muted/50 px-2 py-0.5 font-mono text-[10px] font-medium text-muted-foreground"
-                          >
-                            {tech}
-                          </span>
-                        ))}
-                        {project.tech.length > 4 && (
-                          <span className="rounded border border-border bg-muted/50 px-2 py-0.5 text-[10px] text-muted-foreground">
-                            +{project.tech.length - 4}
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex flex-wrap gap-1.5">
-                        {project.doc && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="min-h-[2.5rem] text-muted-foreground hover:text-foreground touch-manipulation sm:min-h-0"
-                            onClick={() => setDocProject(project)}
-                          >
-                            <FileText className="mr-1 h-3.5 w-3.5" />
-                            Doc. técnica
-                          </Button>
-                        )}
-                        {project.link ? (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="flex-1 min-h-[2.5rem] border-primary/30 text-foreground hover:bg-primary/5 hover:border-primary/50 touch-manipulation sm:min-h-0"
-                            asChild
-                          >
-                            <a href={project.link} target="_blank" rel="noopener noreferrer">
-                              <ExternalLink className="mr-1.5 h-3.5 w-3.5" />
-                              Ver proyecto
-                            </a>
-                          </Button>
-                        ) : (
-                          <Button variant="outline" size="sm" className="flex-1" disabled>
-                            Proyecto privado
-                          </Button>
-                        )}
-                      </div>
-                    </Card>
+                    <p className="mb-4 text-sm leading-relaxed text-muted-foreground sm:text-base">
+                      {project.description}
+                    </p>
+                    <div className="mb-4 flex flex-wrap gap-1.5 sm:gap-2">
+                      {project.tech.map((tech, i) => (
+                        <Badge key={i} variant="secondary" className="border-border text-xs text-muted-foreground sm:text-sm">
+                          {tech}
+                        </Badge>
+                      ))}
                     </div>
-                  )
-                })}
+                    <div className="mt-auto flex flex-wrap gap-2">
+                      {project.doc && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="min-h-[2.5rem] border-border touch-manipulation sm:min-h-0"
+                          onClick={() => setDocProject(project)}
+                        >
+                          <FileText className="mr-1.5 h-4 w-4" />
+                          {t.projects.docTech}
+                        </Button>
+                      )}
+                      {project.link && project.link !== "#" ? (
+                        <Button
+                          size="sm"
+                          className="min-h-[2.5rem] bg-primary text-primary-foreground hover:bg-primary/90 touch-manipulation sm:min-h-0"
+                          asChild
+                        >
+                          <a href={project.link} target="_blank" rel="noopener noreferrer">
+                            {t.projects.viewProject}
+                            <ExternalLink className="ml-1.5 h-4 w-4" />
+                          </a>
+                        </Button>
+                      ) : (
+                        <Button variant="outline" size="sm" className="min-h-[2.5rem]" disabled>
+                          {t.projects.privateProject}
+                        </Button>
+                      )}
+                    </div>
+                  </Card>
+                </div>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* Contacto */}
+        <WaveSeparator variant="up" isDark={isDark} />
+
+        {/* Contacto — entra desde los lados */}
         <section
           ref={(el) => {
             sectionRefs.current.contact = el
           }}
-          className="relative py-12 px-4 sm:py-16 sm:px-6 md:py-20"
+          className={`relative py-12 px-4 sm:py-16 sm:px-6 md:py-20 ${isDark ? "bg-muted/10" : "bg-muted/30"}`}
         >
           <div className="mx-auto max-w-4xl text-center">
-            <h2 className="mb-4 text-3xl font-bold text-foreground sm:text-4xl md:text-5xl">Contacto</h2>
-            <div className="mx-auto mb-6 h-1 w-20 bg-primary" />
-            <p className="mx-auto mb-8 max-w-2xl text-base text-muted-foreground sm:mb-12 sm:text-xl">
-              ¿Listo para llevar tu proyecto al siguiente nivel? Hablemos.
-            </p>
+            <div
+              className={`mb-8 transition-all duration-700 ${
+                contactInView ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+              }`}
+            >
+              <h2 className="mb-4 text-3xl font-bold text-foreground sm:text-4xl md:text-5xl">{t.contact.title}</h2>
+              <div className="mx-auto mb-6 h-1 w-20 bg-primary" />
+              <p className="mx-auto max-w-2xl text-base text-muted-foreground sm:mb-12 sm:text-xl">
+                {t.contact.subtitle}
+              </p>
+            </div>
             <div className="mb-8 grid gap-4 sm:mb-12 sm:gap-6 md:grid-cols-2">
-              <Card className="border-border bg-card p-4 text-center shadow-sm transition-colors hover:border-primary/20 sm:p-6 md:p-8">
+              <div
+                className={`transition-all duration-700 delay-150 ${
+                  contactInView ? "translate-x-0 opacity-100" : "-translate-x-16 opacity-0"
+                }`}
+              >
+                <Card className="border-border bg-card p-4 text-center shadow-sm transition-colors hover:border-primary/20 sm:p-6 md:p-8">
                 <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-muted sm:mb-4 sm:h-16 sm:w-16">
                   <Mail className="h-6 w-6 text-primary sm:h-8 sm:w-8" />
                 </div>
-                <h3 className="mb-2 text-base font-bold text-foreground sm:text-lg">Email</h3>
+                <h3 className="mb-2 text-base font-bold text-foreground sm:text-lg">{t.contact.email}</h3>
                 <a href="mailto:Stevenvilla10@gmail.com" className="break-all text-sm text-primary hover:underline sm:text-base">
                   Stevenvilla10@gmail.com
                 </a>
               </Card>
-              <Card className="border-border bg-card p-4 text-center shadow-sm transition-colors hover:border-primary/20 sm:p-6 md:p-8">
+              </div>
+              <div
+                className={`transition-all duration-700 delay-200 ${
+                  contactInView ? "translate-x-0 opacity-100" : "translate-x-16 opacity-0"
+                }`}
+              >
+                <Card className="border-border bg-card p-4 text-center shadow-sm transition-colors hover:border-primary/20 sm:p-6 md:p-8">
                 <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-muted sm:mb-4 sm:h-16 sm:w-16">
                   <Phone className="h-6 w-6 text-primary sm:h-8 sm:w-8" />
                 </div>
-                <h3 className="mb-2 text-base font-bold text-foreground sm:text-lg">Teléfono</h3>
+                <h3 className="mb-2 text-base font-bold text-foreground sm:text-lg">{t.contact.phone}</h3>
                 <a href="tel:3046467135" className="text-primary hover:underline">304 646 7135</a>
               </Card>
+              </div>
             </div>
+            <div
+              className={`transition-all duration-700 delay-300 ${
+                contactInView ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
+              }`}
+            >
             <Button size="lg" className="min-h-[2.75rem] bg-primary text-primary-foreground hover:bg-primary/90 touch-manipulation sm:min-h-0" asChild>
               <a href="mailto:Stevenvilla10@gmail.com">
                 <Mail className="mr-2 h-5 w-5" />
-                Iniciar Conversación
+                {t.contact.startConversation}
               </a>
             </Button>
+            </div>
           </div>
         </section>
 
-        <footer className="safe-area-bottom border-t border-border bg-muted/30 py-8 sm:py-12">
+        <WaveSeparator variant="small" isDark={isDark} />
+
+        <footer
+          className={`safe-area-bottom border-t border-border bg-muted/30 py-8 sm:py-12 transition-all duration-700 ${
+            contactInView ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
+          }`}
+        >
           <div className="mx-auto max-w-6xl px-4 text-center sm:px-6">
-            <p className="text-sm text-muted-foreground sm:text-base">© 2025 Steven Villamizar Mendoza</p>
+            <p className="text-sm text-muted-foreground sm:text-base">{t.footer.copyright}</p>
             <p className="mt-2 text-xs text-muted-foreground sm:text-sm">
-              Desarrollado con Next.js y React · Autor: STEVEN VILLAMIZAR MENDOZA
+              {t.footer.built}
             </p>
           </div>
         </footer>
@@ -1112,7 +946,7 @@ export default function CVPage() {
                   <div>
                     <h4 className="mb-2 flex items-center gap-2 font-semibold text-foreground">
                       <Layers className="h-4 w-4 text-primary" />
-                      Arquitectura
+                      {t.projects.docLabels.architecture}
                     </h4>
                     <ul className="list-inside list-disc space-y-1 text-sm text-muted-foreground">
                       {docProject.doc.architecture.map((item, i) => (
@@ -1125,7 +959,7 @@ export default function CVPage() {
                   <div>
                     <h4 className="mb-2 flex items-center gap-2 font-semibold text-foreground">
                       <Code className="h-4 w-4 text-primary" />
-                      Decisiones técnicas
+                      {t.projects.docLabels.technicalDecisions}
                     </h4>
                     <ul className="list-inside list-disc space-y-1 text-sm text-muted-foreground">
                       {docProject.doc.technicalDecisions.map((item, i) => (
@@ -1138,7 +972,7 @@ export default function CVPage() {
                   <div>
                     <h4 className="mb-2 flex items-center gap-2 font-semibold text-foreground">
                       <CheckCircle2 className="h-4 w-4 text-primary" />
-                      Problemas resueltos
+                      {t.projects.docLabels.problemsSolved}
                     </h4>
                     <ul className="list-inside list-disc space-y-1 text-sm text-muted-foreground">
                       {docProject.doc.problemsSolved.map((item, i) => (
