@@ -109,15 +109,10 @@
     -webkit-text-size-adjust: 100%;
     -webkit-tap-highlight-color: transparent;
     overflow-x: hidden;
-    /* Evitar doble scrollbar: solo body hace scroll */
-    overflow-y: hidden;
-    height: 100%;
   }
   body {
     @apply bg-background text-foreground antialiased;
     overflow-x: hidden;
-    overflow-y: auto;
-    height: 100%;
     margin: 0;
   }
 }

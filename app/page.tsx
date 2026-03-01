@@ -261,7 +261,7 @@ export default function CVPage() {
   ]
 
   return (
-    <div className="min-h-screen min-h-[100dvh] bg-background text-foreground relative overflow-x-hidden transition-colors duration-300">
+    <div className="min-h-screen min-h-[100dvh] bg-background text-foreground relative transition-colors duration-300">
       {/* Grid sutil */}
       <div
         className="fixed inset-0 pointer-events-none z-0 opacity-[0.03] dark:opacity-[0.04]"
