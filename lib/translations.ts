@@ -142,6 +142,32 @@ export const translations = {
         },
       },
       {
+        title: "FINANZAS PRO - Control Financiero Personal",
+        description: "Aplicación web de control financiero personal para gestionar gastos, ingresos y presupuestos. Desarrollada con React y Next.js.",
+        tech: ["React", "Next.js", "TypeScript", "Tailwind CSS"],
+        link: "https://finanzaspro-nine.vercel.app/",
+        featured: true,
+        doc: {
+          architecture: [
+            "Next.js App Router con React para una SPA de alto rendimiento.",
+            "Componentes de dashboard con gráficos y tablas de movimientos financieros.",
+            "Persistencia de datos en localStorage o base de datos para historial de gastos e ingresos.",
+            "UI construida con Tailwind CSS para diseño responsivo y moderno.",
+          ],
+          technicalDecisions: [
+            "Next.js para renderizado optimizado y enrutamiento sin configuración adicional.",
+            "React para componentes reutilizables (tarjetas de resumen, gráficos, formularios de transacciones).",
+            "TypeScript para tipado estricto y mayor robustez en el manejo de datos financieros.",
+            "Tailwind CSS para estilos consistentes y desarrollo ágil de la interfaz.",
+          ],
+          problemsSolved: [
+            "Visualización clara de gastos e ingresos por categorías y períodos de tiempo.",
+            "Control de presupuesto con alertas cuando se supera el límite establecido.",
+            "Historial de transacciones con filtros y búsqueda para fácil seguimiento del dinero.",
+          ],
+        },
+      },
+      {
         title: "SaaS sistemas de inventario y ventas",
         description: "Aplicación web para gestión de inventario, control de stock y ventas. Desarrollada con React, Node.js y HTML.",
         tech: ["HTML", "React", "Node.js", "CSS", "JavaScript"],
@@ -255,32 +281,6 @@ export const translations = {
             "Mostrar muchos proyectos sin saturar: destacados + grid secundario y doc técnica bajo demanda.",
             "Rendimiento en móvil: animaciones con CSS/RAF y lazy de imágenes con Next/Image.",
             "Accesibilidad: tema claro/oscuro, menú móvil y botones con labels.",
-          ],
-        },
-      },
-      {
-        title: "FINANZAS PRO - Control Financiero Personal",
-        description: "Aplicación web de control financiero personal para gestionar gastos, ingresos y presupuestos. Desarrollada con React y Next.js.",
-        tech: ["React", "Next.js", "TypeScript", "Tailwind CSS"],
-        link: "https://finanzaspro-nine.vercel.app/",
-        featured: true,
-        doc: {
-          architecture: [
-            "Next.js App Router con React para una SPA de alto rendimiento.",
-            "Componentes de dashboard con gráficos y tablas de movimientos financieros.",
-            "Persistencia de datos en localStorage o base de datos para historial de gastos e ingresos.",
-            "UI construida con Tailwind CSS para diseño responsivo y moderno.",
-          ],
-          technicalDecisions: [
-            "Next.js para renderizado optimizado y enrutamiento sin configuración adicional.",
-            "React para componentes reutilizables (tarjetas de resumen, gráficos, formularios de transacciones).",
-            "TypeScript para tipado estricto y mayor robustez en el manejo de datos financieros.",
-            "Tailwind CSS para estilos consistentes y desarrollo ágil de la interfaz.",
-          ],
-          problemsSolved: [
-            "Visualización clara de gastos e ingresos por categorías y períodos de tiempo.",
-            "Control de presupuesto con alertas cuando se supera el límite establecido.",
-            "Historial de transacciones con filtros y búsqueda para fácil seguimiento del dinero.",
           ],
         },
       },
@@ -465,6 +465,32 @@ export const translations = {
         },
       },
       {
+        title: "FINANZAS PRO - Personal Finance Control",
+        description: "Personal financial control web app to manage expenses, income and budgets. Built with React and Next.js.",
+        tech: ["React", "Next.js", "TypeScript", "Tailwind CSS"],
+        link: "https://finanzaspro-nine.vercel.app/",
+        featured: true,
+        doc: {
+          architecture: [
+            "Next.js App Router with React for a high-performance SPA.",
+            "Dashboard components with charts and financial movement tables.",
+            "Data persistence in localStorage or database for expense and income history.",
+            "UI built with Tailwind CSS for responsive and modern design.",
+          ],
+          technicalDecisions: [
+            "Next.js for optimized rendering and routing without additional configuration.",
+            "React for reusable components (summary cards, charts, transaction forms).",
+            "TypeScript for strict typing and greater robustness in financial data handling.",
+            "Tailwind CSS for consistent styles and agile UI development.",
+          ],
+          problemsSolved: [
+            "Clear visualization of expenses and income by categories and time periods.",
+            "Budget control with alerts when the set limit is exceeded.",
+            "Transaction history with filters and search for easy money tracking.",
+          ],
+        },
+      },
+      {
         title: "SaaS inventory and sales system",
         description: "Web application for inventory management, stock control and sales. Developed with React, Node.js and HTML.",
         tech: ["HTML", "React", "Node.js", "CSS", "JavaScript"],
@@ -578,32 +604,6 @@ export const translations = {
             "Display many projects without clutter: featured + secondary grid and tech doc on demand.",
             "Mobile performance: CSS/RAF animations and lazy images with Next/Image.",
             "Accessibility: light/dark theme, mobile menu and buttons with labels.",
-          ],
-        },
-      },
-      {
-        title: "FINANZAS PRO - Personal Finance Control",
-        description: "Personal financial control web app to manage expenses, income and budgets. Built with React and Next.js.",
-        tech: ["React", "Next.js", "TypeScript", "Tailwind CSS"],
-        link: "https://finanzaspro-nine.vercel.app/",
-        featured: true,
-        doc: {
-          architecture: [
-            "Next.js App Router with React for a high-performance SPA.",
-            "Dashboard components with charts and financial movement tables.",
-            "Data persistence in localStorage or database for expense and income history.",
-            "UI built with Tailwind CSS for responsive and modern design.",
-          ],
-          technicalDecisions: [
-            "Next.js for optimized rendering and routing without additional configuration.",
-            "React for reusable components (summary cards, charts, transaction forms).",
-            "TypeScript for strict typing and greater robustness in financial data handling.",
-            "Tailwind CSS for consistent styles and agile UI development.",
-          ],
-          problemsSolved: [
-            "Clear visualization of expenses and income by categories and time periods.",
-            "Budget control with alerts when the set limit is exceeded.",
-            "Transaction history with filters and search for easy money tracking.",
           ],
         },
       },
