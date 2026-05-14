@@ -130,19 +130,96 @@ export function AiAssistant({ lang }: { lang: "es" | "en" }) {
   }, [messages, isTyping])
 
   const findAnswer = (query: string) => {
-    const defaultAnswer =
-      lang === "es"
-        ? "Buena pregunta. Para detalles más específicos, te recomiendo contactar a Steven directamente al Stevenvilla10@gmail.com — responde en menos de 24h."
-        : "Good question. For specifics, I recommend reaching Steven directly at Stevenvilla10@gmail.com — he replies in under 24h."
-    const db = KNOWLEDGE_BASE[lang]
     const normalized = query
       .toLowerCase()
       .normalize("NFD")
       .replace(/[̀-ͯ]/g, "")
-    for (const entry of db) {
-      if (entry.keywords.some((kw) => normalized.includes(kw))) return entry.answer
+      .replace(/[¿¡?!.,;:]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+    const tokens = new Set(normalized.split(" ").filter(Boolean))
+    const has = (...words: string[]) => words.some((w) => tokens.has(w))
+
+    // 1) Smart intents (date / time / weather / identity / thanks / off-topic)
+    const now = new Date()
+    const dateFmt = new Intl.DateTimeFormat(lang === "es" ? "es-CO" : "en-US", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    }).format(now)
+    const timeFmt = new Intl.DateTimeFormat(lang === "es" ? "es-CO" : "en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(now)
+
+    if (has("dia", "fecha", "hoy", "date", "today", "day")) {
+      return lang === "es"
+        ? `Hoy es ${dateFmt}. Por cierto, si estás explorando el portafolio te puedo contar de la experiencia, stack o proyectos de Steven.`
+        : `Today is ${dateFmt}. By the way, if you're exploring the portfolio I can tell you about Steven's experience, stack or projects.`
     }
-    return defaultAnswer
+    if (has("hora", "time", "clock")) {
+      return lang === "es"
+        ? `Son las ${timeFmt} (hora Colombia). ¿Quieres saber algo de Steven mientras tanto?`
+        : `It's ${timeFmt} (Colombia time). Anything you'd like to know about Steven in the meantime?`
+    }
+    if (has("clima", "tiempo", "lluvia", "weather", "rain")) {
+      return lang === "es"
+        ? "No tengo acceso al clima en tiempo real 🌤️ — pero sí puedo contarte de los proyectos, stack y experiencia de Steven."
+        : "I don't have real-time weather access 🌤️ — but I can tell you about Steven's projects, stack and experience."
+    }
+    if (
+      /\b(quien eres|quien es esto|tu nombre|como te llamas|who are you|who is this|your name|what.s your name)\b/.test(
+        normalized,
+      )
+    ) {
+      return lang === "es"
+        ? "Soy el copiloto IA del portafolio de Steven. Estoy aquí para responder lo que quieras saber sobre su experiencia, stack, proyectos o disponibilidad."
+        : "I'm Steven's portfolio AI copilot. I'm here to answer anything about his experience, stack, projects or availability."
+    }
+    if (
+      /\b(como estas|como te va|que tal|how are you|how.s it going)\b/.test(normalized)
+    ) {
+      return lang === "es"
+        ? "¡Todo bien por aquí! 🚀 Listo para responderte sobre experiencia, stack, proyectos o tarifas de Steven."
+        : "All good here! 🚀 Ready to tell you about Steven's experience, stack, projects or rates."
+    }
+    if (has("gracias", "thanks", "thank")) {
+      return lang === "es"
+        ? "¡Con gusto! Si quieres avanzar, puedes escribirle directo a Stevenvilla10@gmail.com — responde en menos de 24h."
+        : "You're welcome! If you'd like to move forward, you can email Stevenvilla10@gmail.com — replies in under 24h."
+    }
+    if (has("edad", "anos", "age", "old")) {
+      return lang === "es"
+        ? "Steven prefiere que el trabajo hable por él — tiene 2+ años de experiencia profesional y 20+ proyectos en producción. ¿Quieres ver alguno?"
+        : "Steven prefers letting the work speak — 2+ years of professional experience and 20+ projects in production. Want to see one?"
+    }
+
+    // 2) Scored keyword match against knowledge base (word-boundary, not substring)
+    const db = KNOWLEDGE_BASE[lang]
+    let best: { score: number; answer: string } | null = null
+    for (const entry of db) {
+      let score = 0
+      for (const kw of entry.keywords) {
+        const kwNorm = kw.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "")
+        // Multi-word keywords: match as phrase. Single-word: match whole word.
+        if (kwNorm.includes(" ")) {
+          if (normalized.includes(kwNorm)) score += 2
+        } else if (tokens.has(kwNorm)) {
+          score += 2
+        } else if (kwNorm.length > 4 && new RegExp(`\\b${kwNorm}\\w*\\b`).test(normalized)) {
+          // Allow stems for longer keywords (proyecto → proyectos)
+          score += 1
+        }
+      }
+      if (score > 0 && (!best || score > best.score)) best = { score, answer: entry.answer }
+    }
+    if (best) return best.answer
+
+    // 3) Friendly fallback that nudges back on-topic
+    return lang === "es"
+      ? "No tengo una respuesta directa para eso 🤔. Puedo contarte de la experiencia de Steven, su stack, proyectos, tarifas o disponibilidad. ¿O prefieres escribirle directo a Stevenvilla10@gmail.com?"
+      : "I don't have a direct answer for that 🤔. I can tell you about Steven's experience, stack, projects, rates or availability. Or you can email him directly at Stevenvilla10@gmail.com."
   }
 
   const handleSubmit = (e?: React.FormEvent, customText?: string) => {
