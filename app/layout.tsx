@@ -3,22 +3,35 @@
  */
 import type React from "react"
 import type { Metadata, Viewport } from "next"
-import { GeistSans } from "geist/font/sans"
-import { GeistMono } from "geist/font/mono"
+import { Inter, Playfair_Display, JetBrains_Mono } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
 import "./globals.css"
 
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans", display: "swap" })
+const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-serif", display: "swap" })
+const jetbrains = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono", display: "swap" })
+
 export const metadata: Metadata = {
-  title: "Steven Villamizar - CV",
-  description: "Steven Villamizar Mendoza - Tecnólogo en Análisis y Desarrollo de Software. Proyectos, experiencia y contacto.",
+  title: "Steven Villamizar — Full Stack Engineer & AI Specialist",
+  description:
+    "Portafolio de Steven Villamizar Mendoza — Full Stack Engineer especializado en aplicaciones web escalables con integración de Inteligencia Artificial. Disponible para nuevos proyectos.",
+  keywords: ["Full Stack Developer", "AI Engineer", "React", "Next.js", "Node.js", "TypeScript", "Steven Villamizar", "Medellín", "Colombia"],
+  authors: [{ name: "Steven Villamizar Mendoza" }],
+  creator: "Steven Villamizar Mendoza",
   openGraph: {
-    title: "Steven Villamizar - CV | Portafolio",
-    description: "Portafolio de Steven Villamizar Mendoza — Tecnólogo en Análisis y Desarrollo de Software.",
+    title: "Steven Villamizar — Full Stack Engineer & AI Specialist",
+    description:
+      "Construyo productos digitales que generan resultados medibles. Especializado en web apps escalables con IA.",
     url: "https://stevencv.vercel.app",
-    siteName: "StevenCV",
+    siteName: "Steven Villamizar — Portfolio",
     locale: "es_CO",
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Steven Villamizar — Full Stack Engineer & AI Specialist",
+    description: "Construyo productos digitales con IA integrada. 20+ proyectos en producción.",
   },
   icons: {
     icon: "/icon.svg",
@@ -30,7 +43,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#fafafa" },
-    { media: "(prefers-color-scheme: dark)", color: "#1a1a1a" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0a0f" },
   ],
 }
 
@@ -41,13 +54,21 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" suppressHydrationWarning>
-      <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
+      <body className={`${inter.variable} ${playfair.variable} ${jetbrains.variable} font-sans`}>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){var t=localStorage.getItem('theme');if(t==='dark'){document.documentElement.classList.add('dark')}else{document.documentElement.classList.remove('dark')}})();`,
+            __html: `(function(){try{var t=localStorage.getItem('theme');if(t==='light'){document.documentElement.classList.remove('dark')}else{document.documentElement.classList.add('dark')}}catch(e){document.documentElement.classList.add('dark')}})();`,
           }}
         />
-        <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-background text-foreground">Cargando...</div>}>{children}</Suspense>
+        <Suspense
+          fallback={
+            <div className="flex min-h-screen items-center justify-center bg-background text-foreground">
+              <span className="text-sm font-mono text-muted-foreground">Loading…</span>
+            </div>
+          }
+        >
+          {children}
+        </Suspense>
         <Analytics />
       </body>
     </html>
