@@ -1,5 +1,5 @@
 "use client"
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useLayoutEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Sparkles, Send, Bot, User, Trash2, Wand2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -123,14 +123,39 @@ export function AiAssistant({ lang }: { lang: "es" | "en" }) {
   const [isTyping, setIsTyping] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const messagesContainerRef = useRef<HTMLDivElement>(null)
+  const wasNearBottomRef = useRef(true)
+  const pageScrollYRef = useRef<number | null>(null)
 
-  // Scroll only the chat container — never the page.
-  useEffect(() => {
+  // Track whether the user is "stuck at bottom" BEFORE the DOM updates.
+  // If they scrolled up to read history, we must not yank them back down.
+  useLayoutEffect(() => {
     const el = messagesContainerRef.current
-    if (!el) return
+    if (!el) {
+      wasNearBottomRef.current = true
+      return
+    }
+    const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight
+    wasNearBottomRef.current = distanceFromBottom < 120
+  })
+
+  // After paint, scroll the CHAT container (never the window) and restore
+  // any page scroll the browser may have nudged during the state update.
+  useEffect(() => {
     if (messages.length <= 1 && !isTyping) return
-    // Direct scrollTop manipulation does not bubble to window like scrollIntoView can.
-    el.scrollTo({ top: el.scrollHeight, behavior: "smooth" })
+    const el = messagesContainerRef.current
+    const savedPageY = pageScrollYRef.current
+
+    // Restore window scroll if it shifted (defensive against focus-triggered nudges).
+    if (savedPageY != null && Math.abs(window.scrollY - savedPageY) > 2) {
+      // `instant` avoids the global `html { scroll-behavior: smooth }`.
+      window.scrollTo({ top: savedPageY, left: 0, behavior: "instant" as ScrollBehavior })
+    }
+    pageScrollYRef.current = null
+
+    if (!el) return
+    if (!wasNearBottomRef.current) return
+    // Direct scrollTop write — lowest-level scroll, cannot bubble, no animation.
+    el.scrollTop = el.scrollHeight
   }, [messages, isTyping])
 
   // Keep the welcome message in sync with the active language.
@@ -246,6 +271,10 @@ export function AiAssistant({ lang }: { lang: "es" | "en" }) {
     if (!text.trim()) return
     const trimmed = text.trim().slice(0, 2000)
 
+    // Snapshot the page scroll position so we can restore it
+    // if any focus/layout change nudges the window during the update.
+    pageScrollYRef.current = window.scrollY
+
     const userMsg: Message = { id: Date.now().toString(), role: "user", text: trimmed }
     setMessages((prev) => [...prev, userMsg])
     if (!customText) setInput("")
@@ -262,6 +291,9 @@ export function AiAssistant({ lang }: { lang: "es" | "en" }) {
         role: "assistant",
         text: answer,
       }
+      // Snapshot again — by the time the response arrives the user may have
+      // scrolled the page somewhere else; we restore THAT position, not the old one.
+      pageScrollYRef.current = window.scrollY
       setMessages((prev) => [...prev, aiMsg])
       setIsTyping(false)
     }

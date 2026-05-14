@@ -29,10 +29,10 @@ export function Process({ lang }: { lang: Lang }) {
 
         {/* Steps */}
         <div className="relative">
-          {/* Horizontal connector (desktop) */}
-          <div className="pointer-events-none absolute left-0 right-0 top-9 hidden h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent lg:block" />
+          {/* Horizontal connector (desktop) — anchored to bubble center */}
+          <div className="pointer-events-none absolute left-0 right-0 top-[44px] hidden h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent lg:block" />
 
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
+          <div className="grid items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-5">
             {steps.map((step, idx) => {
               const Icon = STEP_ICONS[idx] ?? Compass
               return (
@@ -42,10 +42,10 @@ export function Process({ lang }: { lang: Lang }) {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "-60px" }}
                   transition={{ duration: 0.5, delay: idx * 0.08 }}
-                  className="relative"
+                  className="relative flex h-full flex-col"
                 >
                   {/* Number bubble */}
-                  <div className="relative z-10 mx-auto flex h-[72px] w-[72px] items-center justify-center">
+                  <div className="relative z-10 mx-auto flex h-[72px] w-[72px] shrink-0 items-center justify-center">
                     <div className="absolute inset-0 animate-pulse-slow rounded-full bg-primary/20 blur-xl" />
                     <div className="relative flex h-[72px] w-[72px] items-center justify-center rounded-full bg-gradient-to-br from-card to-background ring-1 ring-white/10">
                       <Icon className="h-7 w-7 text-primary" />
@@ -55,20 +55,22 @@ export function Process({ lang }: { lang: Lang }) {
                     </div>
                   </div>
 
-                  {/* Card */}
+                  {/* Card — flex column so duration anchors to bottom on every card */}
                   <motion.div
                     whileHover={{ y: -4 }}
-                    className="glass relative mt-4 rounded-xl p-5 text-center"
+                    className="glass relative mt-4 flex flex-1 flex-col rounded-xl p-5 text-center"
                   >
-                    <h3 className="mb-2 font-serif text-lg font-medium text-foreground">
+                    <h3 className="mb-2 min-h-[3rem] font-serif text-lg font-medium leading-tight text-foreground sm:min-h-[3.5rem]">
                       {step.title}
                     </h3>
-                    <p className="mb-4 text-xs leading-relaxed text-muted-foreground sm:text-sm">
+                    <p className="mb-5 text-xs leading-relaxed text-muted-foreground sm:text-sm">
                       {step.desc}
                     </p>
-                    <div className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                      <Clock className="h-3 w-3" />
-                      {step.duration}
+                    <div className="mt-auto flex justify-center">
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                        <Clock className="h-3 w-3" />
+                        {step.duration}
+                      </span>
                     </div>
                   </motion.div>
                 </motion.div>
