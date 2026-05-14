@@ -222,20 +222,68 @@ export function AiAssistant({ lang }: { lang: "es" | "en" }) {
       : "I don't have a direct answer for that 🤔. I can tell you about Steven's experience, stack, projects, rates or availability. Or you can email him directly at Stevenvilla10@gmail.com."
   }
 
-  const handleSubmit = (e?: React.FormEvent, customText?: string) => {
+  const handleSubmit = async (e?: React.FormEvent, customText?: string) => {
     e?.preventDefault()
     const text = customText || input
     if (!text.trim()) return
-    const userMsg: Message = { id: Date.now().toString(), role: "user", text }
+    const trimmed = text.trim().slice(0, 2000)
+
+    const userMsg: Message = { id: Date.now().toString(), role: "user", text: trimmed }
     setMessages((prev) => [...prev, userMsg])
     if (!customText) setInput("")
     setIsTyping(true)
-    setTimeout(() => {
-      const answer = findAnswer(text)
-      const aiMsg: Message = { id: (Date.now() + 1).toString(), role: "assistant", text: answer }
+
+    // Build conversation context: take last 8 messages + new user msg
+    const history = [...messages, userMsg]
+      .slice(-9)
+      .map((m) => ({ role: m.role, content: m.text }))
+
+    const respond = (answer: string) => {
+      const aiMsg: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        text: answer,
+      }
       setMessages((prev) => [...prev, aiMsg])
       setIsTyping(false)
-    }, 900 + Math.random() * 600)
+    }
+
+    try {
+      const controller = new AbortController()
+      const timeout = setTimeout(() => controller.abort(), 25000)
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: history, lang, honeypot: "" }),
+        signal: controller.signal,
+        credentials: "same-origin",
+      })
+      clearTimeout(timeout)
+
+      if (res.ok) {
+        const data = await res.json()
+        const answer =
+          typeof data?.text === "string" && data.text.trim().length > 0
+            ? data.text.trim()
+            : findAnswer(trimmed)
+        respond(answer)
+        return
+      }
+
+      if (res.status === 429) {
+        respond(
+          lang === "es"
+            ? "Demasiadas preguntas seguidas. Espera unos segundos e intenta de nuevo."
+            : "Too many questions in a row. Wait a few seconds and try again.",
+        )
+        return
+      }
+
+      // Any other error → graceful fallback to local matcher
+      respond(findAnswer(trimmed))
+    } catch {
+      respond(findAnswer(trimmed))
+    }
   }
 
   const clearChat = () => {
@@ -408,8 +456,8 @@ export function AiAssistant({ lang }: { lang: "es" | "en" }) {
         <p className="mx-auto mt-6 max-w-md text-center font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
           <Sparkles className="mr-1 inline h-3 w-3" />
           {lang === "es"
-            ? "Demo · El asistente real corre sobre Gemini en producto"
-            : "Demo · The production assistant runs on Gemini in product"}
+            ? "IA personal entrenada con la info de Steven · Respuestas en tiempo real"
+            : "Personal AI trained on Steven's info · Real-time answers"}
         </p>
       </div>
     </section>
