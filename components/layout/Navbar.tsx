@@ -44,8 +44,16 @@ export function Navbar({
 
   const selectLanguage = (l: Lang) => {
     setLang(l)
-    localStorage.setItem(LANG_KEY, l)
+    try {
+      localStorage.setItem(LANG_KEY, l)
+    } catch {
+      // localStorage can throw in private mode or when disabled — ignore.
+    }
     setShowLangModal(false)
+  }
+
+  const quickToggleLanguage = () => {
+    selectLanguage(lang === "es" ? "en" : "es")
   }
 
   const handleScroll = (id: string) => {
@@ -161,15 +169,16 @@ export function Navbar({
 
           {/* Actions */}
           <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setShowLangModal(true)}
-              className="h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-white/5"
-              title={lang === "es" ? "English" : "Español"}
+            <button
+              type="button"
+              onClick={quickToggleLanguage}
+              className="inline-flex h-9 items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 text-[11px] font-mono font-semibold uppercase tracking-widest text-muted-foreground transition-all hover:border-white/20 hover:bg-white/10 hover:text-foreground"
+              aria-label={lang === "es" ? "Switch to English" : "Cambiar a Español"}
+              title={lang === "es" ? "Switch to English" : "Cambiar a Español"}
             >
-              <Globe className="h-4 w-4" />
-            </Button>
+              <Globe className="h-3.5 w-3.5" />
+              <span>{lang === "es" ? "ES" : "EN"}</span>
+            </button>
             <Button
               variant="ghost"
               size="icon"

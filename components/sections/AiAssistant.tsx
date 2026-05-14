@@ -122,12 +122,30 @@ export function AiAssistant({ lang }: { lang: "es" | "en" }) {
   const [input, setInput] = useState("")
   const [isTyping, setIsTyping] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const messagesContainerRef = useRef<HTMLDivElement>(null)
 
+  // Scroll only the chat container — never the page.
   useEffect(() => {
-    if (messages.length > 1 || isTyping) {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-    }
+    const el = messagesContainerRef.current
+    if (!el) return
+    if (messages.length <= 1 && !isTyping) return
+    // Direct scrollTop manipulation does not bubble to window like scrollIntoView can.
+    el.scrollTo({ top: el.scrollHeight, behavior: "smooth" })
   }, [messages, isTyping])
+
+  // Keep the welcome message in sync with the active language.
+  // Only swap when the chat has no user activity yet — never overwrite a real conversation.
+  useEffect(() => {
+    setMessages((prev) => {
+      if (prev.length !== 1 || prev[0].role !== "assistant") return prev
+      const welcome =
+        lang === "es"
+          ? "👋 Soy el copiloto IA del portafolio de Steven. Puedo contarte sobre su experiencia, stack, proyectos, tarifas y disponibilidad. ¿Qué quieres saber?"
+          : "👋 I'm Steven's portfolio AI copilot. I can tell you about his experience, stack, projects, rates and availability. What do you want to know?"
+      if (prev[0].text === welcome) return prev
+      return [{ id: prev[0].id, role: "assistant", text: welcome }]
+    })
+  }, [lang])
 
   const findAnswer = (query: string) => {
     const normalized = query
@@ -364,7 +382,10 @@ export function AiAssistant({ lang }: { lang: "es" | "en" }) {
           </div>
 
           {/* Chat flow */}
-          <div className="h-[400px] overflow-y-auto p-6 space-y-4">
+          <div
+            ref={messagesContainerRef}
+            className="h-[400px] overflow-y-auto overscroll-contain p-6 space-y-4"
+          >
             <AnimatePresence initial={false}>
               {messages.map((msg) => (
                 <motion.div
