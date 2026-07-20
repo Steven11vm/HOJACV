@@ -3,12 +3,43 @@ import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { type Lang, translations } from "@/lib/translations"
 import { Button } from "@/components/ui/button"
-import { FileText, ExternalLink, Layers, Code, CheckCircle2, X, Lock, ArrowUpRight } from "lucide-react"
+import {
+  FileText,
+  ExternalLink,
+  Layers,
+  Code,
+  CheckCircle2,
+  X,
+  Lock,
+  ArrowUpRight,
+  Sparkles,
+} from "lucide-react"
+
+type Project = {
+  title: string
+  subtitle?: string
+  description: string
+  tech: string[]
+  link?: string
+  featured?: boolean
+  hero?: boolean
+  accent?: string
+  image?: string
+  imageAlt?: string
+  doc?: {
+    architecture?: string[]
+    technicalDecisions?: string[]
+    problemsSolved?: string[]
+  }
+}
 
 export function Projects({ lang }: { lang: Lang }) {
   const t = translations[lang]
-  const projects = t.projectsData
-  const [docProject, setDocProject] = useState<any | null>(null)
+  const projects = t.projectsData as unknown as Project[]
+  const [docProject, setDocProject] = useState<Project | null>(null)
+
+  const heroProjects = projects.filter((p) => p.hero)
+  const regularProjects = projects.filter((p) => !p.hero)
 
   return (
     <section id="projects" className="relative overflow-hidden px-4 py-28 sm:px-6">
@@ -31,95 +62,29 @@ export function Projects({ lang }: { lang: Lang }) {
           <p className="max-w-2xl text-base text-muted-foreground sm:text-lg">{t.projects.subtitle}</p>
         </motion.div>
 
+        {heroProjects.length > 0 && (
+          <div className="mb-8 flex flex-col gap-8">
+            {heroProjects.map((project, idx) => (
+              <HeroProjectCard
+                key={`hero-${idx}`}
+                project={project}
+                idx={idx}
+                t={t}
+                onOpenDoc={setDocProject}
+              />
+            ))}
+          </div>
+        )}
+
         <div className="grid gap-5 md:grid-cols-2">
-          {projects.map((project, idx) => (
-            <motion.article
+          {regularProjects.map((project, idx) => (
+            <ProjectCard
               key={idx}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.55, delay: (idx % 2) * 0.06 }}
-              whileHover={{ y: -6 }}
-              className="glass spotlight-card group relative flex flex-col overflow-hidden rounded-2xl p-7 sm:p-8"
-              onMouseMove={(e) => {
-                const rect = e.currentTarget.getBoundingClientRect()
-                e.currentTarget.style.setProperty("--mouse-x", `${e.clientX - rect.left}px`)
-                e.currentTarget.style.setProperty("--mouse-y", `${e.clientY - rect.top}px`)
-              }}
-            >
-              {/* Top row */}
-              <div className="mb-5 flex items-start justify-between gap-4">
-                <div className="flex flex-wrap items-center gap-2">
-                  {project.featured && (
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/15 px-2.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-widest text-primary ring-1 ring-primary/30">
-                      <span className="status-dot" style={{ background: "var(--primary)", boxShadow: "0 0 8px var(--primary)" }} />
-                      {t.projects.featured}
-                    </span>
-                  )}
-                  {project.link && project.link !== "#" && (
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-neon-green/12 px-2.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-widest text-neon-green ring-1 ring-neon-green/30">
-                      {t.projects.live}
-                    </span>
-                  )}
-                </div>
-                <span className="font-serif text-5xl font-medium leading-none num-outline">
-                  {String(idx + 1).padStart(2, "0")}
-                </span>
-              </div>
-
-              {/* Title */}
-              <h3 className="mb-1 font-serif text-2xl font-medium leading-tight text-foreground transition-colors group-hover:text-primary sm:text-3xl">
-                {project.title}
-              </h3>
-              <p className="mb-4 font-mono text-xs uppercase tracking-widest text-muted-foreground">
-                {(project as any).subtitle ?? ""}
-              </p>
-              <p className="mb-6 flex-grow text-sm leading-relaxed text-muted-foreground sm:text-base">
-                {project.description}
-              </p>
-
-              {/* Tech tags */}
-              <div className="mb-6 flex flex-wrap gap-1.5">
-                {project.tech.map((tech, i) => (
-                  <span key={i} className="tech-tag">
-                    {tech}
-                  </span>
-                ))}
-              </div>
-
-              {/* Actions */}
-              <div className="mt-auto flex flex-wrap items-center gap-3 border-t border-white/5 pt-5">
-                {project.doc && (
-                  <button
-                    type="button"
-                    onClick={() => setDocProject(project)}
-                    className="group/btn inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-widest text-muted-foreground transition-colors hover:text-foreground"
-                  >
-                    <FileText className="h-3.5 w-3.5" />
-                    {t.projects.docTech}
-                  </button>
-                )}
-                {project.link && project.link !== "#" ? (
-                  <a
-                    href={project.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group/btn ml-auto inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-widest text-foreground transition-all hover:border-primary/40 hover:bg-primary/10 hover:text-primary"
-                  >
-                    {t.projects.viewProject}
-                    <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
-                  </a>
-                ) : (
-                  <span className="ml-auto inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-widest text-muted-foreground/60">
-                    <Lock className="h-3 w-3" />
-                    {t.projects.privateProject}
-                  </span>
-                )}
-              </div>
-
-              {/* Gradient border on hover */}
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-            </motion.article>
+              project={project}
+              idx={idx + heroProjects.length}
+              t={t}
+              onOpenDoc={setDocProject}
+            />
           ))}
         </div>
       </div>
@@ -211,6 +176,328 @@ export function Projects({ lang }: { lang: Lang }) {
   )
 }
 
+/* ------------------------------------------------------------------ */
+/* Hero (large, image + unfold reveal, per-project accent)             */
+/* ------------------------------------------------------------------ */
+
+function HeroProjectCard({
+  project,
+  idx,
+  t,
+  onOpenDoc,
+}: {
+  project: Project
+  idx: number
+  t: (typeof translations)[Lang]
+  onOpenDoc: (p: Project) => void
+}) {
+  const accent = project.accent ?? "var(--primary)"
+
+  return (
+    <motion.article
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-80px" }}
+      transition={{ duration: 0.7, ease: [0.2, 0.8, 0.2, 1] }}
+      whileHover={{ y: -6 }}
+      className="glass spotlight-card group relative flex flex-col overflow-hidden rounded-3xl md:flex-row"
+      style={{
+        // subtle accent aura on the card border
+        boxShadow: `0 0 0 1px color-mix(in oklch, ${accent} 22%, transparent), 0 30px 80px -30px color-mix(in oklch, ${accent} 35%, transparent)`,
+      }}
+      onMouseMove={(e) => {
+        const rect = e.currentTarget.getBoundingClientRect()
+        e.currentTarget.style.setProperty("--mouse-x", `${e.clientX - rect.left}px`)
+        e.currentTarget.style.setProperty("--mouse-y", `${e.clientY - rect.top}px`)
+      }}
+    >
+      {/* Image / unfold reveal */}
+      {project.image && (
+        <div className="relative w-full overflow-hidden md:w-[46%]">
+          <div
+            className="pointer-events-none absolute inset-0 z-10"
+            style={{
+              background: `linear-gradient(115deg, transparent 55%, color-mix(in oklch, ${accent} 8%, transparent) 100%)`,
+            }}
+          />
+          <motion.div
+            initial={{ scaleY: 0, opacity: 0 }}
+            whileInView={{ scaleY: 1, opacity: 1 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.9, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+            style={{ originY: 0 }}
+            className="relative h-56 w-full sm:h-72 md:h-full md:min-h-[380px]"
+          >
+            <motion.img
+              src={project.image}
+              alt={project.imageAlt ?? project.title}
+              className="h-full w-full select-none object-cover"
+              draggable={false}
+              initial={{ scale: 1.08 }}
+              whileInView={{ scale: 1 }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1] }}
+              whileHover={{ scale: 1.04 }}
+            />
+            {/* scan line accent that swipes down as the image unfolds */}
+            <motion.div
+              initial={{ y: "-100%", opacity: 0 }}
+              whileInView={{ y: "110%", opacity: [0, 0.9, 0] }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: 1.2, delay: 0.15, ease: "easeInOut" }}
+              className="pointer-events-none absolute inset-x-0 top-0 h-24"
+              style={{
+                background: `linear-gradient(to bottom, transparent, color-mix(in oklch, ${accent} 55%, transparent), transparent)`,
+                mixBlendMode: "screen",
+              }}
+            />
+          </motion.div>
+
+          {/* Corner brackets — editorial feel */}
+          <CornerBrackets accent={accent} />
+        </div>
+      )}
+
+      {/* Content */}
+      <div className="relative flex flex-1 flex-col p-7 sm:p-8 md:p-10">
+        <div className="mb-5 flex items-start justify-between gap-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <motion.span
+              initial={{ opacity: 0, y: -4 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.25 }}
+              className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-widest ring-1"
+              style={{
+                background: `color-mix(in oklch, ${accent} 14%, transparent)`,
+                color: accent,
+                boxShadow: `inset 0 0 0 1px color-mix(in oklch, ${accent} 32%, transparent)`,
+                borderColor: "transparent",
+              }}
+            >
+              <Sparkles className="h-3 w-3" />
+              {t.projects.featured}
+            </motion.span>
+            {project.link && project.link !== "#" && (
+              <motion.span
+                initial={{ opacity: 0, y: -4 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.32 }}
+                className="inline-flex items-center gap-1.5 rounded-full bg-neon-green/12 px-2.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-widest text-neon-green ring-1 ring-neon-green/30"
+              >
+                <span
+                  className="status-dot"
+                  style={{ background: "var(--neon-green)", boxShadow: "0 0 8px var(--neon-green)" }}
+                />
+                {t.projects.live}
+              </motion.span>
+            )}
+          </div>
+          <span className="font-serif text-5xl font-medium leading-none num-outline sm:text-6xl">
+            {String(idx + 1).padStart(2, "0")}
+          </span>
+        </div>
+
+        <motion.h3
+          initial={{ opacity: 0, y: 8 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.28, duration: 0.5 }}
+          className="mb-1 font-serif text-3xl font-medium leading-tight text-foreground transition-colors group-hover:text-foreground sm:text-4xl"
+        >
+          {project.title}
+        </motion.h3>
+        <p className="mb-5 font-mono text-xs uppercase tracking-widest" style={{ color: accent }}>
+          {project.subtitle ?? ""}
+        </p>
+        <motion.p
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.35, duration: 0.6 }}
+          className="mb-6 text-sm leading-relaxed text-muted-foreground sm:text-base"
+        >
+          {project.description}
+        </motion.p>
+
+        <div className="mb-6 flex flex-wrap gap-1.5">
+          {project.tech.map((tech, i) => (
+            <motion.span
+              key={i}
+              initial={{ opacity: 0, y: 6 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.4 + i * 0.05 }}
+              className="tech-tag"
+            >
+              {tech}
+            </motion.span>
+          ))}
+        </div>
+
+        <div className="mt-auto flex flex-wrap items-center gap-3 border-t border-white/5 pt-5">
+          {project.doc && (
+            <button
+              type="button"
+              onClick={() => onOpenDoc(project)}
+              className="group/btn inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-widest text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <FileText className="h-3.5 w-3.5" />
+              {t.projects.docTech}
+            </button>
+          )}
+          {project.link && project.link !== "#" && (
+            <a
+              href={project.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group/btn ml-auto inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-widest transition-all"
+              style={{
+                color: "var(--background)",
+                background: accent,
+                boxShadow: `0 8px 30px -10px ${accent}`,
+              }}
+            >
+              {t.projects.viewProject}
+              <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
+            </a>
+          )}
+        </div>
+
+        <div
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-px opacity-70"
+          style={{
+            background: `linear-gradient(to right, transparent, ${accent}, transparent)`,
+          }}
+        />
+      </div>
+    </motion.article>
+  )
+}
+
+function CornerBrackets({ accent }: { accent: string }) {
+  const stroke = { stroke: accent, strokeWidth: 1.2, fill: "none" as const }
+  return (
+    <svg
+      className="pointer-events-none absolute inset-0 z-20"
+      viewBox="0 0 100 100"
+      preserveAspectRatio="none"
+      aria-hidden
+    >
+      <g opacity={0.75} vectorEffect="non-scaling-stroke">
+        <path d="M2 8 L2 2 L8 2" {...stroke} />
+        <path d="M98 8 L98 2 L92 2" {...stroke} />
+        <path d="M2 92 L2 98 L8 98" {...stroke} />
+        <path d="M98 92 L98 98 L92 98" {...stroke} />
+      </g>
+    </svg>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/* Regular project cards (original design, preserved)                  */
+/* ------------------------------------------------------------------ */
+
+function ProjectCard({
+  project,
+  idx,
+  t,
+  onOpenDoc,
+}: {
+  project: Project
+  idx: number
+  t: (typeof translations)[Lang]
+  onOpenDoc: (p: Project) => void
+}) {
+  return (
+    <motion.article
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-60px" }}
+      transition={{ duration: 0.55, delay: (idx % 2) * 0.06 }}
+      whileHover={{ y: -6 }}
+      className="glass spotlight-card group relative flex flex-col overflow-hidden rounded-2xl p-7 sm:p-8"
+      onMouseMove={(e) => {
+        const rect = e.currentTarget.getBoundingClientRect()
+        e.currentTarget.style.setProperty("--mouse-x", `${e.clientX - rect.left}px`)
+        e.currentTarget.style.setProperty("--mouse-y", `${e.clientY - rect.top}px`)
+      }}
+    >
+      <div className="mb-5 flex items-start justify-between gap-4">
+        <div className="flex flex-wrap items-center gap-2">
+          {project.featured && (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/15 px-2.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-widest text-primary ring-1 ring-primary/30">
+              <span
+                className="status-dot"
+                style={{ background: "var(--primary)", boxShadow: "0 0 8px var(--primary)" }}
+              />
+              {t.projects.featured}
+            </span>
+          )}
+          {project.link && project.link !== "#" && (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-neon-green/12 px-2.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-widest text-neon-green ring-1 ring-neon-green/30">
+              {t.projects.live}
+            </span>
+          )}
+        </div>
+        <span className="font-serif text-5xl font-medium leading-none num-outline">
+          {String(idx + 1).padStart(2, "0")}
+        </span>
+      </div>
+
+      <h3 className="mb-1 font-serif text-2xl font-medium leading-tight text-foreground transition-colors group-hover:text-primary sm:text-3xl">
+        {project.title}
+      </h3>
+      <p className="mb-4 font-mono text-xs uppercase tracking-widest text-muted-foreground">
+        {project.subtitle ?? ""}
+      </p>
+      <p className="mb-6 flex-grow text-sm leading-relaxed text-muted-foreground sm:text-base">
+        {project.description}
+      </p>
+
+      <div className="mb-6 flex flex-wrap gap-1.5">
+        {project.tech.map((tech, i) => (
+          <span key={i} className="tech-tag">
+            {tech}
+          </span>
+        ))}
+      </div>
+
+      <div className="mt-auto flex flex-wrap items-center gap-3 border-t border-white/5 pt-5">
+        {project.doc && (
+          <button
+            type="button"
+            onClick={() => onOpenDoc(project)}
+            className="group/btn inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-widest text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <FileText className="h-3.5 w-3.5" />
+            {t.projects.docTech}
+          </button>
+        )}
+        {project.link && project.link !== "#" ? (
+          <a
+            href={project.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group/btn ml-auto inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-widest text-foreground transition-all hover:border-primary/40 hover:bg-primary/10 hover:text-primary"
+          >
+            {t.projects.viewProject}
+            <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
+          </a>
+        ) : (
+          <span className="ml-auto inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-widest text-muted-foreground/60">
+            <Lock className="h-3 w-3" />
+            {t.projects.privateProject}
+          </span>
+        )}
+      </div>
+
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+    </motion.article>
+  )
+}
+
 function DocBlock({
   icon: Icon,
   color,
@@ -225,11 +512,7 @@ function DocBlock({
   delay: number
 }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, x: -16 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ delay }}
-    >
+    <motion.div initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay }}>
       <h4 className="mb-3 flex items-center gap-2 font-serif text-lg font-medium text-foreground">
         <span
           className="flex h-7 w-7 items-center justify-center rounded-lg ring-1"

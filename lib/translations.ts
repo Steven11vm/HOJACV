@@ -232,6 +232,42 @@ export const translations = {
     },
     projectsData: [
       {
+        title: "Tonsorium — Spa for Men",
+        subtitle: "Barbería premium con reservas online",
+        description:
+          "Ecosistema digital para barbería premium en Itagüí: catálogo de servicios, sistema de reservas con validación de disponibilidad, panel administrativo, cuentas de cliente e integración con WhatsApp. Diseñado con estética editorial oscura y dorado clásico para reforzar la marca 'El arte del caballero'.",
+        tech: ["React", "PHP", "SQL Server", "Tailwind CSS", "WhatsApp API"],
+        link: "https://tonsorium.online/",
+        featured: true,
+        hero: true,
+        accent: "#c9a253",
+        image: "/projects/tonsorium.svg",
+        imageAlt: "Tonsorium — barbería premium",
+        doc: {
+          architecture: [
+            "SPA en React con vistas: inicio, servicios, galería, testimonios, reservas, login/registro y cuenta.",
+            "Backend en PHP con endpoints REST para servicios, disponibilidad, reservas y sesiones (JWT / cookies HttpOnly).",
+            "SQL Server como fuente de verdad para servicios, maestros, turnos, clientes y reservas — con constraints para evitar dobles bookings.",
+            "Panel administrativo separado (/admin) con autenticación reforzada para gestión de agenda, servicios y clientes.",
+            "Integración con WhatsApp para confirmación de reservas y contacto directo con el negocio.",
+          ],
+          technicalDecisions: [
+            "React desacoplado del backend PHP vía API JSON, para escalar frontend y backend por separado.",
+            "SQL Server elegido por transacciones ACID sólidas — clave para evitar reservas duplicadas del mismo turno.",
+            "Diseño mobile-first con estética editorial (dorado sobre negro cálido) que refuerza el posicionamiento premium.",
+            "Zona /admin aislada del bundle público y con rate-limit propio para reducir superficie de ataque.",
+            "Envío de notificaciones vía WhatsApp en lugar de SMS por adopción del canal en Colombia y menor fricción.",
+          ],
+          problemsSolved: [
+            "Eliminar el ida-y-vuelta por WhatsApp para agendar: el cliente ve disponibilidad real y cierra la reserva en segundos.",
+            "Prevenir dobles reservas de un mismo turno mediante lock optimista en SQL Server + validación en backend.",
+            "Panel de administración fácil de operar para el equipo de barberos, sin necesidad de perfil técnico.",
+            "Experiencia móvil impecable — el 80%+ del tráfico llega desde el teléfono en horario de cita.",
+            "Marca premium consistente en cada pantalla: tipografía serif, dorado clásico y micro-interacciones sobrias.",
+          ],
+        },
+      },
+      {
         title: "Beat Generator AI",
         subtitle: "Plataforma de generación musical con IA",
         description:
@@ -690,6 +726,42 @@ export const translations = {
       },
     },
     projectsData: [
+      {
+        title: "Tonsorium — Spa for Men",
+        subtitle: "Premium barbershop with online booking",
+        description:
+          "Digital ecosystem for a premium barbershop in Itagüí: service catalog, booking system with real-time availability, admin panel, client accounts and WhatsApp integration. Built with an editorial dark aesthetic and classic gold to reinforce the 'The Art of the Gentleman' brand.",
+        tech: ["React", "PHP", "SQL Server", "Tailwind CSS", "WhatsApp API"],
+        link: "https://tonsorium.online/",
+        featured: true,
+        hero: true,
+        accent: "#c9a253",
+        image: "/projects/tonsorium.svg",
+        imageAlt: "Tonsorium — premium barbershop",
+        doc: {
+          architecture: [
+            "React SPA with views: home, services, gallery, testimonials, booking, login/register and account.",
+            "PHP backend with REST endpoints for services, availability, reservations and sessions (JWT / HttpOnly cookies).",
+            "SQL Server as source of truth for services, barbers, time slots, clients and bookings — with constraints preventing double-booking.",
+            "Separate admin panel (/admin) with hardened authentication to manage schedule, services and clients.",
+            "WhatsApp integration for booking confirmations and direct customer contact.",
+          ],
+          technicalDecisions: [
+            "React decoupled from the PHP backend via a JSON API, so frontend and backend scale independently.",
+            "SQL Server chosen for solid ACID transactions — critical to prevent double-booking the same slot.",
+            "Mobile-first editorial design (gold on warm black) to reinforce the premium positioning.",
+            "The /admin surface is isolated from the public bundle and has its own rate-limit to shrink the attack surface.",
+            "Notifications go through WhatsApp instead of SMS — better adoption in Colombia and lower friction.",
+          ],
+          problemsSolved: [
+            "Killed the back-and-forth on WhatsApp: clients see real availability and close a booking in seconds.",
+            "Prevent double bookings of the same slot via optimistic locking in SQL Server + backend validation.",
+            "Admin panel easy to operate for the barber team — no technical profile required.",
+            "Flawless mobile experience — 80%+ of traffic comes from phones at appointment time.",
+            "Consistent premium brand on every screen: serif typography, classic gold and restrained micro-interactions.",
+          ],
+        },
+      },
       {
         title: "Beat Generator AI",
         subtitle: "AI-powered music generation platform",
