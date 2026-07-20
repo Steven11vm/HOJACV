@@ -4,6 +4,7 @@ import Image from "next/image"
 import { motion, AnimatePresence } from "framer-motion"
 import { type Lang, translations } from "@/lib/translations"
 import { X, ArrowUpRight } from "lucide-react"
+import { ContainerScroll } from "@/components/ui/container-scroll-animation"
 
 type Project = {
   title: string
@@ -27,6 +28,9 @@ export function Projects({ lang }: { lang: Lang }) {
   const t = translations[lang]
   const projects = t.projectsData as unknown as Project[]
   const [docProject, setDocProject] = useState<Project | null>(null)
+
+  const featured = projects[0]
+  const rest = projects.slice(1)
 
   return (
     <section id="projects" className="border-t border-hairline px-6 py-28 sm:px-10 sm:py-36 lg:px-16">
@@ -52,8 +56,17 @@ export function Projects({ lang }: { lang: Lang }) {
           </div>
         </div>
 
-        <ol className="mt-20 border-t border-hairline">
-          {projects.map((project, idx) => (
+        {featured?.image && (
+          <FeaturedScrollCard
+            project={featured}
+            t={t}
+            onOpenDoc={setDocProject}
+            lang={lang}
+          />
+        )}
+
+        <ol className="mt-8 border-t border-hairline">
+          {rest.map((project, idx) => (
             <ProjectRow
               key={idx}
               project={project}
@@ -310,6 +323,75 @@ function ProjectRow({
         )}
       </AnimatePresence>
     </motion.li>
+  )
+}
+
+function FeaturedScrollCard({
+  project,
+  t,
+  onOpenDoc,
+  lang,
+}: {
+  project: Project
+  t: (typeof translations)[Lang]
+  onOpenDoc: (p: Project) => void
+  lang: Lang
+}) {
+  return (
+    <div className="mt-16 border-t border-hairline pt-4">
+      <ContainerScroll
+        titleComponent={
+          <>
+            <p className="mb-4 font-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
+              {lang === "es" ? "Destacado · Nº 01" : "Featured · Nº 01"}
+            </p>
+            <h3 className="font-display text-4xl leading-tight text-foreground sm:text-5xl md:text-6xl">
+              {project.title}
+            </h3>
+            <p className="mt-4 text-sm text-muted-foreground sm:text-base">
+              {project.subtitle}
+            </p>
+          </>
+        }
+      >
+        <Image
+          src={project.image!}
+          alt={project.imageAlt ?? project.title}
+          fill
+          className="object-cover object-top dark:invert"
+          sizes="(max-width: 1024px) 90vw, 1024px"
+          priority
+        />
+      </ContainerScroll>
+
+      <div className="mx-auto -mt-4 flex max-w-5xl flex-col items-start gap-4 px-2 sm:flex-row sm:items-center sm:justify-between">
+        <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+          {project.tech.join(" · ")}
+        </p>
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+          {project.doc && (
+            <button
+              type="button"
+              onClick={() => onOpenDoc(project)}
+              className="link-r font-mono text-[11px] uppercase tracking-[0.18em] text-foreground"
+            >
+              {t.projects.docTech}
+            </button>
+          )}
+          {project.link && project.link !== "#" && (
+            <a
+              href={project.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-plain btn-plain-inv"
+            >
+              {t.projects.viewProject}
+              <ArrowUpRight className="h-3.5 w-3.5" />
+            </a>
+          )}
+        </div>
+      </div>
+    </div>
   )
 }
 
