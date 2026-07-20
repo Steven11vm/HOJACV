@@ -268,6 +268,40 @@ export const translations = {
         },
       },
       {
+        title: "Alien Style 51",
+        subtitle: "Estampados personalizados con Studio 3D",
+        description:
+          "E-commerce de estampados personalizados en Medellín: catálogo de camisetas, tazas, gorras y llaveros; Studio interactivo para diseñar en vivo sobre el producto (canvas HTML5); flujo de compra, cuenta de cliente y panel administrativo. Producción exprés 48h y envíos a toda Colombia.",
+        tech: ["PHP", "JavaScript", "HTML5 Canvas", "MySQL", "Tailwind CSS"],
+        link: "https://alyenstyle.online/",
+        featured: true,
+        image: "/projects/alienstyle.svg",
+        imageAlt: "Alien Style 51 — estampados personalizados",
+        doc: {
+          architecture: [
+            "Backend PHP con endpoints REST para catálogo, autenticación, órdenes y administración.",
+            "Studio de personalización en cliente: HTML5 Canvas + JS para posicionar, escalar y previsualizar el diseño sobre el producto en tiempo real.",
+            "MySQL como fuente de verdad para productos, variantes (colores, tallas), clientes y pedidos.",
+            "Panel administrativo aparte para gestionar catálogo, órdenes y estados de producción.",
+            "Flujo de checkout con datos de envío nacional y confirmación por correo/WhatsApp.",
+          ],
+          technicalDecisions: [
+            "Studio en el cliente con canvas para que el usuario vea el resultado antes de comprar y baje el porcentaje de devoluciones.",
+            "PHP + MySQL por estabilidad, hosting barato y velocidad para iterar promociones/temporada.",
+            "Modelo de producto con variantes (tipo de tela, color, talla) para no duplicar SKUs y mantener stock simple.",
+            "Endpoints separados para /auth y /catalogo con validación server-side para reducir superficie de ataque.",
+            "Producción 48h como promesa central del negocio — refuerza el copy y la conversión.",
+          ],
+          problemsSolved: [
+            "El cliente ya no necesita imaginarse el diseño: lo ve renderizado sobre el producto antes de pagar.",
+            "Menor tasa de devoluciones/reclamos gracias a la previsualización + confirmación final del arte.",
+            "Un solo panel para gestionar pedidos de sublimado, DTF y láser con estados de producción claros.",
+            "Catálogo escalable: productos con múltiples variantes y precios sin duplicar registros.",
+            "Marca 'Alien Style 51' consistente en cada pantalla, sin plantillas tipo Shopify genérico.",
+          ],
+        },
+      },
+      {
         title: "Beat Generator AI",
         subtitle: "Plataforma de generación musical con IA",
         description:
@@ -759,6 +793,40 @@ export const translations = {
             "Admin panel easy to operate for the barber team — no technical profile required.",
             "Flawless mobile experience — 80%+ of traffic comes from phones at appointment time.",
             "Consistent premium brand on every screen: serif typography, classic gold and restrained micro-interactions.",
+          ],
+        },
+      },
+      {
+        title: "Alien Style 51",
+        subtitle: "Custom apparel printing with 3D Studio",
+        description:
+          "Custom print-on-demand e-commerce based in Medellín: catalog of t-shirts, mugs, caps and keychains; interactive Studio to design live on the product (HTML5 Canvas); checkout flow, customer accounts and admin panel. 48h express production, nationwide shipping across Colombia.",
+        tech: ["PHP", "JavaScript", "HTML5 Canvas", "MySQL", "Tailwind CSS"],
+        link: "https://alyenstyle.online/",
+        featured: true,
+        image: "/projects/alienstyle.svg",
+        imageAlt: "Alien Style 51 — custom apparel printing",
+        doc: {
+          architecture: [
+            "PHP backend with REST endpoints for catalog, authentication, orders and administration.",
+            "Client-side customization Studio: HTML5 Canvas + JS to position, scale and live-preview the design on the product.",
+            "MySQL as source of truth for products, variants (colors, sizes), customers and orders.",
+            "Separate admin panel to manage catalog, orders and production statuses.",
+            "Checkout flow with domestic shipping data and email/WhatsApp confirmation.",
+          ],
+          technicalDecisions: [
+            "Client-side Studio with canvas so the user sees the result before buying — cuts the return rate.",
+            "PHP + MySQL for stability, cheap hosting and speed to iterate promos and seasonal collections.",
+            "Product model with variants (fabric, color, size) to avoid duplicating SKUs and keep stock simple.",
+            "Separate /auth and /catalogo endpoints with server-side validation to shrink the attack surface.",
+            "48h production as the core brand promise — reinforced in copy and conversion.",
+          ],
+          problemsSolved: [
+            "The customer no longer has to imagine the design: they see it rendered on the product before paying.",
+            "Lower return/complaint rate thanks to live preview + final artwork confirmation.",
+            "A single admin panel to handle sublimation, DTF and laser orders with clear production states.",
+            "Scalable catalog: products with multiple variants and prices without duplicating records.",
+            "Consistent 'Alien Style 51' brand on every screen — not a generic Shopify template.",
           ],
         },
       },

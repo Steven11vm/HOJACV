@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 640" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Alien Style 51 — Estampados personalizados">
+  <rect width="800" height="640" fill="#ffffff"/>
+
+  <g stroke="#111111" stroke-width="1" fill="none">
+    <rect x="40" y="40" width="720" height="560"/>
+    <rect x="52" y="52" width="696" height="536"/>
+  </g>
+
+  <g transform="translate(400 190)" text-anchor="middle" fill="#111111">
+    <text font-family="Georgia, 'Times New Roman', serif" font-size="12" letter-spacing="8" y="-30">EST · 2019</text>
+    <line x1="-70" y1="-14" x2="70" y2="-14" stroke="#111111" stroke-width="1"/>
+    <text font-family="Georgia, 'Times New Roman', serif" font-size="60" font-weight="400" letter-spacing="4" y="34">ALIEN STYLE</text>
+    <text font-family="Georgia, 'Times New Roman', serif" font-size="60" font-weight="400" letter-spacing="20" y="94">51</text>
+    <text font-family="Georgia, 'Times New Roman', serif" font-size="13" letter-spacing="10" y="128" fill="#6b6b68">ESTAMPADOS · PERSONALIZADOS</text>
+  </g>
+
+  <g transform="translate(400 380)" text-anchor="middle" fill="#111111">
+    <text font-family="Georgia, serif" font-size="16" font-style="italic" y="0">"Diseña. Personaliza. Recíbelo en casa."</text>
+  </g>
+
+  <g transform="translate(400 470)" stroke="#111111" stroke-width="1" fill="none" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M-140 -22 L-118 -34 L-90 -30 L-72 -34 L-50 -22 L-56 -6 L-70 -8 L-70 30 L-120 30 L-120 -8 L-134 -6 Z"/>
+    <path d="M-14 -30 h32 v6 h-32 z M-24 -24 h52 v54 a10 10 0 0 1 -10 10 h-32 a10 10 0 0 1 -10 -10 z"/>
+    <ellipse cx="82" cy="0" rx="24" ry="30"/>
+    <line x1="82" y1="-30" x2="82" y2="-38"/>
+    <line x1="82" y1="30" x2="82" y2="38"/>
+    <circle cx="145" cy="0" r="10"/>
+    <circle cx="145" cy="0" r="4"/>
+    <line x1="145" y1="-14" x2="145" y2="-24"/>
+    <line x1="145" y1="14" x2="145" y2="24"/>
+  </g>
+
+  <g transform="translate(400 555)" text-anchor="middle" fill="#6b6b68">
+    <line x1="-160" y1="-14" x2="-50" y2="-14" stroke="#111111" stroke-width="0.5"/>
+    <line x1="50" y1="-14" x2="160" y2="-14" stroke="#111111" stroke-width="0.5"/>
+    <text font-family="ui-monospace, Menlo, monospace" font-size="9" letter-spacing="6">PHP · JS · CANVAS 3D · MYSQL</text>
+  </g>
+
+  <g fill="#111111" font-family="ui-monospace, Menlo, monospace" font-size="9" letter-spacing="4">
+    <text x="60" y="70">Nº 02</text>
+    <text x="740" y="70" text-anchor="end">2026</text>
+    <text x="60" y="590">MEDELLÍN · CO</text>
+    <text x="740" y="590" text-anchor="end">ALYENSTYLE.ONLINE</text>
+  </g>
+</svg>
