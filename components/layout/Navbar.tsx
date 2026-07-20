@@ -1,6 +1,6 @@
 "use client"
 import { useState, useEffect } from "react"
-import { Globe, Sun, Moon, Menu, X, Sparkles } from "lucide-react"
+import { Menu, X } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { translations, type Lang, LANG_KEY } from "@/lib/translations"
@@ -46,15 +46,11 @@ export function Navbar({
     setLang(l)
     try {
       localStorage.setItem(LANG_KEY, l)
-    } catch {
-      // localStorage can throw in private mode or when disabled — ignore.
-    }
+    } catch {}
     setShowLangModal(false)
   }
 
-  const quickToggleLanguage = () => {
-    selectLanguage(lang === "es" ? "en" : "es")
-  }
+  const quickToggleLanguage = () => selectLanguage(lang === "es" ? "en" : "es")
 
   const handleScroll = (id: string) => {
     scrollToSection(id)
@@ -64,7 +60,6 @@ export function Navbar({
   if (!mounted) return null
 
   const navItems = [
-    { id: "hero", label: t.nav.home },
     { id: "about", label: t.nav.about },
     { id: "experience", label: t.nav.experience },
     { id: "skills", label: t.nav.skills },
@@ -78,140 +73,87 @@ export function Navbar({
   return (
     <>
       <Dialog open={showLangModal} onOpenChange={(open) => !open && setShowLangModal(false)}>
-        <DialogContent className="max-w-md gap-6 sm:max-w-lg data-[state=open]:!animate-lang-modal border-white/10 bg-card/80 backdrop-blur-2xl">
-          <DialogHeader className="overflow-hidden">
-            <DialogTitle className="flex items-center gap-2 text-xl sm:text-2xl animate-lang-title">
-              <Globe className="h-6 w-6 text-primary" />
-              <span>
-                {translations.es.langModal.title} / {translations.en.langModal.title}
-              </span>
+        <DialogContent className="max-w-md gap-6 border border-foreground bg-background sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="font-display text-xl font-normal text-foreground sm:text-2xl">
+              {translations.es.langModal.title}
+              <br />
+              <span className="text-muted-foreground">{translations.en.langModal.title}</span>
             </DialogTitle>
           </DialogHeader>
-          <p className="text-sm text-muted-foreground animate-lang-subtitle">
-            {translations.es.langModal.subtitle}
-            <br />
-            <span className="text-muted-foreground/80">{translations.en.langModal.subtitle}</span>
-          </p>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 overflow-hidden">
-            <Button
-              size="lg"
-              variant={lang === "es" ? "default" : "outline"}
-              className="min-h-[4rem] text-lg font-semibold animate-lang-btn-left transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/30"
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <button
+              className="btn-plain justify-center"
               onClick={() => selectLanguage("es")}
             >
-              🇪🇸 {t.langModal.spanish}
-            </Button>
-            <Button
-              size="lg"
-              variant={lang === "en" ? "default" : "outline"}
-              className="min-h-[4rem] text-lg font-semibold animate-lang-btn-right transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/30"
+              {t.langModal.spanish}
+            </button>
+            <button
+              className="btn-plain justify-center"
               onClick={() => selectLanguage("en")}
             >
-              🇺🇸 {t.langModal.english}
-            </Button>
+              {t.langModal.english}
+            </button>
           </div>
         </DialogContent>
       </Dialog>
 
       <motion.header
-        initial={{ y: -50, opacity: 0 }}
-        animate={{ y: isVisible ? 0 : -50, opacity: isVisible ? 1 : 0 }}
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: isVisible ? 0 : -20, opacity: isVisible ? 1 : 0 }}
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-        className={`fixed left-0 right-0 top-0 z-50 transition-all duration-300 ${
+        className={`fixed left-0 right-0 top-0 z-50 transition-colors duration-300 ${
           scrolled
-            ? "border-b border-white/5 bg-background/70 backdrop-blur-xl"
-            : "border-b border-transparent bg-background/30 backdrop-blur-sm"
+            ? "border-b border-hairline bg-background/90 backdrop-blur"
+            : "border-b border-transparent bg-background/60 backdrop-blur"
         }`}
       >
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          {/* Logo */}
-          <motion.button
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6 sm:px-10 lg:px-16">
+          <button
             onClick={() => handleScroll("hero")}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="group flex items-center gap-2"
+            className="font-mono text-[11px] font-medium uppercase tracking-[0.24em] text-foreground"
           >
-            <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-neon-violet to-neon-blue text-primary-foreground shadow-lg shadow-primary/30">
-              <span className="font-mono text-sm font-bold">SV</span>
-              <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-neon-violet to-neon-blue opacity-0 blur-md transition-opacity group-hover:opacity-70" />
-            </div>
-            <span className="hidden font-mono text-sm font-semibold tracking-tight text-foreground sm:inline">
-              steven<span className="text-primary">.</span>dev
-            </span>
-          </motion.button>
+            Steven Villamizar
+          </button>
 
-          {/* Desktop nav */}
-          <nav className="hidden items-center gap-1 lg:flex">
+          <nav className="hidden items-center gap-8 lg:flex">
             {navItems.map(({ id, label }) => (
               <button
                 key={id}
                 type="button"
                 onClick={() => handleScroll(id)}
-                className="relative rounded-full px-3 py-1.5 text-xs font-medium uppercase tracking-wider transition-colors"
+                className={`font-mono text-[11px] uppercase tracking-[0.2em] transition-colors ${
+                  activeSection === id ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+                }`}
               >
-                <span
-                  className={`relative z-10 transition-colors ${
-                    activeSection === id ? "text-foreground" : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {label}
-                </span>
-                {activeSection === id && (
-                  <motion.div
-                    layoutId="navbar-active"
-                    className="absolute inset-0 rounded-full bg-white/5 ring-1 ring-white/10"
-                    transition={{ type: "spring", stiffness: 350, damping: 30 }}
-                  />
-                )}
+                {label}
               </button>
             ))}
           </nav>
 
-          {/* Actions */}
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-4">
             <button
               type="button"
               onClick={quickToggleLanguage}
-              className="inline-flex h-9 items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 text-[11px] font-mono font-semibold uppercase tracking-widest text-muted-foreground transition-all hover:border-white/20 hover:bg-white/10 hover:text-foreground"
+              className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:text-foreground"
               aria-label={lang === "es" ? "Switch to English" : "Cambiar a Español"}
-              title={lang === "es" ? "Switch to English" : "Cambiar a Español"}
             >
-              <Globe className="h-3.5 w-3.5" />
-              <span>{lang === "es" ? "ES" : "EN"}</span>
+              {lang === "es" ? "EN" : "ES"}
             </button>
-            <Button
-              variant="ghost"
-              size="icon"
+            <button
+              type="button"
               onClick={toggleTheme}
-              className="h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-white/5"
+              aria-label={isDark ? t.aria.lightMode : t.aria.darkMode}
+              className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:text-foreground"
             >
-              <AnimatePresence mode="wait" initial={false}>
-                <motion.div
-                  key={isDark ? "dark" : "light"}
-                  initial={{ rotate: -90, opacity: 0, scale: 0.5 }}
-                  animate={{ rotate: 0, opacity: 1, scale: 1 }}
-                  exit={{ rotate: 90, opacity: 0, scale: 0.5 }}
-                  transition={{ duration: 0.25 }}
-                >
-                  {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-                </motion.div>
-              </AnimatePresence>
-            </Button>
-
-            <Button
-              size="sm"
-              onClick={() => handleScroll("contact")}
-              className="ml-2 hidden h-9 rounded-full bg-foreground px-4 text-xs font-semibold uppercase tracking-wider text-background hover:bg-foreground/90 lg:inline-flex"
-            >
-              <Sparkles className="mr-1.5 h-3 w-3" />
-              {t.hero.hireNow}
-            </Button>
+              {isDark ? "Light" : "Dark"}
+            </button>
 
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setMobileMenuOpen((o) => !o)}
-              className="h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-white/5 lg:hidden"
+              className="h-9 w-9 text-muted-foreground hover:text-foreground lg:hidden"
               aria-label={mobileMenuOpen ? t.aria.closeMenu : t.aria.openMenu}
             >
               {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -226,34 +168,27 @@ export function Navbar({
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="absolute left-0 right-0 top-full overflow-hidden border-b border-white/5 bg-background/95 backdrop-blur-2xl lg:hidden"
+              className="overflow-hidden border-b border-hairline bg-background lg:hidden"
             >
-              <nav className="flex flex-col gap-1 p-4">
+              <nav className="mx-auto flex max-w-6xl flex-col px-6 py-6 sm:px-10">
                 {navItems.map(({ id, label }, idx) => (
                   <motion.button
                     key={id}
                     type="button"
-                    initial={{ opacity: 0, x: -20 }}
+                    initial={{ opacity: 0, x: -8 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: idx * 0.04 }}
+                    transition={{ delay: idx * 0.03 }}
                     onClick={() => handleScroll(id)}
-                    className={`flex items-center justify-between rounded-lg px-4 py-3 text-sm font-medium transition-colors ${
-                      activeSection === id
-                        ? "bg-white/5 text-foreground ring-1 ring-white/10"
-                        : "text-muted-foreground hover:bg-white/5 hover:text-foreground"
+                    className={`flex items-center justify-between border-b border-hairline py-4 text-left font-mono text-[11px] uppercase tracking-[0.2em] transition-colors ${
+                      activeSection === id ? "text-foreground" : "text-muted-foreground hover:text-foreground"
                     }`}
                   >
-                    <span className="uppercase tracking-wider">{label}</span>
-                    {activeSection === id && <span className="status-dot" />}
+                    <span>{label}</span>
+                    {activeSection === id && (
+                      <span className="inline-block h-1.5 w-1.5 rounded-full bg-foreground" aria-hidden />
+                    )}
                   </motion.button>
                 ))}
-                <Button
-                  onClick={() => handleScroll("contact")}
-                  className="mt-3 h-12 w-full rounded-lg bg-foreground text-sm font-semibold uppercase tracking-wider text-background"
-                >
-                  <Sparkles className="mr-2 h-4 w-4" />
-                  {t.hero.hireNow}
-                </Button>
               </nav>
             </motion.div>
           )}

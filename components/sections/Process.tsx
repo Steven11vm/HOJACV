@@ -1,82 +1,57 @@
 "use client"
 import { motion } from "framer-motion"
 import { type Lang, translations } from "@/lib/translations"
-import { Compass, Pencil, Rocket, ShieldCheck, LifeBuoy, Clock } from "lucide-react"
-
-const STEP_ICONS = [Compass, Pencil, Rocket, ShieldCheck, LifeBuoy]
 
 export function Process({ lang }: { lang: Lang }) {
   const t = translations[lang]
   const steps = t.process.steps
 
   return (
-    <section id="process" className="relative overflow-hidden px-4 py-28 sm:px-6">
-      <div className="pointer-events-none absolute inset-0 -z-10 bg-dots mask-radial opacity-40" />
+    <section id="process" className="border-t border-hairline px-6 py-28 sm:px-10 sm:py-36 lg:px-16">
+      <div className="mx-auto grid max-w-6xl gap-16 lg:grid-cols-[220px_1fr] lg:gap-24">
+        <div>
+          <p className="eyebrow">{lang === "es" ? "05 · Proceso" : "05 · Process"}</p>
+        </div>
 
-      <div className="mx-auto max-w-6xl">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          className="mb-16 flex flex-col items-center text-center"
-        >
-          <div className="section-label mb-5">{t.process.label}</div>
-          <h2 className="mb-5 font-serif text-4xl font-medium tracking-tight text-foreground sm:text-5xl md:text-6xl">
+        <div>
+          <motion.h2
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8 }}
+            className="max-w-3xl font-display text-4xl leading-tight text-foreground sm:text-5xl md:text-6xl"
+          >
             {t.process.title}
-          </h2>
-          <p className="max-w-2xl text-base text-muted-foreground sm:text-lg">{t.process.subtitle}</p>
-        </motion.div>
+          </motion.h2>
+          <p className="mt-6 max-w-2xl text-base leading-relaxed text-muted-foreground">
+            {t.process.subtitle}
+          </p>
 
-        {/* Steps */}
-        <div className="relative">
-          {/* Horizontal connector (desktop) — anchored to bubble center */}
-          <div className="pointer-events-none absolute left-0 right-0 top-[44px] hidden h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent lg:block" />
-
-          <div className="grid items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-5">
-            {steps.map((step, idx) => {
-              const Icon = STEP_ICONS[idx] ?? Compass
-              return (
-                <motion.div
-                  key={idx}
-                  initial={{ opacity: 0, y: 24 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-60px" }}
-                  transition={{ duration: 0.5, delay: idx * 0.08 }}
-                  className="relative flex h-full flex-col"
-                >
-                  {/* Number bubble */}
-                  <div className="relative z-10 mx-auto flex h-[72px] w-[72px] shrink-0 items-center justify-center">
-                    <div className="absolute inset-0 animate-pulse-slow rounded-full bg-primary/20 blur-xl" />
-                    <div className="relative flex h-[72px] w-[72px] items-center justify-center rounded-full bg-gradient-to-br from-card to-background ring-1 ring-white/10">
-                      <Icon className="h-7 w-7 text-primary" />
-                      <span className="absolute -right-1 -top-1 flex h-7 w-7 items-center justify-center rounded-full bg-primary font-mono text-[11px] font-bold text-primary-foreground shadow-lg shadow-primary/30">
-                        {step.number}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Card — flex column so duration anchors to bottom on every card */}
-                  <motion.div
-                    whileHover={{ y: -4 }}
-                    className="glass relative mt-4 flex flex-1 flex-col rounded-xl p-5 text-center"
-                  >
-                    <h3 className="mb-2 min-h-[3rem] font-serif text-lg font-medium leading-tight text-foreground sm:min-h-[3.5rem]">
-                      {step.title}
-                    </h3>
-                    <p className="mb-5 text-xs leading-relaxed text-muted-foreground sm:text-sm">
-                      {step.desc}
-                    </p>
-                    <div className="mt-auto flex justify-center">
-                      <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                        <Clock className="h-3 w-3" />
-                        {step.duration}
-                      </span>
-                    </div>
-                  </motion.div>
-                </motion.div>
-              )
-            })}
-          </div>
+          <ol className="mt-16 border-t border-hairline">
+            {steps.map((step, idx) => (
+              <motion.li
+                key={idx}
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-80px" }}
+                transition={{ duration: 0.6, delay: idx * 0.05 }}
+                className="grid gap-4 border-b border-hairline py-8 sm:grid-cols-[80px_1fr_120px] sm:gap-8"
+              >
+                <p className="index pt-1">{step.number}</p>
+                <div>
+                  <h3 className="font-display text-xl leading-tight text-foreground sm:text-2xl">
+                    {step.title}
+                  </h3>
+                  <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted-foreground">
+                    {step.desc}
+                  </p>
+                </div>
+                <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground sm:text-right sm:pt-1">
+                  {step.duration}
+                </p>
+              </motion.li>
+            ))}
+          </ol>
         </div>
       </div>
     </section>

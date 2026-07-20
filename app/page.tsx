@@ -15,7 +15,7 @@ import { Contact } from "@/components/sections/Contact"
 
 export default function CVPage() {
   const [activeSection, setActiveSection] = useState("hero")
-  const [isDark, setIsDark] = useState(true)
+  const [isDark, setIsDark] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
   const [lang, setLang] = useState<Lang>("es")
 
