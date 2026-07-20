@@ -91,7 +91,7 @@ export function Hero({ lang }: { lang: Lang }) {
                 src={formalImage}
                 alt="Steven Villamizar"
                 fill
-                className="object-cover object-top grayscale contrast-105"
+                className="object-cover object-top"
                 sizes="(max-width: 640px) 320px, 400px"
                 priority
                 quality={100}
