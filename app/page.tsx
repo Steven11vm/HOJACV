@@ -3,7 +3,9 @@ import { useState, useEffect } from "react"
 import { type Lang, LANG_KEY } from "@/lib/translations"
 import { Navbar } from "@/components/layout/Navbar"
 import { Footer } from "@/components/layout/Footer"
+import { Intro } from "@/components/sections/Intro"
 import { Hero } from "@/components/sections/Hero"
+import { AlienShowcase } from "@/components/sections/AlienShowcase"
 import { About } from "@/components/sections/About"
 import { Experience } from "@/components/sections/Experience"
 import { Skills } from "@/components/sections/Skills"
@@ -78,7 +80,9 @@ export default function CVPage() {
       />
 
       <main className="relative z-10">
+        <Intro lang={lang} />
         <Hero lang={lang} />
+        <AlienShowcase lang={lang} />
         <About lang={lang} />
         <Experience lang={lang} />
         <Skills lang={lang} />
