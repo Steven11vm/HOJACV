@@ -66,6 +66,7 @@ export function Navbar({
     { id: "services", label: t.nav.services },
     { id: "process", label: t.nav.process },
     { id: "projects", label: t.nav.projects },
+    { id: "github", label: "GitHub" },
     { id: "ai", label: "AI" },
     { id: "contact", label: t.nav.contact },
   ]

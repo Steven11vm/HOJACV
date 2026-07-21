@@ -16,7 +16,7 @@ export function Contact({ lang }: { lang: Lang }) {
     <section id="contact" className="border-t border-hairline px-6 py-28 sm:px-10 sm:py-40 lg:px-16">
       <div className="mx-auto grid max-w-6xl gap-16 lg:grid-cols-[220px_1fr] lg:gap-24">
         <div>
-          <p className="eyebrow">{lang === "es" ? "08 · Contacto" : "08 · Contact"}</p>
+          <p className="eyebrow">{lang === "es" ? "09 · Contacto" : "09 · Contact"}</p>
         </div>
 
         <motion.div

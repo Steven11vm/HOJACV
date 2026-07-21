@@ -164,7 +164,7 @@ export function AiAssistant({ lang }: { lang: Lang }) {
     <section id="ai" className="border-t border-hairline px-6 py-28 sm:px-10 sm:py-36 lg:px-16">
       <div className="mx-auto grid max-w-6xl gap-16 lg:grid-cols-[220px_1fr] lg:gap-24">
         <div>
-          <p className="eyebrow">{lang === "es" ? "07 · IA" : "07 · AI"}</p>
+          <p className="eyebrow">{lang === "es" ? "08 · IA" : "08 · AI"}</p>
         </div>
 
         <div>

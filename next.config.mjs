@@ -12,7 +12,7 @@ const csp = [
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "img-src 'self' data: blob: https: ",
   "font-src 'self' data: https://fonts.gstatic.com",
-  "connect-src 'self' https://vitals.vercel-insights.com https://va.vercel-scripts.com",
+  "connect-src 'self' https://vitals.vercel-insights.com https://va.vercel-scripts.com https://api.github.com https://raw.githubusercontent.com",
   "frame-ancestors 'none'",
   "form-action 'self'",
   "base-uri 'self'",

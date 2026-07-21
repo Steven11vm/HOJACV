@@ -12,6 +12,7 @@ import { Skills } from "@/components/sections/Skills"
 import { Services } from "@/components/sections/Services"
 import { Process } from "@/components/sections/Process"
 import { Projects } from "@/components/sections/Projects"
+import { GitShowroom } from "@/components/sections/GitShowroom"
 import { AiAssistant } from "@/components/sections/AiAssistant"
 import { Contact } from "@/components/sections/Contact"
 
@@ -59,7 +60,7 @@ export default function CVPage() {
       },
       { rootMargin: "-30% 0px -65% 0px" },
     )
-    const sections = ["hero", "about", "experience", "skills", "services", "process", "projects", "ai", "contact"]
+    const sections = ["hero", "about", "experience", "skills", "services", "process", "projects", "github", "ai", "contact"]
     sections.forEach((id) => {
       const el = document.getElementById(id)
       if (el) observer.observe(el)
@@ -90,6 +91,7 @@ export default function CVPage() {
         <Services lang={lang} />
         <Process lang={lang} />
         <Projects lang={lang} />
+        <GitShowroom lang={lang} />
         <AiAssistant lang={lang} />
         <Contact lang={lang} />
       </main>
