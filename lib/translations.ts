@@ -309,6 +309,7 @@ export const translations = {
         tech: ["Next.js", "Node.js", "Gemini API", "Python", "AI/ML"],
         link: "https://opiumm-gray.vercel.app/",
         featured: true,
+        visual: "shader",
         doc: {
           architecture: [
             "Frontend en React/Next con interfaz de chat y controles de generación.",
@@ -390,6 +391,7 @@ export const translations = {
         tech: ["React", "Node.js", "Recharts", "xlsx", "pdf-lib"],
         link: "https://empresarial-omega.vercel.app/",
         featured: true,
+        visual: "orb",
         doc: {
           architecture: [
             "Frontend React con dashboards, tablas y gráficos (ej. Recharts).",
@@ -465,6 +467,7 @@ export const translations = {
         tech: ["Next.js 14", "TypeScript", "Tailwind CSS", "Framer Motion"],
         link: "https://cv-steven.vercel.app/",
         featured: true,
+        visual: "particles",
         doc: {
           architecture: [
             "Next.js App Router con una página principal (page.tsx) y componentes reutilizables.",
@@ -838,6 +841,7 @@ export const translations = {
         tech: ["Next.js", "Node.js", "Gemini API", "Python", "AI/ML"],
         link: "https://opiumm-gray.vercel.app/",
         featured: true,
+        visual: "shader",
         doc: {
           architecture: [
             "React/Next frontend with chat interface and generation controls.",
@@ -919,6 +923,7 @@ export const translations = {
         tech: ["React", "Node.js", "Recharts", "xlsx", "pdf-lib"],
         link: "https://empresarial-omega.vercel.app/",
         featured: true,
+        visual: "orb",
         doc: {
           architecture: [
             "React frontend with dashboards, tables and charts (e.g. Recharts).",
@@ -994,6 +999,7 @@ export const translations = {
         tech: ["Next.js 14", "TypeScript", "Tailwind CSS", "Framer Motion"],
         link: "https://cv-steven.vercel.app/",
         featured: true,
+        visual: "particles",
         doc: {
           architecture: [
             "Next.js App Router with main page (page.tsx) and reusable components.",

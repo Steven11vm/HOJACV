@@ -1,9 +1,24 @@
 "use client"
 import { useState } from "react"
+import dynamic from "next/dynamic"
 import Image from "next/image"
 import { motion, AnimatePresence } from "framer-motion"
 import { type Lang, translations } from "@/lib/translations"
 import { X, ArrowUpRight } from "lucide-react"
+
+// Lazy-load canvases WebGL: solo entran al bundle si el usuario expande
+// una fila con visual. No SSR: son dependientes de window / WebGL.
+const ShaderAnimation = dynamic(
+  () => import("@/components/ui/shader-animation").then((m) => m.ShaderAnimation),
+  { ssr: false },
+)
+const Orb = dynamic(() => import("@/components/ui/orb").then((m) => m.Orb), { ssr: false })
+const ParticleMorph = dynamic(
+  () => import("@/components/ui/particle-morph").then((m) => m.ParticleMorph),
+  { ssr: false },
+)
+
+type ProjectVisual = "shader" | "orb" | "particles"
 
 type Project = {
   title: string
@@ -16,6 +31,7 @@ type Project = {
   accent?: string
   image?: string
   imageAlt?: string
+  visual?: ProjectVisual
   doc?: {
     architecture?: string[]
     technicalDecisions?: string[]
@@ -105,22 +121,13 @@ export function Projects({ lang }: { lang: Lang }) {
 
                 <div className="space-y-10 overflow-y-auto p-8">
                   {docProject.doc?.architecture && (
-                    <DocBlock
-                      title={t.projects.docLabels.architecture}
-                      items={docProject.doc.architecture}
-                    />
+                    <DocBlock title={t.projects.docLabels.architecture} items={docProject.doc.architecture} />
                   )}
                   {docProject.doc?.technicalDecisions && (
-                    <DocBlock
-                      title={t.projects.docLabels.technicalDecisions}
-                      items={docProject.doc.technicalDecisions}
-                    />
+                    <DocBlock title={t.projects.docLabels.technicalDecisions} items={docProject.doc.technicalDecisions} />
                   )}
                   {docProject.doc?.problemsSolved && (
-                    <DocBlock
-                      title={t.projects.docLabels.problemsSolved}
-                      items={docProject.doc.problemsSolved}
-                    />
+                    <DocBlock title={t.projects.docLabels.problemsSolved} items={docProject.doc.problemsSolved} />
                   )}
                 </div>
 
@@ -133,7 +140,7 @@ export function Projects({ lang }: { lang: Lang }) {
                       className="btn-plain btn-plain-inv w-full justify-center"
                     >
                       {t.projects.viewProject}
-                      <span aria-hidden>↗</span>
+                      <ArrowUpRight className="h-3.5 w-3.5" />
                     </a>
                   </div>
                 )}
@@ -159,6 +166,8 @@ function ProjectRow({
 }) {
   const [expanded, setExpanded] = useState(false)
   const hasImage = Boolean(project.image)
+  const hasVisual = Boolean(project.visual)
+  const isExpandable = hasImage || hasVisual
 
   return (
     <motion.li
@@ -169,11 +178,11 @@ function ProjectRow({
       className="group border-b border-hairline"
     >
       <div
-        role={hasImage ? "button" : undefined}
-        tabIndex={hasImage ? 0 : undefined}
-        onClick={hasImage ? () => setExpanded((v) => !v) : undefined}
+        role={isExpandable ? "button" : undefined}
+        tabIndex={isExpandable ? 0 : undefined}
+        onClick={isExpandable ? () => setExpanded((v) => !v) : undefined}
         onKeyDown={
-          hasImage
+          isExpandable
             ? (e) => {
                 if (e.key === "Enter" || e.key === " ") {
                   e.preventDefault()
@@ -183,7 +192,7 @@ function ProjectRow({
             : undefined
         }
         className={`grid gap-4 py-10 transition-colors sm:grid-cols-[60px_1fr_200px_40px] sm:items-baseline sm:gap-8 ${
-          hasImage ? "cursor-pointer hover:bg-muted" : ""
+          isExpandable ? "cursor-pointer hover:bg-muted" : ""
         }`}
       >
         <p className="index sm:pt-1">{String(idx + 1).padStart(2, "0")}</p>
@@ -201,12 +210,12 @@ function ProjectRow({
         </p>
 
         <p className="hidden text-right text-muted-foreground transition-transform group-hover:translate-x-1 sm:block">
-          {hasImage ? (expanded ? "−" : "+") : project.link && project.link !== "#" ? "↗" : "·"}
+          {isExpandable ? (expanded ? "−" : "+") : project.link && project.link !== "#" ? "↗" : "·"}
         </p>
       </div>
 
       <AnimatePresence initial={false}>
-        {expanded && hasImage && (
+        {expanded && isExpandable && (
           <motion.div
             key="expand"
             initial={{ height: 0, opacity: 0 }}
@@ -218,14 +227,19 @@ function ProjectRow({
             <div className="grid gap-8 pb-12 sm:grid-cols-[60px_1fr] sm:gap-8">
               <div />
               <div className="grid gap-10 lg:grid-cols-[1.15fr_1fr] lg:gap-12">
-                <div className="relative aspect-[5/4] w-full overflow-hidden border border-hairline bg-white">
-                  <Image
-                    src={project.image!}
-                    alt={project.imageAlt ?? project.title}
-                    fill
-                    className="object-cover dark:invert"
-                    sizes="(max-width: 1024px) 100vw, 600px"
-                  />
+                <div className="relative aspect-[5/4] w-full overflow-hidden border border-hairline bg-white dark:bg-black">
+                  {hasImage && (
+                    <Image
+                      src={project.image!}
+                      alt={project.imageAlt ?? project.title}
+                      fill
+                      className="object-cover dark:invert"
+                      sizes="(max-width: 1024px) 100vw, 600px"
+                    />
+                  )}
+                  {!hasImage && project.visual === "shader" && <ShaderAnimation />}
+                  {!hasImage && project.visual === "orb" && <Orb />}
+                  {!hasImage && project.visual === "particles" && <ParticleMorph />}
                 </div>
 
                 <div className="flex flex-col">
@@ -268,7 +282,7 @@ function ProjectRow({
           </motion.div>
         )}
 
-        {!expanded && !hasImage && (
+        {!expanded && !isExpandable && (
           <motion.div
             key="static"
             initial={false}
