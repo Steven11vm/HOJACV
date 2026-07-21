@@ -5,6 +5,7 @@ import { Navbar } from "@/components/layout/Navbar"
 import { Footer } from "@/components/layout/Footer"
 import { Intro } from "@/components/sections/Intro"
 import { Hero } from "@/components/sections/Hero"
+import { HeroWave } from "@/components/ui/dynamic-wave-canvas-background"
 import { About } from "@/components/sections/About"
 import { Experience } from "@/components/sections/Experience"
 import { Skills } from "@/components/sections/Skills"
@@ -16,7 +17,7 @@ import { Contact } from "@/components/sections/Contact"
 
 export default function CVPage() {
   const [activeSection, setActiveSection] = useState("hero")
-  const [isDark, setIsDark] = useState(false)
+  const [isDark, setIsDark] = useState(true)
   const [isVisible, setIsVisible] = useState(false)
   const [lang, setLang] = useState<Lang>("es")
 
@@ -68,6 +69,8 @@ export default function CVPage() {
 
   return (
     <div className="relative min-h-screen bg-background text-foreground selection:bg-primary/30">
+      <HeroWave />
+
       <Navbar
         lang={lang}
         setLang={setLang}

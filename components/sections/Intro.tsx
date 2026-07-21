@@ -1,7 +1,6 @@
 "use client"
 import { motion } from "framer-motion"
 import { type Lang, translations } from "@/lib/translations"
-import { ShaderAnimation } from "@/components/ui/shader-animation"
 
 export function Intro({ lang }: { lang: Lang }) {
   const t = translations[lang]
@@ -9,13 +8,9 @@ export function Intro({ lang }: { lang: Lang }) {
   return (
     <section
       id="intro"
-      className="relative flex min-h-[100dvh] w-full flex-col items-center justify-center overflow-hidden bg-background px-6 sm:px-10"
+      className="relative flex min-h-[100dvh] w-full flex-col items-center justify-center overflow-hidden px-6 sm:px-10"
     >
-      <ShaderAnimation />
-
-      <div className="pointer-events-none absolute inset-0 bg-background/55 dark:bg-background/45" />
-
-      <div className="pointer-events-none absolute inset-x-0 top-6 flex items-center justify-between px-6 font-mono text-[10px] uppercase tracking-[0.24em] text-foreground sm:px-10">
+      <div className="pointer-events-none absolute inset-x-0 top-6 flex items-center justify-between px-6 font-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground sm:px-10">
         <span>Nº 01 · MMXXV</span>
         <span>{lang === "es" ? "Portafolio" : "Portfolio"}</span>
       </div>
