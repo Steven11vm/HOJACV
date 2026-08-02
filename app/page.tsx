@@ -15,12 +15,15 @@ import { Projects } from "@/components/sections/Projects"
 import { AiAssistant } from "@/components/sections/AiAssistant"
 import { Manifesto } from "@/components/sections/Manifesto"
 import { Contact } from "@/components/sections/Contact"
+import { FloatingChat } from "@/components/ui/floating-chat"
+import { SplashScreen } from "@/components/ui/splash-screen"
 
 export default function CVPage() {
   const [activeSection, setActiveSection] = useState("intro")
   const [isDark, setIsDark] = useState(true)
   const [isVisible, setIsVisible] = useState(false)
   const [lang, setLang] = useState<Lang>("es")
+  const [chatOpen, setChatOpen] = useState(false)
 
   useEffect(() => {
     setIsVisible(true)
@@ -82,6 +85,7 @@ export default function CVPage() {
 
   return (
     <div className="relative min-h-screen bg-background text-foreground selection:bg-primary/30">
+      <SplashScreen />
       <HeroWave />
 
       <Navbar
@@ -103,12 +107,14 @@ export default function CVPage() {
         <Services lang={lang} />
         <Process lang={lang} />
         <Projects lang={lang} />
-        <AiAssistant lang={lang} />
+        <AiAssistant lang={lang} onOpenChat={() => setChatOpen(true)} />
         <Manifesto lang={lang} />
         <Contact lang={lang} />
       </main>
 
       <Footer />
+
+      <FloatingChat lang={lang} open={chatOpen} onOpenChange={setChatOpen} />
     </div>
   )
 }
