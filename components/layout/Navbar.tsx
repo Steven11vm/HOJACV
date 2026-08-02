@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button"
 import { translations, type Lang, LANG_KEY } from "@/lib/translations"
 import { motion, AnimatePresence } from "framer-motion"
+import { SignatureLogo } from "@/components/ui/signature-logo"
 
 interface NavbarProps {
   lang: Lang
@@ -116,10 +117,14 @@ export function Navbar({
       >
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6 sm:px-10 lg:px-16">
           <button
-            onClick={() => handleScroll("hero")}
-            className="font-mono text-[11px] font-medium uppercase tracking-[0.24em] text-foreground"
+            onClick={() => handleScroll("intro")}
+            aria-label="Steven Villamizar — Inicio"
+            className="flex items-center gap-3 text-foreground transition-opacity hover:opacity-70"
           >
-            Steven Villamizar
+            <SignatureLogo className="text-3xl leading-none sm:text-4xl" />
+            <span className="hidden font-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground sm:inline">
+              Steven Villamizar
+            </span>
           </button>
 
           <nav className="hidden items-center gap-8 lg:flex">

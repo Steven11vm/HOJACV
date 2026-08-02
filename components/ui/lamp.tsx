@@ -24,7 +24,7 @@ export const LampContainer = ({
   return (
     <div
       className={cn(
-        "relative z-0 flex min-h-[70vh] w-full flex-col items-center justify-center overflow-hidden",
+        "relative z-0 flex min-h-screen w-full flex-col items-center justify-center overflow-hidden py-16",
         className,
       )}
       style={{ backgroundColor: NEAR_BLACK }}
@@ -94,7 +94,7 @@ export const LampContainer = ({
         />
       </div>
 
-      <div className="relative z-50 flex -translate-y-64 flex-col items-center px-5 md:-translate-y-80">
+      <div className="relative z-50 flex -translate-y-40 flex-col items-center px-5 md:-translate-y-56">
         {children}
       </div>
     </div>

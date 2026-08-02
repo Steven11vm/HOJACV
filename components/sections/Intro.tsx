@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { type Lang, translations } from "@/lib/translations"
 import ShutterText from "@/components/ui/shutter-text"
 import { ShineBorder } from "@/components/ui/shine-border"
+import { SignatureLogo } from "@/components/ui/signature-logo"
 import formalImage from "@/imagenes/image.png"
 
 interface IntroProps {
@@ -106,14 +107,11 @@ export function Intro({ lang, isDark, toggleTheme, scrollToSection }: IntroProps
             </AnimatePresence>
           </div>
 
-          {/* Signature "S" — sistema cursive fallback */}
-          <div
-            className="select-none text-4xl leading-none text-foreground sm:text-5xl"
-            style={{ fontFamily: "'Brush Script MT','Lucida Handwriting','Snell Roundhand',cursive" }}
-            aria-hidden
-          >
-            S
-          </div>
+          {/* Signature "S" — marca personal grande */}
+          <SignatureLogo
+            animated
+            className="text-6xl leading-none sm:text-7xl md:text-8xl"
+          />
 
           {/* Theme toggle sincronizado con page.tsx */}
           <button
