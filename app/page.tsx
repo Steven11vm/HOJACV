@@ -14,10 +14,11 @@ import { Process } from "@/components/sections/Process"
 import { Projects } from "@/components/sections/Projects"
 import { GitShowroom } from "@/components/sections/GitShowroom"
 import { AiAssistant } from "@/components/sections/AiAssistant"
+import { Manifesto } from "@/components/sections/Manifesto"
 import { Contact } from "@/components/sections/Contact"
 
 export default function CVPage() {
-  const [activeSection, setActiveSection] = useState("hero")
+  const [activeSection, setActiveSection] = useState("intro")
   const [isDark, setIsDark] = useState(true)
   const [isVisible, setIsVisible] = useState(false)
   const [lang, setLang] = useState<Lang>("es")
@@ -60,7 +61,20 @@ export default function CVPage() {
       },
       { rootMargin: "-30% 0px -65% 0px" },
     )
-    const sections = ["hero", "about", "experience", "skills", "services", "process", "projects", "github", "ai", "contact"]
+    const sections = [
+      "intro",
+      "hero",
+      "about",
+      "experience",
+      "skills",
+      "services",
+      "process",
+      "projects",
+      "github",
+      "ai",
+      "manifesto",
+      "contact",
+    ]
     sections.forEach((id) => {
       const el = document.getElementById(id)
       if (el) observer.observe(el)
@@ -80,10 +94,16 @@ export default function CVPage() {
         activeSection={activeSection}
         scrollToSection={scrollToSection}
         isVisible={isVisible}
+        hidden={activeSection === "intro"}
       />
 
       <main className="relative z-10">
-        <Intro lang={lang} />
+        <Intro
+          lang={lang}
+          isDark={isDark}
+          toggleTheme={toggleTheme}
+          scrollToSection={scrollToSection}
+        />
         <Hero lang={lang} />
         <About lang={lang} />
         <Experience lang={lang} />
@@ -93,6 +113,7 @@ export default function CVPage() {
         <Projects lang={lang} />
         <GitShowroom lang={lang} />
         <AiAssistant lang={lang} />
+        <Manifesto lang={lang} />
         <Contact lang={lang} />
       </main>
 

@@ -14,6 +14,7 @@ interface NavbarProps {
   activeSection: string
   scrollToSection: (id: string) => void
   isVisible: boolean
+  hidden?: boolean
 }
 
 export function Navbar({
@@ -24,6 +25,7 @@ export function Navbar({
   activeSection,
   scrollToSection,
   isVisible,
+  hidden = false,
 }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [showLangModal, setShowLangModal] = useState(false)
@@ -101,8 +103,12 @@ export function Navbar({
 
       <motion.header
         initial={{ y: -20, opacity: 0 }}
-        animate={{ y: isVisible ? 0 : -20, opacity: isVisible ? 1 : 0 }}
-        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        animate={{
+          y: hidden ? -30 : isVisible ? 0 : -20,
+          opacity: hidden ? 0 : isVisible ? 1 : 0,
+          pointerEvents: hidden ? "none" : "auto",
+        }}
+        transition={{ duration: hidden ? 0.35 : 0.8, ease: [0.16, 1, 0.3, 1] }}
         className={`fixed left-0 right-0 top-0 z-50 transition-colors duration-300 ${
           scrolled
             ? "border-b border-hairline bg-background/90 backdrop-blur"
