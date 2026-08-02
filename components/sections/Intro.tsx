@@ -51,7 +51,6 @@ export function Intro({ lang, isDark, toggleTheme, scrollToSection }: IntroProps
     { id: "services", label: (t.nav.services || "").toUpperCase() },
     { id: "process", label: (t.nav.process || "").toUpperCase() },
     { id: "projects", label: (t.nav.projects || "").toUpperCase() },
-    { id: "github", label: "GITHUB" },
     { id: "ai", label: "AI" },
     { id: "contact", label: (t.nav.contact || "").toUpperCase() },
   ]

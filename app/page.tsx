@@ -12,7 +12,6 @@ import { Skills } from "@/components/sections/Skills"
 import { Services } from "@/components/sections/Services"
 import { Process } from "@/components/sections/Process"
 import { Projects } from "@/components/sections/Projects"
-import { GitShowroom } from "@/components/sections/GitShowroom"
 import { AiAssistant } from "@/components/sections/AiAssistant"
 import { Manifesto } from "@/components/sections/Manifesto"
 import { Contact } from "@/components/sections/Contact"
@@ -70,7 +69,6 @@ export default function CVPage() {
       "services",
       "process",
       "projects",
-      "github",
       "ai",
       "manifesto",
       "contact",
@@ -111,7 +109,6 @@ export default function CVPage() {
         <Services lang={lang} />
         <Process lang={lang} />
         <Projects lang={lang} />
-        <GitShowroom lang={lang} />
         <AiAssistant lang={lang} />
         <Manifesto lang={lang} />
         <Contact lang={lang} />
