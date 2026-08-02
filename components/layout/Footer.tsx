@@ -1,12 +1,16 @@
 "use client"
+import { RuixenGradientFooter } from "@/components/ui/ruixen-gradient-footer"
 
 export function Footer() {
   const year = new Date().getFullYear()
   const scrollTop = () => window.scrollTo({ top: 0, behavior: "smooth" })
 
   return (
-    <footer className="border-t border-hairline px-6 py-16 sm:px-10 lg:px-16">
-      <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-8 sm:flex-row sm:items-end">
+    <RuixenGradientFooter
+      className="relative border-t border-hairline"
+      gradientHeight="42vh"
+    >
+      <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-8 px-6 py-16 sm:flex-row sm:items-end sm:px-10 lg:px-16">
         <div>
           <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-foreground">
             Steven Villamizar
@@ -28,6 +32,6 @@ export function Footer() {
           </button>
         </div>
       </div>
-    </footer>
+    </RuixenGradientFooter>
   )
 }
