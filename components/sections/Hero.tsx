@@ -1,8 +1,6 @@
 "use client"
-import Image from "next/image"
 import { motion } from "framer-motion"
 import { type Lang, translations } from "@/lib/translations"
-import formalImage from "@/imagenes/image.png"
 
 export function Hero({ lang }: { lang: Lang }) {
   const t = translations[lang]
@@ -10,15 +8,14 @@ export function Hero({ lang }: { lang: Lang }) {
   return (
     <section
       id="hero"
-      className="relative min-h-[100dvh] px-6 pt-32 pb-24 sm:px-10 lg:px-16"
+      className="relative flex min-h-[100dvh] items-center px-6 pt-32 pb-24 sm:px-10 lg:px-16"
     >
-      <div className="mx-auto grid max-w-6xl gap-16 lg:grid-cols-[1.35fr_1fr] lg:gap-24">
-        {/* Left — name + role + intro */}
+      <div className="mx-auto w-full max-w-4xl">
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, ease: [0.2, 0.8, 0.2, 1] }}
-          className="flex flex-col justify-center"
+          className="flex flex-col"
         >
           <p className="eyebrow mb-10">
             <span
@@ -35,7 +32,7 @@ export function Hero({ lang }: { lang: Lang }) {
             <span className="text-muted-foreground">.</span>
           </h1>
 
-          <p className="mt-10 max-w-md text-base leading-relaxed text-muted-foreground">
+          <p className="mt-10 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
             {t.hero.intro}
           </p>
 
@@ -76,32 +73,6 @@ export function Hero({ lang }: { lang: Lang }) {
               <dd className="font-display text-3xl text-foreground">Medellín</dd>
             </div>
           </dl>
-        </motion.div>
-
-        {/* Right — portrait */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1.2, delay: 0.2 }}
-          className="flex items-center justify-center lg:justify-end"
-        >
-          <figure className="relative w-full max-w-sm">
-            <div className="relative aspect-[4/5] w-full overflow-hidden bg-muted">
-              <Image
-                src={formalImage}
-                alt="Steven Villamizar"
-                fill
-                className="object-cover object-top"
-                sizes="(max-width: 640px) 320px, 400px"
-                priority
-                quality={100}
-              />
-            </div>
-            <figcaption className="mt-4 flex items-baseline justify-between font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-              <span>Steven Villamizar · MMXXV</span>
-              <span>Nº 01</span>
-            </figcaption>
-          </figure>
         </motion.div>
       </div>
     </section>

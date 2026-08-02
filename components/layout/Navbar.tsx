@@ -1,10 +1,8 @@
 "use client"
-import { useState, useEffect } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Menu, X } from "lucide-react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { translations, type Lang, LANG_KEY } from "@/lib/translations"
 import { motion, AnimatePresence } from "framer-motion"
+import { translations, type Lang, LANG_KEY } from "@/lib/translations"
 import { SignatureLogo } from "@/components/ui/signature-logo"
 
 interface NavbarProps {
@@ -15,9 +13,14 @@ interface NavbarProps {
   activeSection: string
   scrollToSection: (id: string) => void
   isVisible: boolean
-  hidden?: boolean
 }
 
+/**
+ * Navbar unificado — mismo layout siempre, tanto al cargar como al scrollear:
+ * hamburguesa (con dropdown de secciones + toggle idioma) a la izquierda,
+ * firma "S" al centro, theme toggle a la derecha. Sin cambio de estilo por
+ * scroll — es la marca personal persistente.
+ */
 export function Navbar({
   lang,
   setLang,
@@ -26,185 +29,164 @@ export function Navbar({
   activeSection,
   scrollToSection,
   isVisible,
-  hidden = false,
 }: NavbarProps) {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [showLangModal, setShowLangModal] = useState(false)
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [scrolled, setScrolled] = useState(false)
-
+  const menuRef = useRef<HTMLDivElement>(null)
+  const buttonRef = useRef<HTMLButtonElement>(null)
   const t = translations[lang]
 
   useEffect(() => {
     setMounted(true)
-    const saved = localStorage.getItem(LANG_KEY) as Lang | null
-    if (!saved) setShowLangModal(true)
-
-    const handleScroll = () => setScrolled(window.scrollY > 20)
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
+    const onScroll = () => setScrolled(window.scrollY > 20)
+    onScroll()
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => window.removeEventListener("scroll", onScroll)
   }, [])
 
-  const selectLanguage = (l: Lang) => {
-    setLang(l)
-    try {
-      localStorage.setItem(LANG_KEY, l)
-    } catch {}
-    setShowLangModal(false)
-  }
-
-  const quickToggleLanguage = () => selectLanguage(lang === "es" ? "en" : "es")
-
-  const handleScroll = (id: string) => {
-    scrollToSection(id)
-    setMobileMenuOpen(false)
-  }
+  useEffect(() => {
+    const onDocClick = (e: MouseEvent) => {
+      if (
+        isMenuOpen &&
+        menuRef.current &&
+        buttonRef.current &&
+        !menuRef.current.contains(e.target as Node) &&
+        !buttonRef.current.contains(e.target as Node)
+      ) {
+        setIsMenuOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", onDocClick)
+    return () => document.removeEventListener("mousedown", onDocClick)
+  }, [isMenuOpen])
 
   if (!mounted) return null
 
-  const navItems = [
-    { id: "about", label: t.nav.about },
-    { id: "experience", label: t.nav.experience },
-    { id: "skills", label: t.nav.skills },
-    { id: "services", label: t.nav.services },
-    { id: "process", label: t.nav.process },
-    { id: "projects", label: t.nav.projects },
+  const menuItems: { id: string; label: string }[] = [
+    { id: "intro", label: lang === "es" ? "INICIO" : "HOME" },
+    { id: "about", label: (t.nav.about || "").toUpperCase() },
+    { id: "experience", label: (t.nav.experience || "").toUpperCase() },
+    { id: "skills", label: (t.nav.skills || "").toUpperCase() },
+    { id: "services", label: (t.nav.services || "").toUpperCase() },
+    { id: "process", label: (t.nav.process || "").toUpperCase() },
+    { id: "projects", label: (t.nav.projects || "").toUpperCase() },
     { id: "ai", label: "AI" },
-    { id: "contact", label: t.nav.contact },
+    { id: "contact", label: (t.nav.contact || "").toUpperCase() },
   ]
 
-  return (
-    <>
-      <Dialog open={showLangModal} onOpenChange={(open) => !open && setShowLangModal(false)}>
-        <DialogContent className="max-w-md gap-6 border border-foreground bg-background sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="font-display text-xl font-normal text-foreground sm:text-2xl">
-              {translations.es.langModal.title}
-              <br />
-              <span className="text-muted-foreground">{translations.en.langModal.title}</span>
-            </DialogTitle>
-          </DialogHeader>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <button
-              className="btn-plain justify-center"
-              onClick={() => selectLanguage("es")}
-            >
-              {t.langModal.spanish}
-            </button>
-            <button
-              className="btn-plain justify-center"
-              onClick={() => selectLanguage("en")}
-            >
-              {t.langModal.english}
-            </button>
-          </div>
-        </DialogContent>
-      </Dialog>
+  const handleMenuClick = (id: string) => {
+    setIsMenuOpen(false)
+    scrollToSection(id)
+  }
 
-      <motion.header
-        initial={{ y: -20, opacity: 0 }}
-        animate={{
-          y: hidden ? -30 : isVisible ? 0 : -20,
-          opacity: hidden ? 0 : isVisible ? 1 : 0,
-          pointerEvents: hidden ? "none" : "auto",
-        }}
-        transition={{ duration: hidden ? 0.35 : 0.8, ease: [0.16, 1, 0.3, 1] }}
-        className={`fixed left-0 right-0 top-0 z-50 transition-colors duration-300 ${
-          scrolled
-            ? "border-b border-hairline bg-background/90 backdrop-blur"
-            : "border-b border-transparent bg-background/60 backdrop-blur"
-        }`}
-      >
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6 sm:px-10 lg:px-16">
+  const toggleLanguage = () => {
+    const next: Lang = lang === "es" ? "en" : "es"
+    setLang(next)
+    try {
+      localStorage.setItem(LANG_KEY, next)
+    } catch {
+      /* silent */
+    }
+  }
+
+  return (
+    <motion.header
+      initial={{ y: -20, opacity: 0 }}
+      animate={{ y: isVisible ? 0 : -20, opacity: isVisible ? 1 : 0 }}
+      transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+      className={`fixed inset-x-0 top-0 z-50 transition-colors duration-300 ${
+        scrolled ? "bg-background/70 backdrop-blur-md" : "bg-transparent"
+      }`}
+    >
+      <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4 sm:px-10 lg:px-16">
+        {/* Menu button */}
+        <div className="relative">
           <button
-            onClick={() => handleScroll("intro")}
-            aria-label="Steven Villamizar — Inicio"
-            className="flex items-center gap-3 text-foreground transition-opacity hover:opacity-70"
+            ref={buttonRef}
+            type="button"
+            onClick={() => setIsMenuOpen((v) => !v)}
+            aria-label={isMenuOpen ? t.aria.closeMenu : t.aria.openMenu}
+            className="p-2 text-muted-foreground transition-colors hover:text-foreground"
           >
-            <SignatureLogo className="text-3xl leading-none sm:text-4xl" />
-            <span className="hidden font-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground sm:inline">
-              Steven Villamizar
-            </span>
+            {isMenuOpen ? (
+              <X className="h-7 w-7" strokeWidth={1.5} />
+            ) : (
+              <Menu className="h-7 w-7" strokeWidth={1.5} />
+            )}
           </button>
 
-          <nav className="hidden items-center gap-8 lg:flex">
-            {navItems.map(({ id, label }) => (
-              <button
-                key={id}
-                type="button"
-                onClick={() => handleScroll(id)}
-                className={`font-mono text-[11px] uppercase tracking-[0.2em] transition-colors ${
-                  activeSection === id ? "text-foreground" : "text-muted-foreground hover:text-foreground"
-                }`}
+          <AnimatePresence>
+            {isMenuOpen && (
+              <motion.div
+                ref={menuRef}
+                initial={{ opacity: 0, y: -6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.18 }}
+                className="absolute left-0 top-full mt-2 w-[240px] border border-hairline bg-background p-2 shadow-2xl"
               >
-                {label}
-              </button>
-            ))}
-          </nav>
-
-          <div className="flex items-center gap-4">
-            <button
-              type="button"
-              onClick={quickToggleLanguage}
-              className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:text-foreground"
-              aria-label={lang === "es" ? "Switch to English" : "Cambiar a Español"}
-            >
-              {lang === "es" ? "EN" : "ES"}
-            </button>
-            <button
-              type="button"
-              onClick={toggleTheme}
-              aria-label={isDark ? t.aria.lightMode : t.aria.darkMode}
-              className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:text-foreground"
-            >
-              {isDark ? "Light" : "Dark"}
-            </button>
-
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setMobileMenuOpen((o) => !o)}
-              className="h-9 w-9 text-muted-foreground hover:text-foreground lg:hidden"
-              aria-label={mobileMenuOpen ? t.aria.closeMenu : t.aria.openMenu}
-            >
-              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </Button>
-          </div>
+                {menuItems.map((item) => {
+                  const active = activeSection === item.id
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => handleMenuClick(item.id)}
+                      className={`flex w-full items-center justify-between px-3 py-2 text-left font-mono text-xs uppercase tracking-[0.22em] transition-colors hover:bg-foreground hover:text-background ${
+                        active ? "text-foreground" : "text-muted-foreground"
+                      }`}
+                    >
+                      <span>{item.label}</span>
+                      {active && (
+                        <span
+                          className="inline-block h-1.5 w-1.5 rounded-full bg-foreground"
+                          aria-hidden
+                        />
+                      )}
+                    </button>
+                  )
+                })}
+                <div className="my-1 border-t border-hairline" />
+                <button
+                  type="button"
+                  onClick={toggleLanguage}
+                  className="flex w-full items-center justify-between px-3 py-2 text-left font-mono text-xs uppercase tracking-[0.22em] text-muted-foreground transition-colors hover:bg-foreground hover:text-background"
+                >
+                  <span>{lang === "es" ? "Idioma" : "Language"}</span>
+                  <span>
+                    {lang.toUpperCase()} → {lang === "es" ? "EN" : "ES"}
+                  </span>
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
-        <AnimatePresence>
-          {mobileMenuOpen && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="overflow-hidden border-b border-hairline bg-background lg:hidden"
-            >
-              <nav className="mx-auto flex max-w-6xl flex-col px-6 py-6 sm:px-10">
-                {navItems.map(({ id, label }, idx) => (
-                  <motion.button
-                    key={id}
-                    type="button"
-                    initial={{ opacity: 0, x: -8 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: idx * 0.03 }}
-                    onClick={() => handleScroll(id)}
-                    className={`flex items-center justify-between border-b border-hairline py-4 text-left font-mono text-[11px] uppercase tracking-[0.2em] transition-colors ${
-                      activeSection === id ? "text-foreground" : "text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    <span>{label}</span>
-                    {activeSection === id && (
-                      <span className="inline-block h-1.5 w-1.5 rounded-full bg-foreground" aria-hidden />
-                    )}
-                  </motion.button>
-                ))}
-              </nav>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.header>
-    </>
+        {/* Signature logo (center) */}
+        <button
+          type="button"
+          onClick={() => scrollToSection("intro")}
+          aria-label="Steven Villamizar — Inicio"
+          className="transition-opacity hover:opacity-70"
+        >
+          <SignatureLogo className="text-4xl leading-none sm:text-5xl" />
+        </button>
+
+        {/* Theme toggle (right) */}
+        <button
+          type="button"
+          onClick={toggleTheme}
+          aria-label={isDark ? t.aria.lightMode : t.aria.darkMode}
+          className="relative h-8 w-16 border border-hairline transition-colors"
+        >
+          <span
+            className="absolute top-1/2 h-5 w-5 -translate-y-1/2 bg-foreground transition-transform duration-300"
+            style={{ transform: `translate(${isDark ? "2.25rem" : "0.25rem"}, -50%)` }}
+            aria-hidden
+          />
+        </button>
+      </nav>
+    </motion.header>
   )
 }

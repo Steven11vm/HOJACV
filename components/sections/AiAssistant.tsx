@@ -167,23 +167,25 @@ export function AiAssistant({ lang }: { lang: Lang }) {
           <p className="eyebrow">{lang === "es" ? "07 · IA" : "07 · AI"}</p>
         </div>
 
-        <div>
-          <motion.h2
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.8 }}
-            className="max-w-3xl font-display text-4xl leading-tight text-foreground sm:text-5xl md:text-6xl"
-          >
-            {lang === "es" ? "Habla con el copiloto." : "Talk to the copilot."}
-          </motion.h2>
-          <p className="mt-6 max-w-2xl text-base leading-relaxed text-muted-foreground">
-            {lang === "es"
-              ? "Una demo viva de cómo integro IA en producto. Pregúntale lo que quieras."
-              : "A live demo of how I ship AI in product. Ask anything."}
-          </p>
+        <div className="grid gap-12 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-start lg:gap-12">
+          <div className="lg:sticky lg:top-28">
+            <motion.h2
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.8 }}
+              className="font-display text-4xl leading-tight text-foreground sm:text-5xl md:text-6xl"
+            >
+              {lang === "es" ? "Habla con el copiloto." : "Talk to the copilot."}
+            </motion.h2>
+            <p className="mt-6 text-base leading-relaxed text-muted-foreground">
+              {lang === "es"
+                ? "Una demo viva de cómo integro IA en producto. Pregúntale lo que quieras."
+                : "A live demo of how I ship AI in product. Ask anything."}
+            </p>
+          </div>
 
-          <div className="mt-16 max-w-2xl border border-hairline">
+          <div className="border border-hairline">
             <div className="flex items-center justify-between border-b border-hairline px-6 py-4">
               <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-foreground">
                 Steven AI

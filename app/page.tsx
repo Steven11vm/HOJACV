@@ -92,16 +92,10 @@ export default function CVPage() {
         activeSection={activeSection}
         scrollToSection={scrollToSection}
         isVisible={isVisible}
-        hidden={activeSection === "intro"}
       />
 
       <main className="relative z-10">
-        <Intro
-          lang={lang}
-          isDark={isDark}
-          toggleTheme={toggleTheme}
-          scrollToSection={scrollToSection}
-        />
+        <Intro lang={lang} scrollToSection={scrollToSection} />
         <Hero lang={lang} />
         <About lang={lang} />
         <Experience lang={lang} />
