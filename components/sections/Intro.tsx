@@ -5,6 +5,7 @@ import { Menu, X, ChevronDown } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { type Lang, translations } from "@/lib/translations"
 import ShutterText from "@/components/ui/shutter-text"
+import { ShineBorder } from "@/components/ui/shine-border"
 import formalImage from "@/imagenes/image.png"
 
 interface IntroProps {
@@ -133,6 +134,29 @@ export function Intro({ lang, isDark, toggleTheme, scrollToSection }: IntroProps
       {/* Nombre gigante centrado + foto encima */}
       <div className="absolute left-1/2 top-1/2 w-full -translate-x-1/2 -translate-y-1/2 px-4">
         <div className="relative text-center">
+          <motion.div
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.7 }}
+            className="mb-6 flex justify-center sm:mb-8"
+          >
+            <ShineBorder
+              borderRadius={999}
+              borderWidth={1}
+              duration={5}
+              color={["rgba(255,255,255,0.15)", "rgba(255,255,255,0.9)", "rgba(255,255,255,0.15)"]}
+              className="h-auto min-h-0 w-auto min-w-0 rounded-full border border-hairline bg-transparent p-0 px-4 py-1.5 text-foreground dark:bg-transparent"
+            >
+              <span className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-foreground">
+                <span
+                  className="inline-block h-1.5 w-1.5 rounded-full bg-foreground"
+                  aria-hidden
+                />
+                {lang === "es" ? "Disponible · Nuevos proyectos" : "Available · New projects"}
+              </span>
+            </ShineBorder>
+          </motion.div>
+
           <ShutterText
             key={`first-${lang}`}
             text="STEVEN"
