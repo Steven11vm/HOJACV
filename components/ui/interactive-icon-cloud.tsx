@@ -10,15 +10,15 @@ import {
 
 /**
  * IconCloud — 3D rotating cloud de logos (Simple Icons).
- * Adaptaciones sobre el template original:
- * - No usa `useTheme` de next-themes (mi tema global se maneja via classList
- *   en <html>). En su lugar leo el modo directamente del DOM y escucho
- *   cambios con MutationObserver.
- * - Colores del icono empatan con los tokens Muji: fondo #ffffff/#0a0a0a
- *   y fallback #111111/#f4f4f2. minContrastRatio mas alto en dark para que
- *   los logos oscuros (java, unity) no se pierdan.
- * - Estados: si el fetch falla o no hay data, el componente no renderiza
- *   (evita crash en TagCanvas si children esta vacio).
+ *
+ * Notas de la libreria:
+ * - `fetchSimpleIcons` hace fetch a cdn.jsdelivr.net (SVGs) y a raw.github (hex).
+ *   La CSP de este proyecto los permite explicitamente en connect-src.
+ * - TagCanvas (motor interno) necesita ALTURA EXPLICITA en el contenedor,
+ *   si no colapsa a 0px y no dibuja nada. Aqui envuelvo el <Cloud> en un div
+ *   con min-h para reservar espacio.
+ * - Lee el tema del DOM (no de next-themes) para no depender de un provider
+ *   que no esta wired en este proyecto.
  */
 export const cloudProps: Omit<ICloud, "children"> = {
   containerProps: {
@@ -27,7 +27,8 @@ export const cloudProps: Omit<ICloud, "children"> = {
       justifyContent: "center",
       alignItems: "center",
       width: "100%",
-      paddingTop: 40,
+      minHeight: 400,
+      paddingTop: 20,
     },
   },
   options: {
@@ -78,18 +79,25 @@ const renderIcon = (icon: SimpleIcon, theme: "light" | "dark") => {
   })
 }
 
+type Status = "loading" | "ready" | "error"
+
 export function IconCloud({ iconSlugs }: { iconSlugs: string[] }) {
   const [data, setData] = useState<Awaited<ReturnType<typeof fetchSimpleIcons>> | null>(null)
+  const [status, setStatus] = useState<Status>("loading")
   const theme = useDomTheme()
 
   useEffect(() => {
     let cancelled = false
+    setStatus("loading")
     fetchSimpleIcons({ slugs: iconSlugs })
       .then((d) => {
-        if (!cancelled) setData(d)
+        if (cancelled) return
+        setData(d)
+        setStatus("ready")
       })
       .catch(() => {
-        if (!cancelled) setData(null)
+        if (cancelled) return
+        setStatus("error")
       })
     return () => {
       cancelled = true
@@ -101,18 +109,19 @@ export function IconCloud({ iconSlugs }: { iconSlugs: string[] }) {
     return Object.values(data.simpleIcons).map((icon) => renderIcon(icon, theme))
   }, [data, theme])
 
-  if (!renderedIcons) {
-    return (
-      <div className="flex h-[360px] w-full items-center justify-center font-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
-        cargando iconos…
-      </div>
-    )
-  }
-
   return (
-    // @ts-expect-error — Cloud from react-icon-cloud has loose typings
-    <Cloud {...cloudProps}>
-      <>{renderedIcons}</>
-    </Cloud>
+    <div className="relative flex min-h-[400px] w-full items-center justify-center">
+      {status !== "ready" && (
+        <p className="absolute inset-0 flex items-center justify-center font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
+          {status === "loading" ? "cargando iconos…" : "no se pudo cargar la nube"}
+        </p>
+      )}
+      {status === "ready" && renderedIcons && (
+        // @ts-expect-error — Cloud from react-icon-cloud has loose typings
+        <Cloud {...cloudProps}>
+          <>{renderedIcons}</>
+        </Cloud>
+      )}
+    </div>
   )
 }

@@ -3,18 +3,19 @@ import dynamic from "next/dynamic"
 import { motion } from "framer-motion"
 import { type Lang, translations } from "@/lib/translations"
 
-// Lazy import: react-icon-cloud usa TagCanvas (no soporta SSR).
 const IconCloud = dynamic(
   () => import("@/components/ui/interactive-icon-cloud").then((m) => m.IconCloud),
-  { ssr: false, loading: () => (
-    <div className="flex h-[360px] w-full items-center justify-center font-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
-      cargando iconos…
-    </div>
-  ) },
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex min-h-[400px] w-full items-center justify-center font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
+        cargando iconos…
+      </div>
+    ),
+  },
 )
 
 const STACK_SLUGS = [
-  // Frontend
   "react",
   "nextdotjs",
   "typescript",
@@ -22,20 +23,16 @@ const STACK_SLUGS = [
   "tailwindcss",
   "html5",
   "css3",
-  // Backend
   "nodedotjs",
   "express",
   "python",
   "php",
-  // Bases de datos
   "mysql",
   "microsoftsqlserver",
   "mongodb",
   "postgresql",
-  // IA
   "openai",
   "googlegemini",
-  // Herramientas & devops
   "git",
   "github",
   "vercel",
@@ -44,6 +41,29 @@ const STACK_SLUGS = [
   "android",
   "linux",
   "postman",
+]
+
+const STACK_GROUPS: { label: { es: string; en: string }; items: string[] }[] = [
+  {
+    label: { es: "Frontend", en: "Frontend" },
+    items: ["React", "Next.js", "TypeScript", "JavaScript", "Tailwind CSS", "HTML5", "CSS3"],
+  },
+  {
+    label: { es: "Backend", en: "Backend" },
+    items: ["Node.js", "Express", "Python", "PHP", "REST API"],
+  },
+  {
+    label: { es: "Bases de datos", en: "Databases" },
+    items: ["MySQL", "SQL Server", "MongoDB", "PostgreSQL"],
+  },
+  {
+    label: { es: "IA", en: "AI" },
+    items: ["Gemini API", "OpenAI", "Claude", "Prompt Engineering", "RAG"],
+  },
+  {
+    label: { es: "Herramientas", en: "Tools" },
+    items: ["Git", "GitHub", "Vercel", "Docker", "Figma", "Android", "Linux", "Postman"],
+  },
 ]
 
 export function Skills({ lang }: { lang: Lang }) {
@@ -84,21 +104,52 @@ export function Skills({ lang }: { lang: Lang }) {
         </p>
       </motion.div>
 
-      {/* IconCloud 3D */}
+      {/* IconCloud con altura reservada */}
       <motion.div
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true, margin: "-100px" }}
         transition={{ duration: 1.2, delay: 0.3 }}
-        className="mx-auto mt-6 flex w-full max-w-lg items-center justify-center"
+        className="mx-auto mt-6 w-full max-w-lg"
       >
         <IconCloud iconSlugs={STACK_SLUGS} />
       </motion.div>
 
+      {/* Grilla textual — SIEMPRE visible, no depende de que el cloud cargue */}
+      <div className="mx-auto mt-16 w-full max-w-3xl border-y border-hairline">
+        {STACK_GROUPS.map((group, idx) => (
+          <motion.div
+            key={group.label.en}
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.5, delay: idx * 0.04, ease: [0.2, 0.8, 0.2, 1] }}
+            className="grid gap-4 border-b border-hairline py-6 last:border-b-0 sm:grid-cols-[160px_1fr] sm:gap-10 sm:py-7"
+          >
+            <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
+              {group.label[lang]}
+              <span className="ml-2 text-muted-foreground/50">· {group.items.length}</span>
+            </p>
+            <p className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-foreground sm:text-[15px]">
+              {group.items.map((it, i) => (
+                <span key={it} className="inline-flex items-center">
+                  {it}
+                  {i < group.items.length - 1 && (
+                    <span aria-hidden className="ml-4 text-muted-foreground/40">
+                      ·
+                    </span>
+                  )}
+                </span>
+              ))}
+            </p>
+          </motion.div>
+        ))}
+      </div>
+
       <p className="mx-auto mt-8 max-w-xl text-center font-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
         {lang === "es"
-          ? "· Simple Icons · " + STACK_SLUGS.length + " tecnologías ·"
-          : "· Simple Icons · " + STACK_SLUGS.length + " technologies ·"}
+          ? `Simple Icons · ${STACK_SLUGS.length} tecnologías activas`
+          : `Simple Icons · ${STACK_SLUGS.length} active technologies`}
       </p>
     </section>
   )
