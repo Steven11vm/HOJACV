@@ -13,6 +13,7 @@ const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-serif"
 const jetbrains = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono", display: "swap" })
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://cv-steven.vercel.app"),
   title: "Steven Villamizar — Full Stack Engineer & AI Specialist",
   description:
     "Portafolio de Steven Villamizar Mendoza — Full Stack Engineer especializado en aplicaciones web escalables con integración de Inteligencia Artificial. Disponible para nuevos proyectos.",
@@ -23,7 +24,7 @@ export const metadata: Metadata = {
     title: "Steven Villamizar — Full Stack Engineer & AI Specialist",
     description:
       "Construyo productos digitales que generan resultados medibles. Especializado en web apps escalables con IA.",
-    url: "https://stevencv.vercel.app",
+    url: "https://cv-steven.vercel.app",
     siteName: "Steven Villamizar — Portfolio",
     locale: "es_CO",
     type: "website",
@@ -32,6 +33,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Steven Villamizar — Full Stack Engineer & AI Specialist",
     description: "Construyo productos digitales con IA integrada. 20+ proyectos en producción.",
+    creator: "@stevenvm",
   },
   icons: {
     icon: "/icon.svg",
