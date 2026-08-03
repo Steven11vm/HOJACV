@@ -55,9 +55,9 @@ export const translations = {
       bio1b: ", Tecnólogo en Análisis y Desarrollo de Software con",
       bio1c: "más de 2 años",
       bio1d: "diseñando, construyendo y desplegando soluciones digitales de alto impacto.",
-      bio2: "Actualmente lidero iniciativas de desarrollo en",
-      bio2b: "ORAL-PLUS (SKY S.A.S),",
-      bio2c: "donde combino arquitectura web moderna con integraciones de IA para automatizar procesos y mejorar la experiencia de cliente.",
+      bio2: "Hasta hace poco lideré el ecosistema digital de",
+      bio2b: "ORAL-PLUS (SKY S.A.S)",
+      bio2c: "— plataforma web, app Android, pasarela de pagos e integraciones IA para automatizar operaciones. Hoy estoy abierto a nuevos proyectos donde el criterio técnico y la ejecución rápida marquen la diferencia.",
       bio3:
         "Mi obsesión: código limpio, productos que generan ROI real y experiencias que los usuarios disfrutan usar. Si tu equipo necesita velocidad de ejecución sin sacrificar calidad, hablemos.",
       missionTitle: "Mi Misión",
@@ -88,10 +88,10 @@ export const translations = {
         title: "Desarrollador Full Stack",
         company: "ORAL-PLUS (SKY S.A.S)",
         location: "Medellín, Colombia",
-        period: "2024 — Presente",
-        current: true,
+        period: "2024 — 2025",
+        current: false,
         description:
-          "Lidero el desarrollo de la plataforma web y app móvil de ORAL-PLUS: catálogo de productos, pagos en línea, dashboard administrativo y módulos con IA para automatizar atención al cliente.",
+          "Lideré el desarrollo de la plataforma web y app móvil de ORAL-PLUS: catálogo de productos, pagos en línea, dashboard administrativo y módulos con IA para automatizar atención al cliente.",
         achievements: [
           "Migré stack legacy PHP a arquitectura moderna React + Node, reduciendo tiempos de carga en 60%",
           "Integré agentes IA (Gemini) que automatizan 40% de las consultas de soporte",
@@ -588,9 +588,9 @@ export const translations = {
       bio1b: ", a Software Analysis & Development technologist with",
       bio1c: "2+ years",
       bio1d: "designing, building and shipping high-impact digital products.",
-      bio2: "Currently leading development initiatives at",
-      bio2b: "ORAL-PLUS (SKY S.A.S),",
-      bio2c: "combining modern web architecture with AI integrations to automate operations and elevate customer experience.",
+      bio2: "Recently led the digital ecosystem at",
+      bio2b: "ORAL-PLUS (SKY S.A.S)",
+      bio2c: "— web platform, Android app, payments gateway and AI integrations to automate operations. Now open to new projects where technical judgment and fast execution move the needle.",
       bio3:
         "My obsession: clean code, products that deliver real ROI, and experiences users actually enjoy. If your team needs speed without sacrificing quality, let's talk.",
       missionTitle: "My Mission",
@@ -621,10 +621,10 @@ export const translations = {
         title: "Full Stack Developer",
         company: "ORAL-PLUS (SKY S.A.S)",
         location: "Medellín, Colombia",
-        period: "2024 — Present",
-        current: true,
+        period: "2024 — 2025",
+        current: false,
         description:
-          "Leading development of ORAL-PLUS web platform and mobile app: product catalog, online payments, admin dashboard and AI-powered modules to automate customer service.",
+          "Led development of ORAL-PLUS web platform and mobile app: product catalog, online payments, admin dashboard and AI-powered modules to automate customer service.",
         achievements: [
           "Migrated legacy PHP stack to modern React + Node architecture, cutting load times by 60%",
           "Integrated AI agents (Gemini) automating 40% of support tickets",

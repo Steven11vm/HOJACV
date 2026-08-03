@@ -1,18 +1,53 @@
 "use client"
+import dynamic from "next/dynamic"
 import { motion } from "framer-motion"
 import { type Lang, translations } from "@/lib/translations"
 
-const STACK: Record<string, string[]> = {
-  frontend: ["React", "Next.js", "TypeScript", "JavaScript", "Tailwind CSS", "HTML5", "CSS3"],
-  backend: ["Node.js", "Express", "Python", "PHP", "REST API"],
-  database: ["MySQL", "SQL Server", "MongoDB", "PostgreSQL"],
-  ai: ["Gemini API", "OpenAI", "Claude", "Prompt Engineering", "RAG"],
-  tools: ["Git", "GitHub", "Vercel", "Docker", "Figma", "Android"],
-}
+// Lazy import: react-icon-cloud usa TagCanvas (no soporta SSR).
+const IconCloud = dynamic(
+  () => import("@/components/ui/interactive-icon-cloud").then((m) => m.IconCloud),
+  { ssr: false, loading: () => (
+    <div className="flex h-[360px] w-full items-center justify-center font-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
+      cargando iconos…
+    </div>
+  ) },
+)
+
+const STACK_SLUGS = [
+  // Frontend
+  "react",
+  "nextdotjs",
+  "typescript",
+  "javascript",
+  "tailwindcss",
+  "html5",
+  "css3",
+  // Backend
+  "nodedotjs",
+  "express",
+  "python",
+  "php",
+  // Bases de datos
+  "mysql",
+  "microsoftsqlserver",
+  "mongodb",
+  "postgresql",
+  // IA
+  "openai",
+  "googlegemini",
+  // Herramientas & devops
+  "git",
+  "github",
+  "vercel",
+  "docker",
+  "figma",
+  "android",
+  "linux",
+  "postman",
+]
 
 export function Skills({ lang }: { lang: Lang }) {
   const t = translations[lang]
-  const categories = Object.keys(STACK) as Array<keyof typeof STACK>
 
   return (
     <section
@@ -44,58 +79,26 @@ export function Skills({ lang }: { lang: Lang }) {
 
         <p className="mt-8 max-w-xl text-[15px] leading-relaxed text-muted-foreground sm:text-base">
           {lang === "es"
-            ? "Herramientas con las que llevo software real a producción — probadas en clientes, no en tutoriales."
-            : "Tools I use to ship real software into production — battle-tested on clients, not tutorials."}
+            ? "Herramientas con las que llevo software real a producción — arrastra la nube para explorarlas."
+            : "Tools I use to ship real software into production — drag the cloud to explore them."}
         </p>
       </motion.div>
 
-      {/* Bloques por categoria, apilados verticalmente con hairlines */}
-      <div className="mx-auto mt-20 w-full max-w-3xl border-y border-hairline">
-        {categories.map((catKey, idx) => {
-          const items = STACK[catKey]
-          const label = (t.skills.categories as Record<string, string>)[catKey] ?? catKey
-          return (
-            <motion.div
-              key={catKey}
-              initial={{ opacity: 0, y: 12 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-80px" }}
-              transition={{ duration: 0.6, delay: idx * 0.05, ease: [0.2, 0.8, 0.2, 1] }}
-              className="flex flex-col items-center gap-4 border-b border-hairline py-10 last:border-b-0 sm:py-12"
-            >
-              <div className="flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
-                <span>{label}</span>
-                <span aria-hidden className="text-muted-foreground/50">·</span>
-                <span className="text-muted-foreground/70">
-                  {items.length} {lang === "es" ? "techs" : "techs"}
-                </span>
-              </div>
+      {/* IconCloud 3D */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 1.2, delay: 0.3 }}
+        className="mx-auto mt-6 flex w-full max-w-lg items-center justify-center"
+      >
+        <IconCloud iconSlugs={STACK_SLUGS} />
+      </motion.div>
 
-              <div className="flex max-w-2xl flex-wrap justify-center gap-x-6 gap-y-3 text-center">
-                {items.map((s, i) => (
-                  <span
-                    key={s}
-                    className="inline-flex items-center font-display text-lg leading-tight text-foreground sm:text-xl"
-                  >
-                    {s}
-                    {i < items.length - 1 && (
-                      <span aria-hidden className="ml-6 hidden text-muted-foreground/40 sm:inline">
-                        ·
-                      </span>
-                    )}
-                  </span>
-                ))}
-              </div>
-            </motion.div>
-          )
-        })}
-      </div>
-
-      {/* Meta al pie centrada */}
-      <p className="mx-auto mt-12 max-w-xl text-center font-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
+      <p className="mx-auto mt-8 max-w-xl text-center font-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
         {lang === "es"
-          ? "Aprendo herramientas nuevas cuando el proyecto lo pide, no antes."
-          : "New tools when the project asks for them, not before."}
+          ? "· Simple Icons · " + STACK_SLUGS.length + " tecnologías ·"
+          : "· Simple Icons · " + STACK_SLUGS.length + " technologies ·"}
       </p>
     </section>
   )
