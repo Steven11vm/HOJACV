@@ -16,6 +16,7 @@ const IconCloud = dynamic(
 )
 
 const STACK_SLUGS = [
+  // Frontend
   "react",
   "nextdotjs",
   "typescript",
@@ -23,46 +24,91 @@ const STACK_SLUGS = [
   "tailwindcss",
   "html5",
   "css3",
+  // Backend
   "nodedotjs",
   "express",
   "python",
   "php",
+  // Bases de datos SQL & NoSQL
   "mysql",
   "microsoftsqlserver",
   "mongodb",
   "postgresql",
+  // IA
   "openai",
   "googlegemini",
+  // DevOps · Contenedores · Cloud
+  "docker",
+  "amazonaws",
+  "vercel",
+  "cloudflare",
+  "nginx",
+  "githubactions",
+  // Seguridad · Observabilidad
+  "letsencrypt",
+  "sentry",
+  // Herramientas
   "git",
   "github",
-  "vercel",
-  "docker",
-  "figma",
-  "android",
   "linux",
   "postman",
+  "figma",
+  "android",
 ]
 
 const STACK_GROUPS: { label: { es: string; en: string }; items: string[] }[] = [
   {
     label: { es: "Frontend", en: "Frontend" },
-    items: ["React", "Next.js", "TypeScript", "JavaScript", "Tailwind CSS", "HTML5", "CSS3"],
+    items: ["React", "Next.js", "TypeScript", "JavaScript", "Tailwind CSS", "HTML5", "CSS3", "Framer Motion"],
   },
   {
     label: { es: "Backend", en: "Backend" },
-    items: ["Node.js", "Express", "Python", "PHP", "REST API"],
+    items: ["Node.js", "Express", "Python", "PHP", "REST API", "WebSockets"],
   },
   {
-    label: { es: "Bases de datos", en: "Databases" },
-    items: ["MySQL", "SQL Server", "MongoDB", "PostgreSQL"],
+    label: { es: "Bases de datos & SQL", en: "Databases & SQL" },
+    items: [
+      "SQL Server",
+      "MySQL",
+      "PostgreSQL",
+      "MongoDB",
+      "Modelado relacional",
+      "Query tuning",
+      "Backups & restore",
+    ],
   },
   {
-    label: { es: "IA", en: "AI" },
-    items: ["Gemini API", "OpenAI", "Claude", "Prompt Engineering", "RAG"],
+    label: { es: "IA & Automatización", en: "AI & Automation" },
+    items: ["Gemini API", "OpenAI", "Claude", "Prompt Engineering", "RAG", "Function calling"],
+  },
+  {
+    label: { es: "DevOps & Cloud", en: "DevOps & Cloud" },
+    items: [
+      "Docker",
+      "Docker Compose",
+      "Vercel",
+      "AWS (EC2, S3, RDS)",
+      "GitHub Actions",
+      "Nginx",
+      "Cloudflare",
+      "CI/CD",
+    ],
+  },
+  {
+    label: { es: "Seguridad web", en: "Web security" },
+    items: [
+      "OWASP Top 10",
+      "Content Security Policy",
+      "Rate limiting",
+      "JWT & sesiones seguras",
+      "HTTPS / TLS",
+      "Sanitización de input",
+      "Secret management",
+    ],
   },
   {
     label: { es: "Herramientas", en: "Tools" },
-    items: ["Git", "GitHub", "Vercel", "Docker", "Figma", "Android", "Linux", "Postman"],
+    items: ["Git", "GitHub", "Linux", "Postman", "Figma", "Android"],
   },
 ]
 

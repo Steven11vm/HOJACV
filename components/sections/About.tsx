@@ -6,9 +6,12 @@ const SPECIALTIES: { es: string; en: string }[] = [
   { es: "SaaS a medida", en: "Custom SaaS" },
   { es: "Dashboards & analytics", en: "Dashboards & analytics" },
   { es: "Integraciones IA", en: "AI integrations" },
+  { es: "Bases de datos SQL", en: "SQL databases" },
+  { es: "Docker & CI/CD", en: "Docker & CI/CD" },
+  { es: "Despliegue en cloud", en: "Cloud deployment" },
+  { es: "Seguridad web (OWASP)", en: "Web security (OWASP)" },
   { es: "E-commerce", en: "E-commerce" },
   { es: "Apps web escalables", en: "Scalable web apps" },
-  { es: "Automatización de operaciones", en: "Operations automation" },
 ]
 
 export function About({ lang }: { lang: Lang }) {
