@@ -376,7 +376,7 @@ export function FloatingChat({ lang, open, onOpenChange }: FloatingChatProps) {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.25 }}
               onClick={() => onOpenChange(false)}
-              className="fixed inset-0 z-30 bg-black/70 backdrop-blur-md"
+              className="fixed inset-0 z-[80] bg-black/70 backdrop-blur-md"
               aria-hidden
             />
             <motion.aside
@@ -388,7 +388,7 @@ export function FloatingChat({ lang, open, onOpenChange }: FloatingChatProps) {
               exit={{ x: "100%", opacity: 0 }}
               transition={{ type: "spring", damping: 30, stiffness: 240, mass: 0.9 }}
               style={{ height: "100dvh" }}
-              className="fixed right-0 top-0 z-40 flex w-full max-w-full flex-col border-l border-hairline bg-background shadow-[0_0_80px_rgba(0,0,0,0.6)] sm:max-w-[460px] lg:max-w-[500px] 2xl:max-w-[560px]"
+              className="fixed right-0 top-0 z-[90] flex w-full max-w-full flex-col border-l border-hairline bg-background shadow-[0_0_80px_rgba(0,0,0,0.6)] sm:max-w-[460px] lg:max-w-[500px] 2xl:max-w-[560px]"
             >
               {/* Accent gradient superior */}
               <div
