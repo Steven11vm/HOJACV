@@ -6,6 +6,110 @@ import { type Lang } from "@/lib/translations"
 
 type Message = { id: string; role: "user" | "assistant"; text: string }
 
+/**
+ * Fondo ambiental con snippets de codigo scrolleando en 3 columnas.
+ * Puro decorativo — pointer-events-none, aria-hidden y opacidad baja para
+ * que no compita con el contenido del chat.
+ */
+const CODE_COLUMNS = [
+  [
+    "// steven.villamizar",
+    "import { useAI } from '@/hooks/ai'",
+    "const model = 'claude-haiku-4-5'",
+    "async function ask(q: string) {",
+    "  const res = await fetch('/api/chat', {",
+    "    method: 'POST',",
+    "    body: JSON.stringify({ q }),",
+    "  })",
+    "  return res.json()",
+    "}",
+    "export default ask",
+    "",
+    "# python — data pipeline",
+    "from anthropic import Anthropic",
+    "client = Anthropic()",
+    "def summarize(text):",
+    "    return client.messages.create(",
+    "        model='claude-haiku-4-5',",
+    "        max_tokens=400,",
+    "        messages=[{'role':'user','content':text}]",
+    "    )",
+  ],
+  [
+    "-- sql — usuarios activos",
+    "SELECT id, name, created_at",
+    "FROM users",
+    "WHERE last_login > NOW() - INTERVAL '7 days'",
+    "ORDER BY created_at DESC",
+    "LIMIT 100;",
+    "",
+    "// typescript — types",
+    "type Role = 'user' | 'assistant'",
+    "interface Message {",
+    "  id: string",
+    "  role: Role",
+    "  text: string",
+    "  createdAt: Date",
+    "}",
+    "",
+    "export const RATE_LIMIT = {",
+    "  window: 60,",
+    "  max: 20,",
+    "} as const",
+  ],
+  [
+    "# bash — deploy",
+    "$ git add .",
+    "$ git commit -m 'ship'",
+    "$ vercel deploy --prod",
+    "→ Building...",
+    "→ Ready · 45s",
+    "",
+    "// react — floating chat",
+    "export function FloatingChat() {",
+    "  const [open, setOpen] = useState(false)",
+    "  return <Drawer open={open} />",
+    "}",
+    "",
+    "// docker",
+    "FROM node:20-alpine",
+    "WORKDIR /app",
+    "COPY package.json .",
+    "RUN npm ci --omit=dev",
+    "CMD ['npm', 'start']",
+  ],
+]
+
+function CodeLinesBackground() {
+  return (
+    <div
+      aria-hidden
+      className="pointer-events-none absolute inset-0 overflow-hidden select-none"
+      style={{ maskImage: "linear-gradient(180deg, transparent 0, #000 15%, #000 85%, transparent 100%)", WebkitMaskImage: "linear-gradient(180deg, transparent 0, #000 15%, #000 85%, transparent 100%)" }}
+    >
+      <div className="grid h-full grid-cols-3 gap-0">
+        {CODE_COLUMNS.map((col, i) => (
+          <div key={i} className="relative h-full overflow-hidden">
+            <div
+              className="absolute inset-x-0 top-0 flex flex-col gap-2 whitespace-nowrap font-mono text-[10px] leading-[1.6] text-foreground/[0.07]"
+              style={{
+                animation: `chat-code-scroll ${i === 1 ? 80 : i === 0 ? 65 : 95}s linear infinite`,
+                animationDirection: i === 1 ? "reverse" : "normal",
+              }}
+            >
+              {[...col, ...col, ...col].map((line, j) => (
+                <div key={j} className="px-2">
+                  {line || " "}
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 const KNOWLEDGE_BASE = {
   es: [
     { keywords: ["experiencia", "trabajo", "rol", "carrera"], answer: "Steven tiene 2+ años construyendo software profesional. Actualmente lidera el stack de ORAL-PLUS (SKY S.A.S) — migró el sistema legacy a Next.js + Node, integró agentes IA y maneja la pasarela de pagos." },
@@ -189,30 +293,31 @@ export function FloatingChat({ lang, open, onOpenChange }: FloatingChatProps) {
     }
   }
 
+  const canSend = input.trim().length > 0 && !isTyping
+
   return (
     <>
-      {/* FAB — siempre visible */}
+      {/* FAB — mismo tamano y estilo en movil y desktop */}
       <motion.button
         type="button"
         onClick={() => onOpenChange(!open)}
-        initial={{ opacity: 0, scale: 0.8, y: 20 }}
+        initial={{ opacity: 0, scale: 0.6, y: 24 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ delay: 1.2, duration: 0.6, ease: [0.2, 0.8, 0.2, 1] }}
+        transition={{ delay: 1.2, type: "spring", damping: 18, stiffness: 220 }}
         aria-label={
           open
             ? lang === "es" ? "Cerrar chat" : "Close chat"
             : lang === "es" ? "Abrir chat" : "Open chat"
         }
-        className="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-foreground text-background shadow-2xl shadow-black/40 transition-transform hover:scale-105 active:scale-95 sm:bottom-8 sm:right-8"
+        className="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-foreground text-background shadow-[0_10px_40px_-10px_rgba(0,0,0,0.6)] ring-1 ring-black/5 transition-all hover:scale-[1.06] active:scale-95"
       >
-        {/* Halo pulsante */}
+        {/* Halo pulsante — solo cerrado */}
         {!open && (
           <span
             aria-hidden
-            className="pointer-events-none absolute inset-0 animate-ping rounded-full bg-foreground/40"
+            className="pointer-events-none absolute inset-0 animate-ping rounded-full bg-foreground/30"
           />
         )}
-        {/* Icono cambia segun estado */}
         <AnimatePresence mode="wait" initial={false}>
           {open ? (
             <motion.span
@@ -239,19 +344,18 @@ export function FloatingChat({ lang, open, onOpenChange }: FloatingChatProps) {
           )}
         </AnimatePresence>
 
-        {/* Punto de status online — no aparece cuando esta abierto */}
         {!open && (
-          <span className="absolute -right-0.5 -top-0.5 flex h-3 w-3">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-foreground/70" />
+          <span className="pointer-events-none absolute -right-0.5 -top-0.5 flex h-3 w-3">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/70" />
             <span
-              className="relative inline-flex h-3 w-3 rounded-full bg-foreground"
+              className="relative inline-flex h-3 w-3 rounded-full bg-emerald-400"
               style={{ boxShadow: "0 0 0 2px var(--background)" }}
             />
           </span>
         )}
       </motion.button>
 
-      {/* Drawer */}
+      {/* Drawer — misma animacion y tamano visual en movil y desktop */}
       <AnimatePresence>
         {open && (
           <>
@@ -261,46 +365,65 @@ export function FloatingChat({ lang, open, onOpenChange }: FloatingChatProps) {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.25 }}
               onClick={() => onOpenChange(false)}
-              className="fixed inset-0 z-30 bg-black/60 backdrop-blur-md"
+              className="fixed inset-0 z-30 bg-black/70 backdrop-blur-md"
               aria-hidden
             />
             <motion.aside
               role="dialog"
               aria-modal="true"
               aria-label={lang === "es" ? "Chat con Steven AI" : "Chat with Steven AI"}
-              initial={{ x: "100%", opacity: 0.6 }}
+              initial={{ x: "100%", opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
-              exit={{ x: "100%", opacity: 0.6 }}
-              transition={{ type: "spring", damping: 32, stiffness: 260 }}
-              className="fixed right-0 top-0 z-40 flex h-full w-full max-w-[440px] flex-col border-l border-hairline bg-background shadow-[0_0_60px_rgba(0,0,0,0.5)]"
+              exit={{ x: "100%", opacity: 0 }}
+              transition={{ type: "spring", damping: 30, stiffness: 240, mass: 0.9 }}
+              className="fixed right-0 top-0 z-40 flex h-full w-full max-w-full flex-col border-l border-hairline bg-background shadow-[0_0_80px_rgba(0,0,0,0.6)] sm:max-w-[460px]"
             >
-              {/* Header */}
-              <header className="flex items-center justify-between gap-4 border-b border-hairline px-6 py-5">
-                <div className="flex items-center gap-3.5 min-w-0">
+              {/* Accent gradient superior */}
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-x-0 top-0 z-[1] h-px bg-gradient-to-r from-transparent via-foreground/40 to-transparent"
+              />
+
+              {/* Fondo ambiental — snippets de codigo scrolleando */}
+              <CodeLinesBackground />
+
+              {/* Header — mismo layout y tamanos en todas las pantallas */}
+              <header className="relative z-10 flex items-center justify-between gap-4 border-b border-hairline bg-background/85 backdrop-blur-sm px-5 py-4 sm:px-6 sm:py-5">
+                <motion.div
+                  initial={{ opacity: 0, x: -8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.15, duration: 0.3 }}
+                  className="flex min-w-0 items-center gap-3.5"
+                >
+                  {/* Avatar S — mismo tamano exacto en movil y desktop */}
                   <div
-                    className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-hairline bg-foreground text-background"
+                    className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-foreground text-background ring-1 ring-black/10"
                     aria-hidden
                   >
-                    <span className="font-serif text-[17px] font-medium leading-none">S</span>
-                    <span className="absolute -right-0.5 -bottom-0.5 flex h-2.5 w-2.5">
+                    <span className="font-serif text-[20px] font-semibold leading-none">S</span>
+                    <span className="pointer-events-none absolute -right-0.5 -bottom-0.5 flex h-3 w-3">
                       <span className="pointer-events-none absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/60" />
                       <span
-                        className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400"
+                        className="relative inline-flex h-3 w-3 rounded-full bg-emerald-400"
                         style={{ boxShadow: "0 0 0 2px var(--background)" }}
                       />
                     </span>
                   </div>
                   <div className="min-w-0">
-                    <p className="truncate font-serif text-[17px] leading-tight text-foreground">
+                    <p className="truncate font-serif text-[18px] leading-tight text-foreground">
                       Steven AI
                     </p>
-                    <p className="mt-0.5 truncate font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                    <p className="mt-1 truncate font-mono text-[9.5px] uppercase tracking-[0.24em] text-muted-foreground">
                       {lang === "es" ? "Copiloto · En línea" : "Copilot · Online"}
                     </p>
                   </div>
-                </div>
-                <button
+                </motion.div>
+
+                <motion.button
                   type="button"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.2, duration: 0.25 }}
                   onClick={(e) => {
                     e.preventDefault()
                     e.stopPropagation()
@@ -311,46 +434,59 @@ export function FloatingChat({ lang, open, onOpenChange }: FloatingChatProps) {
                   style={{ pointerEvents: "auto" }}
                   className="relative z-[60] inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border border-hairline bg-background text-muted-foreground transition-all hover:border-foreground hover:bg-foreground hover:text-background active:scale-95"
                 >
-                  <X className="h-5 w-5 pointer-events-none" strokeWidth={2} />
-                </button>
+                  <X className="pointer-events-none h-5 w-5" strokeWidth={2} />
+                </motion.button>
               </header>
 
               {/* Messages */}
               <div
                 ref={messagesRef}
-                className="flex-1 space-y-6 overflow-y-auto overscroll-contain px-6 py-6"
+                className="relative z-10 flex-1 space-y-6 overflow-y-auto overscroll-contain px-5 py-6 sm:px-7"
               >
                 <AnimatePresence initial={false}>
-                  {messages.map((m) => (
+                  {messages.map((m, idx) => (
                     <motion.div
                       key={m.id}
-                      initial={{ opacity: 0, y: 6 }}
+                      initial={{ opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0 }}
-                      transition={{ duration: 0.24, ease: [0.2, 0.8, 0.2, 1] }}
-                      className={m.role === "user" ? "pl-6 border-l border-foreground/40" : "pl-6 border-l border-hairline"}
+                      transition={{ duration: 0.28, ease: [0.2, 0.8, 0.2, 1], delay: idx === 0 ? 0.25 : 0 }}
+                      className={
+                        m.role === "user"
+                          ? "border-l-2 border-foreground/50 pl-5"
+                          : "border-l border-hairline pl-5"
+                      }
                     >
                       <p className="mb-2 font-mono text-[9px] uppercase tracking-[0.28em] text-muted-foreground">
                         {m.role === "user"
                           ? lang === "es" ? "Tú" : "You"
                           : "Steven AI"}
                       </p>
-                      <p className="whitespace-pre-wrap text-[14.5px] leading-[1.7] text-foreground/90">
+                      <p
+                        className={
+                          m.role === "user"
+                            ? "whitespace-pre-wrap text-[15px] leading-[1.7] text-foreground"
+                            : "whitespace-pre-wrap text-[15px] leading-[1.7] text-foreground/85"
+                        }
+                      >
                         {m.text}
                       </p>
                     </motion.div>
                   ))}
                   {isTyping && (
                     <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
+                      initial={{ opacity: 0, y: 4 }}
+                      animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0 }}
-                      className="pl-6 border-l border-hairline"
+                      className="border-l border-hairline pl-5"
                     >
                       <p className="mb-2 font-mono text-[9px] uppercase tracking-[0.28em] text-muted-foreground">
                         Steven AI
                       </p>
-                      <span className="inline-flex items-center gap-1.5 py-1" aria-label={lang === "es" ? "Escribiendo" : "Typing"}>
+                      <span
+                        className="inline-flex items-center gap-1.5 py-1"
+                        aria-label={lang === "es" ? "Escribiendo" : "Typing"}
+                      >
                         <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-foreground/60" />
                         <span
                           className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-foreground/60"
@@ -367,26 +503,29 @@ export function FloatingChat({ lang, open, onOpenChange }: FloatingChatProps) {
               </div>
 
               {/* Quick questions */}
-              <div className="border-t border-hairline px-6 py-4">
+              <div className="relative z-10 border-t border-hairline bg-background/85 backdrop-blur-sm px-5 py-4 sm:px-6">
                 <p className="mb-3 font-mono text-[9px] uppercase tracking-[0.28em] text-muted-foreground">
                   {lang === "es" ? "Sugerencias" : "Suggestions"}
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {DEFAULT_QUESTIONS[lang].map((q, i) => (
-                    <button
+                    <motion.button
                       key={i}
                       type="button"
+                      initial={{ opacity: 0, y: 4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.3 + i * 0.05, duration: 0.25 }}
                       onClick={() => handleSubmit(undefined, q)}
-                      className="rounded-full border border-hairline px-3 py-1.5 text-[11.5px] text-muted-foreground transition-all hover:border-foreground hover:bg-foreground hover:text-background"
+                      className="rounded-full border border-hairline px-3.5 py-1.5 text-[12px] text-muted-foreground transition-all hover:-translate-y-px hover:border-foreground hover:bg-foreground hover:text-background active:scale-95"
                     >
                       {q}
-                    </button>
+                    </motion.button>
                   ))}
                 </div>
               </div>
 
-              {/* Form */}
-              <form onSubmit={handleSubmit} className="flex items-stretch border-t border-hairline bg-background">
+              {/* Form — 56px touch en movil */}
+              <form onSubmit={handleSubmit} className="relative z-10 flex items-stretch border-t border-hairline bg-background">
                 <input
                   ref={inputRef}
                   type="text"
@@ -394,20 +533,25 @@ export function FloatingChat({ lang, open, onOpenChange }: FloatingChatProps) {
                   onChange={(e) => setInput(e.target.value)}
                   placeholder={lang === "es" ? "Escribe tu pregunta…" : "Type your question…"}
                   maxLength={2000}
-                  className="flex-1 bg-transparent px-6 py-5 text-[14px] text-foreground placeholder:text-muted-foreground/70 focus:outline-none"
+                  autoComplete="off"
+                  className="flex-1 bg-transparent px-5 py-5 text-[15px] text-foreground placeholder:text-muted-foreground/70 focus:outline-none sm:px-6"
                 />
                 <button
                   type="submit"
-                  disabled={!input.trim() || isTyping}
+                  disabled={!canSend}
                   aria-label={lang === "es" ? "Enviar" : "Send"}
-                  className="flex items-center justify-center border-l border-hairline px-5 text-foreground transition-all hover:bg-foreground hover:text-background disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-foreground"
+                  className={
+                    canSend
+                      ? "flex items-center justify-center border-l border-hairline bg-foreground px-6 text-background transition-all hover:opacity-90 active:scale-95"
+                      : "flex cursor-not-allowed items-center justify-center border-l border-hairline px-6 text-muted-foreground/40"
+                  }
                 >
-                  <Send className="h-4 w-4" strokeWidth={1.75} />
+                  <Send className="h-[18px] w-[18px]" strokeWidth={1.75} />
                 </button>
               </form>
 
-              {/* Footer hint */}
-              <div className="border-t border-hairline px-6 py-2.5">
+              {/* Footer hint — solo desktop (movil no tiene teclado fisico) */}
+              <div className="relative z-10 hidden border-t border-hairline bg-background px-6 py-2.5 sm:block">
                 <p className="font-mono text-[9px] uppercase tracking-[0.22em] text-muted-foreground/70">
                   {lang === "es" ? "ESC para cerrar · Enter para enviar" : "ESC to close · Enter to send"}
                 </p>
