@@ -43,17 +43,6 @@ export function SplashScreen() {
           className="fixed inset-0 z-[200] flex items-center justify-center bg-background"
           aria-hidden
         >
-          {/* Grid de fondo, muy sutil — sin gritar */}
-          <div
-            className="pointer-events-none absolute inset-0 opacity-[0.04] dark:opacity-[0.08]"
-            style={{
-              backgroundImage:
-                "linear-gradient(to right, currentColor 1px, transparent 1px), linear-gradient(to bottom, currentColor 1px, transparent 1px)",
-              backgroundSize: "clamp(20px, 5vw, 60px) clamp(20px, 5vw, 60px)",
-              color: "var(--foreground)",
-            }}
-          />
-
           {/* Corner accents */}
           <div className="pointer-events-none absolute left-6 top-6 h-10 w-10 border-l border-t border-hairline sm:left-10 sm:top-10 sm:h-14 sm:w-14" />
           <div className="pointer-events-none absolute right-6 top-6 h-10 w-10 border-r border-t border-hairline sm:right-10 sm:top-10 sm:h-14 sm:w-14" />
