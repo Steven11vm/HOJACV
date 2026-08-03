@@ -12,6 +12,7 @@ import { Skills } from "@/components/sections/Skills"
 import { Services } from "@/components/sections/Services"
 import { Process } from "@/components/sections/Process"
 import { Projects } from "@/components/sections/Projects"
+import { Ecosystem } from "@/components/sections/Ecosystem"
 import { AiAssistant } from "@/components/sections/AiAssistant"
 import { Manifesto } from "@/components/sections/Manifesto"
 import { Contact } from "@/components/sections/Contact"
@@ -72,6 +73,7 @@ export default function CVPage() {
       "services",
       "process",
       "projects",
+      "ecosystem",
       "ai",
       "manifesto",
       "contact",
@@ -107,6 +109,7 @@ export default function CVPage() {
         <Services lang={lang} />
         <Process lang={lang} />
         <Projects lang={lang} />
+        <Ecosystem lang={lang} />
         <AiAssistant lang={lang} onOpenChat={() => setChatOpen(true)} />
         <Manifesto lang={lang} />
         <Contact lang={lang} />
