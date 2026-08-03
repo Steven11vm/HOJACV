@@ -87,9 +87,16 @@ function CodeLinesBackground() {
       className="pointer-events-none absolute inset-0 overflow-hidden select-none"
       style={{ maskImage: "linear-gradient(180deg, transparent 0, #000 15%, #000 85%, transparent 100%)", WebkitMaskImage: "linear-gradient(180deg, transparent 0, #000 15%, #000 85%, transparent 100%)" }}
     >
-      <div className="grid h-full grid-cols-3 gap-0">
+      <div className="grid h-full grid-cols-2 gap-0 sm:grid-cols-3">
         {CODE_COLUMNS.map((col, i) => (
-          <div key={i} className="relative h-full overflow-hidden">
+          <div
+            key={i}
+            className={
+              i === 2
+                ? "relative hidden h-full overflow-hidden sm:block"
+                : "relative h-full overflow-hidden"
+            }
+          >
             <div
               className="absolute inset-x-0 top-0 flex flex-col gap-2 whitespace-nowrap font-mono text-[10px] leading-[1.6] text-foreground/[0.07]"
               style={{
@@ -309,7 +316,11 @@ export function FloatingChat({ lang, open, onOpenChange }: FloatingChatProps) {
             ? lang === "es" ? "Cerrar chat" : "Close chat"
             : lang === "es" ? "Abrir chat" : "Open chat"
         }
-        className="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-foreground text-background shadow-[0_10px_40px_-10px_rgba(0,0,0,0.6)] ring-1 ring-black/5 transition-all hover:scale-[1.06] active:scale-95"
+        style={{
+          bottom: "max(1.25rem, env(safe-area-inset-bottom, 0px) + 1rem)",
+          right: "max(1.25rem, env(safe-area-inset-right, 0px) + 1rem)",
+        }}
+        className="fixed z-40 flex h-14 w-14 items-center justify-center rounded-full bg-foreground text-background shadow-[0_10px_40px_-10px_rgba(0,0,0,0.6)] ring-1 ring-black/5 transition-all hover:scale-[1.06] active:scale-95 sm:h-[60px] sm:w-[60px]"
       >
         {/* Halo pulsante — solo cerrado */}
         {!open && (
@@ -376,7 +387,8 @@ export function FloatingChat({ lang, open, onOpenChange }: FloatingChatProps) {
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: "100%", opacity: 0 }}
               transition={{ type: "spring", damping: 30, stiffness: 240, mass: 0.9 }}
-              className="fixed right-0 top-0 z-40 flex h-full w-full max-w-full flex-col border-l border-hairline bg-background shadow-[0_0_80px_rgba(0,0,0,0.6)] sm:max-w-[460px]"
+              style={{ height: "100dvh" }}
+              className="fixed right-0 top-0 z-40 flex w-full max-w-full flex-col border-l border-hairline bg-background shadow-[0_0_80px_rgba(0,0,0,0.6)] sm:max-w-[460px] lg:max-w-[500px] 2xl:max-w-[560px]"
             >
               {/* Accent gradient superior */}
               <div
@@ -387,13 +399,16 @@ export function FloatingChat({ lang, open, onOpenChange }: FloatingChatProps) {
               {/* Fondo ambiental — snippets de codigo scrolleando */}
               <CodeLinesBackground />
 
-              {/* Header — mismo layout y tamanos en todas las pantallas */}
-              <header className="relative z-10 flex items-center justify-between gap-4 border-b border-hairline bg-background/85 backdrop-blur-sm px-5 py-4 sm:px-6 sm:py-5">
+              {/* Header — safe-area top para iOS notch */}
+              <header
+                style={{ paddingTop: "max(1rem, env(safe-area-inset-top, 0px) + 0.75rem)" }}
+                className="relative z-10 flex items-center justify-between gap-3 border-b border-hairline bg-background/85 px-4 pb-4 backdrop-blur-sm sm:gap-4 sm:px-6 sm:pb-5"
+              >
                 <motion.div
                   initial={{ opacity: 0, x: -8 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.15, duration: 0.3 }}
-                  className="flex min-w-0 items-center gap-3.5"
+                  className="flex min-w-0 items-center gap-3 sm:gap-3.5"
                 >
                   {/* Avatar S — mismo tamano exacto en movil y desktop */}
                   <div
@@ -410,10 +425,10 @@ export function FloatingChat({ lang, open, onOpenChange }: FloatingChatProps) {
                     </span>
                   </div>
                   <div className="min-w-0">
-                    <p className="truncate font-serif text-[18px] leading-tight text-foreground">
+                    <p className="truncate font-serif text-[17px] leading-tight text-foreground sm:text-[18px]">
                       Steven AI
                     </p>
-                    <p className="mt-1 truncate font-mono text-[9.5px] uppercase tracking-[0.24em] text-muted-foreground">
+                    <p className="mt-1 truncate font-mono text-[9px] uppercase tracking-[0.22em] text-muted-foreground sm:text-[9.5px] sm:tracking-[0.24em]">
                       {lang === "es" ? "Copiloto · En línea" : "Copilot · Online"}
                     </p>
                   </div>
@@ -441,7 +456,7 @@ export function FloatingChat({ lang, open, onOpenChange }: FloatingChatProps) {
               {/* Messages */}
               <div
                 ref={messagesRef}
-                className="relative z-10 flex-1 space-y-6 overflow-y-auto overscroll-contain px-5 py-6 sm:px-7"
+                className="relative z-10 flex-1 space-y-5 overflow-y-auto overscroll-contain px-4 py-5 sm:space-y-6 sm:px-7 sm:py-6"
               >
                 <AnimatePresence initial={false}>
                   {messages.map((m, idx) => (
@@ -453,8 +468,8 @@ export function FloatingChat({ lang, open, onOpenChange }: FloatingChatProps) {
                       transition={{ duration: 0.28, ease: [0.2, 0.8, 0.2, 1], delay: idx === 0 ? 0.25 : 0 }}
                       className={
                         m.role === "user"
-                          ? "border-l-2 border-foreground/50 pl-5"
-                          : "border-l border-hairline pl-5"
+                          ? "border-l-2 border-foreground/50 pl-4 sm:pl-5"
+                          : "border-l border-hairline pl-4 sm:pl-5"
                       }
                     >
                       <p className="mb-2 font-mono text-[9px] uppercase tracking-[0.28em] text-muted-foreground">
@@ -465,8 +480,8 @@ export function FloatingChat({ lang, open, onOpenChange }: FloatingChatProps) {
                       <p
                         className={
                           m.role === "user"
-                            ? "whitespace-pre-wrap text-[15px] leading-[1.7] text-foreground"
-                            : "whitespace-pre-wrap text-[15px] leading-[1.7] text-foreground/85"
+                            ? "whitespace-pre-wrap break-words text-[14.5px] leading-[1.65] text-foreground sm:text-[15px] sm:leading-[1.7]"
+                            : "whitespace-pre-wrap break-words text-[14.5px] leading-[1.65] text-foreground/85 sm:text-[15px] sm:leading-[1.7]"
                         }
                       >
                         {m.text}
@@ -478,7 +493,7 @@ export function FloatingChat({ lang, open, onOpenChange }: FloatingChatProps) {
                       initial={{ opacity: 0, y: 4 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0 }}
-                      className="border-l border-hairline pl-5"
+                      className="border-l border-hairline pl-4 sm:pl-5"
                     >
                       <p className="mb-2 font-mono text-[9px] uppercase tracking-[0.28em] text-muted-foreground">
                         Steven AI
@@ -502,12 +517,12 @@ export function FloatingChat({ lang, open, onOpenChange }: FloatingChatProps) {
                 </AnimatePresence>
               </div>
 
-              {/* Quick questions */}
-              <div className="relative z-10 border-t border-hairline bg-background/85 backdrop-blur-sm px-5 py-4 sm:px-6">
+              {/* Quick questions — scroll horizontal en movil, wrap en desktop */}
+              <div className="relative z-10 border-t border-hairline bg-background/85 px-4 py-3.5 backdrop-blur-sm sm:px-6 sm:py-4">
                 <p className="mb-3 font-mono text-[9px] uppercase tracking-[0.28em] text-muted-foreground">
                   {lang === "es" ? "Sugerencias" : "Suggestions"}
                 </p>
-                <div className="flex flex-wrap gap-2">
+                <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0" style={{ scrollbarWidth: "none" }}>
                   {DEFAULT_QUESTIONS[lang].map((q, i) => (
                     <motion.button
                       key={i}
@@ -516,7 +531,7 @@ export function FloatingChat({ lang, open, onOpenChange }: FloatingChatProps) {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.3 + i * 0.05, duration: 0.25 }}
                       onClick={() => handleSubmit(undefined, q)}
-                      className="rounded-full border border-hairline px-3.5 py-1.5 text-[12px] text-muted-foreground transition-all hover:-translate-y-px hover:border-foreground hover:bg-foreground hover:text-background active:scale-95"
+                      className="shrink-0 whitespace-nowrap rounded-full border border-hairline px-3.5 py-2 text-[12px] text-muted-foreground transition-all hover:-translate-y-px hover:border-foreground hover:bg-foreground hover:text-background active:scale-95 sm:py-1.5"
                     >
                       {q}
                     </motion.button>
@@ -524,8 +539,12 @@ export function FloatingChat({ lang, open, onOpenChange }: FloatingChatProps) {
                 </div>
               </div>
 
-              {/* Form — 56px touch en movil */}
-              <form onSubmit={handleSubmit} className="relative z-10 flex items-stretch border-t border-hairline bg-background">
+              {/* Form — touch target 56px+ en movil, safe area para iOS */}
+              <form
+                onSubmit={handleSubmit}
+                style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+                className="relative z-10 flex items-stretch border-t border-hairline bg-background"
+              >
                 <input
                   ref={inputRef}
                   type="text"
@@ -534,7 +553,9 @@ export function FloatingChat({ lang, open, onOpenChange }: FloatingChatProps) {
                   placeholder={lang === "es" ? "Escribe tu pregunta…" : "Type your question…"}
                   maxLength={2000}
                   autoComplete="off"
-                  className="flex-1 bg-transparent px-5 py-5 text-[15px] text-foreground placeholder:text-muted-foreground/70 focus:outline-none sm:px-6"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  className="min-h-[56px] flex-1 bg-transparent px-4 text-[16px] text-foreground placeholder:text-muted-foreground/70 focus:outline-none sm:min-h-[60px] sm:px-6 sm:text-[15px]"
                 />
                 <button
                   type="submit"
@@ -542,15 +563,15 @@ export function FloatingChat({ lang, open, onOpenChange }: FloatingChatProps) {
                   aria-label={lang === "es" ? "Enviar" : "Send"}
                   className={
                     canSend
-                      ? "flex items-center justify-center border-l border-hairline bg-foreground px-6 text-background transition-all hover:opacity-90 active:scale-95"
-                      : "flex cursor-not-allowed items-center justify-center border-l border-hairline px-6 text-muted-foreground/40"
+                      ? "flex min-w-[56px] items-center justify-center border-l border-hairline bg-foreground text-background transition-all hover:opacity-90 active:scale-95 sm:min-w-[64px]"
+                      : "flex min-w-[56px] cursor-not-allowed items-center justify-center border-l border-hairline text-muted-foreground/40 sm:min-w-[64px]"
                   }
                 >
                   <Send className="h-[18px] w-[18px]" strokeWidth={1.75} />
                 </button>
               </form>
 
-              {/* Footer hint — solo desktop (movil no tiene teclado fisico) */}
+              {/* Footer hint — solo desktop */}
               <div className="relative z-10 hidden border-t border-hairline bg-background px-6 py-2.5 sm:block">
                 <p className="font-mono text-[9px] uppercase tracking-[0.22em] text-muted-foreground/70">
                   {lang === "es" ? "ESC para cerrar · Enter para enviar" : "ESC to close · Enter to send"}
