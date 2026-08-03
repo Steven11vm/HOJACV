@@ -61,6 +61,7 @@ export function FloatingChat({ lang, open, onOpenChange }: FloatingChatProps) {
   const [input, setInput] = useState("")
   const [isTyping, setIsTyping] = useState(false)
   const messagesRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
   const wasNearBottomRef = useRef(true)
 
   useLayoutEffect(() => {
@@ -80,6 +81,23 @@ export function FloatingChat({ lang, open, onOpenChange }: FloatingChatProps) {
     if (!wasNearBottomRef.current) return
     el.scrollTop = el.scrollHeight
   }, [messages, isTyping, open])
+
+  // ESC to close + prevent body scroll when open + focus input
+  useEffect(() => {
+    if (!open) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onOpenChange(false)
+    }
+    document.addEventListener("keydown", onKey)
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+    const t = setTimeout(() => inputRef.current?.focus(), 300)
+    return () => {
+      document.removeEventListener("keydown", onKey)
+      document.body.style.overflow = prevOverflow
+      clearTimeout(t)
+    }
+  }, [open, onOpenChange])
 
   // Sync welcome when lang changes (only if no user activity yet)
   useEffect(() => {
@@ -241,49 +259,60 @@ export function FloatingChat({ lang, open, onOpenChange }: FloatingChatProps) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
+              transition={{ duration: 0.25 }}
               onClick={() => onOpenChange(false)}
-              className="fixed inset-0 z-30 bg-background/70 backdrop-blur-sm"
+              className="fixed inset-0 z-30 bg-black/60 backdrop-blur-md"
               aria-hidden
             />
             <motion.aside
               role="dialog"
               aria-modal="true"
               aria-label={lang === "es" ? "Chat con Steven AI" : "Chat with Steven AI"}
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ type: "spring", damping: 30, stiffness: 220 }}
-              className="fixed right-0 top-0 z-40 flex h-full w-full max-w-md flex-col border-l border-hairline bg-background shadow-2xl"
+              initial={{ x: "100%", opacity: 0.6 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: "100%", opacity: 0.6 }}
+              transition={{ type: "spring", damping: 32, stiffness: 260 }}
+              className="fixed right-0 top-0 z-40 flex h-full w-full max-w-[440px] flex-col border-l border-hairline bg-background shadow-[0_0_60px_rgba(0,0,0,0.5)]"
             >
               {/* Header */}
-              <div className="flex items-center justify-between border-b border-hairline px-6 py-4">
-                <div>
-                  <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-foreground">
-                    Steven AI
-                  </p>
-                  <p className="mt-1 flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.24em] text-muted-foreground">
-                    <span
-                      className="inline-block h-1.5 w-1.5 rounded-full bg-foreground"
-                      aria-hidden
-                    />
-                    {lang === "es" ? "En línea" : "Online"}
-                  </p>
+              <header className="flex items-center justify-between gap-4 border-b border-hairline px-6 py-5">
+                <div className="flex items-center gap-3.5 min-w-0">
+                  <div
+                    className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-hairline bg-foreground text-background"
+                    aria-hidden
+                  >
+                    <span className="font-serif text-[17px] font-medium leading-none">S</span>
+                    <span className="absolute -right-0.5 -bottom-0.5 flex h-2.5 w-2.5">
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/60" />
+                      <span
+                        className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400"
+                        style={{ boxShadow: "0 0 0 2px var(--background)" }}
+                      />
+                    </span>
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate font-serif text-[17px] leading-tight text-foreground">
+                      Steven AI
+                    </p>
+                    <p className="mt-0.5 truncate font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
+                      {lang === "es" ? "Copiloto · En línea" : "Copilot · Online"}
+                    </p>
+                  </div>
                 </div>
                 <button
                   type="button"
                   onClick={() => onOpenChange(false)}
                   aria-label={lang === "es" ? "Cerrar" : "Close"}
-                  className="p-2 text-muted-foreground transition-colors hover:text-foreground"
+                  className="group inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-hairline text-muted-foreground transition-all hover:border-foreground hover:text-foreground active:scale-95"
                 >
-                  <X className="h-5 w-5" strokeWidth={1.5} />
+                  <X className="h-4 w-4" strokeWidth={1.75} />
                 </button>
-              </div>
+              </header>
 
               {/* Messages */}
               <div
                 ref={messagesRef}
-                className="flex-1 space-y-5 overflow-y-auto overscroll-contain p-6"
+                className="flex-1 space-y-6 overflow-y-auto overscroll-contain px-6 py-6"
               >
                 <AnimatePresence initial={false}>
                   {messages.map((m) => (
@@ -292,69 +321,91 @@ export function FloatingChat({ lang, open, onOpenChange }: FloatingChatProps) {
                       initial={{ opacity: 0, y: 6 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0 }}
-                      transition={{ duration: 0.2 }}
+                      transition={{ duration: 0.24, ease: [0.2, 0.8, 0.2, 1] }}
+                      className={m.role === "user" ? "pl-6 border-l border-foreground/40" : "pl-6 border-l border-hairline"}
                     >
-                      <p className="mb-1.5 font-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
+                      <p className="mb-2 font-mono text-[9px] uppercase tracking-[0.28em] text-muted-foreground">
                         {m.role === "user"
                           ? lang === "es" ? "Tú" : "You"
                           : "Steven AI"}
                       </p>
-                      <p className="text-[15px] leading-[1.75] text-foreground/85">{m.text}</p>
+                      <p className="whitespace-pre-wrap text-[14.5px] leading-[1.7] text-foreground/90">
+                        {m.text}
+                      </p>
                     </motion.div>
                   ))}
                   {isTyping && (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                      <p className="mb-1.5 font-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="pl-6 border-l border-hairline"
+                    >
+                      <p className="mb-2 font-mono text-[9px] uppercase tracking-[0.28em] text-muted-foreground">
                         Steven AI
                       </p>
-                      <p className="text-[15px] text-muted-foreground">
-                        <span className="inline-block h-1 w-1 animate-pulse rounded-full bg-foreground" />
+                      <span className="inline-flex items-center gap-1.5 py-1" aria-label={lang === "es" ? "Escribiendo" : "Typing"}>
+                        <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-foreground/60" />
                         <span
-                          className="mx-1 inline-block h-1 w-1 animate-pulse rounded-full bg-foreground"
-                          style={{ animationDelay: "0.2s" }}
+                          className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-foreground/60"
+                          style={{ animationDelay: "0.15s" }}
                         />
                         <span
-                          className="inline-block h-1 w-1 animate-pulse rounded-full bg-foreground"
-                          style={{ animationDelay: "0.4s" }}
+                          className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-foreground/60"
+                          style={{ animationDelay: "0.3s" }}
                         />
-                      </p>
+                      </span>
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
 
               {/* Quick questions */}
-              <div className="flex flex-wrap gap-x-5 gap-y-2 border-t border-hairline px-6 py-4">
-                {DEFAULT_QUESTIONS[lang].map((q, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    onClick={() => handleSubmit(undefined, q)}
-                    className="link-r text-xs text-muted-foreground hover:text-foreground"
-                  >
-                    {q}
-                  </button>
-                ))}
+              <div className="border-t border-hairline px-6 py-4">
+                <p className="mb-3 font-mono text-[9px] uppercase tracking-[0.28em] text-muted-foreground">
+                  {lang === "es" ? "Sugerencias" : "Suggestions"}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {DEFAULT_QUESTIONS[lang].map((q, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => handleSubmit(undefined, q)}
+                      className="rounded-full border border-hairline px-3 py-1.5 text-[11.5px] text-muted-foreground transition-all hover:border-foreground hover:bg-foreground hover:text-background"
+                    >
+                      {q}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               {/* Form */}
-              <form onSubmit={handleSubmit} className="flex items-center border-t border-hairline">
+              <form onSubmit={handleSubmit} className="flex items-stretch border-t border-hairline bg-background">
                 <input
+                  ref={inputRef}
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder={lang === "es" ? "Escribe tu pregunta…" : "Type your question…"}
-                  className="flex-1 bg-transparent px-6 py-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+                  maxLength={2000}
+                  className="flex-1 bg-transparent px-6 py-5 text-[14px] text-foreground placeholder:text-muted-foreground/70 focus:outline-none"
                 />
                 <button
                   type="submit"
                   disabled={!input.trim() || isTyping}
                   aria-label={lang === "es" ? "Enviar" : "Send"}
-                  className="border-l border-hairline px-5 py-4 text-foreground transition-colors hover:bg-foreground hover:text-background disabled:cursor-not-allowed disabled:opacity-40"
+                  className="flex items-center justify-center border-l border-hairline px-5 text-foreground transition-all hover:bg-foreground hover:text-background disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-foreground"
                 >
                   <Send className="h-4 w-4" strokeWidth={1.75} />
                 </button>
               </form>
+
+              {/* Footer hint */}
+              <div className="border-t border-hairline px-6 py-2.5">
+                <p className="font-mono text-[9px] uppercase tracking-[0.22em] text-muted-foreground/70">
+                  {lang === "es" ? "ESC para cerrar · Enter para enviar" : "ESC to close · Enter to send"}
+                </p>
+              </div>
             </motion.aside>
           </>
         )}
