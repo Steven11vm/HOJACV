@@ -1,14 +1,15 @@
 /** @type {import('next').NextConfig} */
 
 // CSP that allows the dev portfolio assets and blocks everything else.
-// `unsafe-inline` is needed for Next's runtime scripts; `unsafe-eval` is required
-// only in development for HMR. In production we drop unsafe-eval.
-const isDev = process.env.NODE_ENV !== "production"
-
+// `unsafe-inline` is needed for Next's runtime scripts. `unsafe-eval` is needed
+// by (a) Next's HMR in dev, and (b) react-icon-cloud in production — it wraps
+// TagCanvas.js as a string and evaluates it via eval() at runtime. It's a
+// small security relaxation acceptable for a personal portfolio (no
+// server-side user-input reflection); if this becomes a concern, swap the
+// library for a native CSS-3D implementation.
 const csp = [
   "default-src 'self'",
-  // Next inlines small bootstrap scripts and uses eval in dev for HMR.
-  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""} https://va.vercel-scripts.com https://vercel.live`,
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com https://vercel.live",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "img-src 'self' data: blob: https: ",
   "font-src 'self' data: https://fonts.gstatic.com",
