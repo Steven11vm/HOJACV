@@ -283,7 +283,7 @@ export function FloatingChat({ lang, open, onOpenChange }: FloatingChatProps) {
                   >
                     <span className="font-serif text-[17px] font-medium leading-none">S</span>
                     <span className="absolute -right-0.5 -bottom-0.5 flex h-2.5 w-2.5">
-                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/60" />
+                      <span className="pointer-events-none absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/60" />
                       <span
                         className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400"
                         style={{ boxShadow: "0 0 0 2px var(--background)" }}
@@ -301,11 +301,17 @@ export function FloatingChat({ lang, open, onOpenChange }: FloatingChatProps) {
                 </div>
                 <button
                   type="button"
-                  onClick={() => onOpenChange(false)}
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    onOpenChange(false)
+                  }}
+                  onPointerDown={(e) => e.stopPropagation()}
                   aria-label={lang === "es" ? "Cerrar" : "Close"}
-                  className="group inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-hairline text-muted-foreground transition-all hover:border-foreground hover:text-foreground active:scale-95"
+                  style={{ pointerEvents: "auto" }}
+                  className="relative z-[60] inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border border-hairline bg-background text-muted-foreground transition-all hover:border-foreground hover:bg-foreground hover:text-background active:scale-95"
                 >
-                  <X className="h-4 w-4" strokeWidth={1.75} />
+                  <X className="h-5 w-5 pointer-events-none" strokeWidth={2} />
                 </button>
               </header>
 
