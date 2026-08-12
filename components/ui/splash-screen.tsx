@@ -3,7 +3,11 @@ import { useEffect, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 
 const SCRIPT_FONT = "'Brush Script MT','Lucida Handwriting','Snell Roundhand','Apple Chancery',cursive"
-const S_SIZE = "text-[35vw] sm:text-[26vw] md:text-[22vw]"
+// Tamaño con piso robusto en movil: usa el mayor lado (vmax) para no encogerse
+// en pantallas estrechas, y limita en desktop.
+const S_SIZE =
+  "text-[min(70vw,55vh)] sm:text-[min(45vw,55vh)] md:text-[min(32vw,55vh)] lg:text-[min(26vw,55vh)]"
+const S_LEADING = "leading-[1.35]"
 
 /**
  * SplashScreen — pagina de bienvenida al cargar/recargar la web.
@@ -50,13 +54,13 @@ export function SplashScreen() {
           <div className="pointer-events-none absolute bottom-6 right-6 h-10 w-10 border-b border-r border-hairline sm:bottom-10 sm:right-10 sm:h-14 sm:w-14" />
 
           {/* Firma "S" con shutter */}
-          <div className="relative inline-block overflow-hidden px-2 leading-none">
+          <div className={`relative inline-block overflow-hidden px-[0.15em] py-[0.12em] ${S_LEADING}`}>
             {/* Capa principal */}
             <motion.span
               initial={{ opacity: 0, filter: "blur(14px)", scale: 0.9 }}
               animate={{ opacity: 1, filter: "blur(0px)", scale: 1 }}
               transition={{ delay: 0.3, duration: 1, ease: [0.2, 0.8, 0.2, 1] }}
-              className={`inline-block font-normal leading-none text-foreground ${S_SIZE}`}
+              className={`inline-block font-normal text-foreground ${S_LEADING} ${S_SIZE}`}
               style={{ fontFamily: SCRIPT_FONT }}
             >
               S
@@ -66,7 +70,7 @@ export function SplashScreen() {
               initial={{ x: "-100%", opacity: 0 }}
               animate={{ x: "100%", opacity: [0, 1, 0] }}
               transition={{ duration: 0.8, delay: 0.05, ease: "easeInOut" }}
-              className={`pointer-events-none absolute inset-0 inline-block font-normal leading-none text-muted-foreground ${S_SIZE}`}
+              className={`pointer-events-none absolute inset-0 inline-block font-normal text-muted-foreground ${S_LEADING} ${S_SIZE}`}
               style={{ fontFamily: SCRIPT_FONT, clipPath: "polygon(0 0, 100% 0, 100% 35%, 0 35%)" }}
             >
               S
@@ -76,7 +80,7 @@ export function SplashScreen() {
               initial={{ x: "100%", opacity: 0 }}
               animate={{ x: "-100%", opacity: [0, 1, 0] }}
               transition={{ duration: 0.8, delay: 0.15, ease: "easeInOut" }}
-              className={`pointer-events-none absolute inset-0 inline-block font-normal leading-none text-foreground/70 ${S_SIZE}`}
+              className={`pointer-events-none absolute inset-0 inline-block font-normal text-foreground/70 ${S_LEADING} ${S_SIZE}`}
               style={{ fontFamily: SCRIPT_FONT, clipPath: "polygon(0 35%, 100% 35%, 100% 65%, 0 65%)" }}
             >
               S
@@ -86,7 +90,7 @@ export function SplashScreen() {
               initial={{ x: "-100%", opacity: 0 }}
               animate={{ x: "100%", opacity: [0, 1, 0] }}
               transition={{ duration: 0.8, delay: 0.25, ease: "easeInOut" }}
-              className={`pointer-events-none absolute inset-0 inline-block font-normal leading-none text-muted-foreground ${S_SIZE}`}
+              className={`pointer-events-none absolute inset-0 inline-block font-normal text-muted-foreground ${S_LEADING} ${S_SIZE}`}
               style={{ fontFamily: SCRIPT_FONT, clipPath: "polygon(0 65%, 100% 65%, 100% 100%, 0 100%)" }}
             >
               S
