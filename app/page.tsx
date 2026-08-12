@@ -17,6 +17,8 @@ import { Manifesto } from "@/components/sections/Manifesto"
 import { Contact } from "@/components/sections/Contact"
 import { FloatingChat } from "@/components/ui/floating-chat"
 import { SplashScreen } from "@/components/ui/splash-screen"
+import { AudienceProvider } from "@/lib/audience"
+import { AudienceSelector } from "@/components/ui/audience-selector"
 
 export default function CVPage() {
   const [activeSection, setActiveSection] = useState("intro")
@@ -84,37 +86,40 @@ export default function CVPage() {
   }, [])
 
   return (
-    <div className="relative min-h-screen bg-background text-foreground selection:bg-primary/30">
-      <SplashScreen />
-      <HeroWave />
+    <AudienceProvider>
+      <div className="relative min-h-screen bg-background text-foreground selection:bg-primary/30">
+        <SplashScreen />
+        <AudienceSelector lang={lang} />
+        <HeroWave />
 
-      <Navbar
-        lang={lang}
-        setLang={setLang}
-        isDark={isDark}
-        toggleTheme={toggleTheme}
-        activeSection={activeSection}
-        scrollToSection={scrollToSection}
-        isVisible={isVisible}
-      />
+        <Navbar
+          lang={lang}
+          setLang={setLang}
+          isDark={isDark}
+          toggleTheme={toggleTheme}
+          activeSection={activeSection}
+          scrollToSection={scrollToSection}
+          isVisible={isVisible}
+        />
 
-      <main className="relative z-10">
-        <Intro lang={lang} scrollToSection={scrollToSection} />
-        <Hero lang={lang} />
-        <About lang={lang} />
-        <Experience lang={lang} />
-        <Skills lang={lang} />
-        <Services lang={lang} />
-        <Process lang={lang} />
-        <Projects lang={lang} />
-        <AiAssistant lang={lang} onOpenChat={() => setChatOpen(true)} />
-        <Manifesto lang={lang} />
-        <Contact lang={lang} />
-      </main>
+        <main className="relative z-10">
+          <Intro lang={lang} scrollToSection={scrollToSection} />
+          <Hero lang={lang} />
+          <About lang={lang} />
+          <Experience lang={lang} />
+          <Skills lang={lang} />
+          <Services lang={lang} />
+          <Process lang={lang} />
+          <Projects lang={lang} />
+          <AiAssistant lang={lang} onOpenChat={() => setChatOpen(true)} />
+          <Manifesto lang={lang} />
+          <Contact lang={lang} />
+        </main>
 
-      <Footer />
+        <Footer />
 
-      <FloatingChat lang={lang} open={chatOpen} onOpenChange={setChatOpen} />
-    </div>
+        <FloatingChat lang={lang} open={chatOpen} onOpenChange={setChatOpen} />
+      </div>
+    </AudienceProvider>
   )
 }

@@ -1,9 +1,24 @@
 "use client"
 import { motion } from "framer-motion"
 import { type Lang, translations } from "@/lib/translations"
+import { useAudience } from "@/lib/audience"
 
 export function Hero({ lang }: { lang: Lang }) {
   const t = translations[lang]
+  const { audience } = useAudience()
+  const isRecruiter = audience === "recruiter"
+
+  const status = isRecruiter
+    ? lang === "es"
+      ? "Abierto a nuevas oportunidades"
+      : "Open to new opportunities"
+    : t.hero.status
+
+  const intro = isRecruiter
+    ? lang === "es"
+      ? "Ingeniero Full Stack (2+ años) con foco en React/Next.js, Node, SQL y despliegue Docker + AWS/Vercel. Envío productos a producción con seguridad por defecto (CSP, OWASP Top 10) e integraciones de IA aplicada."
+      : "Full Stack Engineer (2+ yrs) focused on React/Next.js, Node, SQL and Docker + AWS/Vercel deployments. I ship production products with security by default (CSP, OWASP Top 10) and applied AI integrations."
+    : t.hero.intro
 
   return (
     <section
@@ -20,7 +35,7 @@ export function Hero({ lang }: { lang: Lang }) {
         <p className="inline-flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
           <span aria-hidden className="inline-block h-px w-6 bg-muted-foreground/60" />
           <span aria-hidden className="inline-block h-1.5 w-1.5 rounded-full bg-foreground" />
-          <span>{t.hero.status}</span>
+          <span>{status}</span>
           <span aria-hidden className="inline-block h-px w-6 bg-muted-foreground/60" />
         </p>
 
@@ -42,25 +57,42 @@ export function Hero({ lang }: { lang: Lang }) {
 
         {/* Intro */}
         <p className="mt-8 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-          {t.hero.intro}
+          {intro}
         </p>
 
-        {/* CTAs */}
+        {/* CTAs — reordenados por audiencia */}
         <div className="mt-14 flex flex-wrap items-center justify-center gap-x-8 gap-y-4">
-          <a href="#projects" className="btn-plain btn-plain-inv">
-            {lang === "es" ? "Ver trabajo" : "See work"}
-            <span aria-hidden>→</span>
-          </a>
-          <a
-            href="/CV/Hoja de vida.pdf"
-            download="Steven_Villamizar_CV.pdf"
-            className="link-r text-sm text-foreground"
-          >
-            {t.hero.downloadCV}
-          </a>
-          <a href="#contact" className="link-r text-sm text-foreground">
-            {lang === "es" ? "Contacto" : "Contact"}
-          </a>
+          {isRecruiter ? (
+            <>
+              <a
+                href="/CV/Hoja de vida.pdf"
+                download="Steven_Villamizar_CV.pdf"
+                className="btn-plain btn-plain-inv"
+              >
+                {t.hero.downloadCV}
+                <span aria-hidden>↓</span>
+              </a>
+              <a href="#experience" className="link-r text-sm text-foreground">
+                {lang === "es" ? "Ver experiencia" : "See experience"}
+              </a>
+              <a href="#contact" className="link-r text-sm text-foreground">
+                {lang === "es" ? "Contacto" : "Contact"}
+              </a>
+            </>
+          ) : (
+            <>
+              <a href="#services" className="btn-plain btn-plain-inv">
+                {lang === "es" ? "Ver servicios" : "See services"}
+                <span aria-hidden>→</span>
+              </a>
+              <a href="#projects" className="link-r text-sm text-foreground">
+                {lang === "es" ? "Ver trabajo" : "See work"}
+              </a>
+              <a href="#contact" className="link-r text-sm text-foreground">
+                {lang === "es" ? "Contacto" : "Contact"}
+              </a>
+            </>
+          )}
         </div>
 
         {/* Stats — centradas y contenidas */}

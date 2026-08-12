@@ -4,6 +4,7 @@ import { Menu, X } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { translations, type Lang, LANG_KEY } from "@/lib/translations"
 import { SignatureLogo } from "@/components/ui/signature-logo"
+import { useAudience } from "@/lib/audience"
 
 interface NavbarProps {
   lang: Lang
@@ -36,6 +37,7 @@ export function Navbar({
   const menuRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
   const t = translations[lang]
+  const { audience, clearAudience } = useAudience()
 
   useEffect(() => {
     setMounted(true)
@@ -63,17 +65,26 @@ export function Navbar({
 
   if (!mounted) return null
 
-  const menuItems: { id: string; label: string }[] = [
-    { id: "intro", label: lang === "es" ? "INICIO" : "HOME" },
-    { id: "about", label: (t.nav.about || "").toUpperCase() },
-    { id: "experience", label: (t.nav.experience || "").toUpperCase() },
-    { id: "skills", label: (t.nav.skills || "").toUpperCase() },
-    { id: "services", label: (t.nav.services || "").toUpperCase() },
-    { id: "process", label: (t.nav.process || "").toUpperCase() },
-    { id: "projects", label: (t.nav.projects || "").toUpperCase() },
-    { id: "ai", label: "AI" },
-    { id: "contact", label: (t.nav.contact || "").toUpperCase() },
-  ]
+  const allItems: Record<string, { id: string; label: string }> = {
+    intro: { id: "intro", label: lang === "es" ? "INICIO" : "HOME" },
+    about: { id: "about", label: (t.nav.about || "").toUpperCase() },
+    experience: { id: "experience", label: (t.nav.experience || "").toUpperCase() },
+    skills: { id: "skills", label: (t.nav.skills || "").toUpperCase() },
+    services: { id: "services", label: (t.nav.services || "").toUpperCase() },
+    process: { id: "process", label: (t.nav.process || "").toUpperCase() },
+    projects: { id: "projects", label: (t.nav.projects || "").toUpperCase() },
+    ai: { id: "ai", label: "AI" },
+    contact: { id: "contact", label: (t.nav.contact || "").toUpperCase() },
+  }
+
+  // Orden segun audiencia: cliente prioriza propuesta comercial;
+  // reclutador prioriza evidencia profesional (experiencia, stack, CV).
+  const orderByAudience: Record<"client" | "recruiter" | "default", string[]> = {
+    client: ["intro", "services", "process", "projects", "ai", "about", "experience", "skills", "contact"],
+    recruiter: ["intro", "experience", "skills", "projects", "about", "ai", "services", "process", "contact"],
+    default: ["intro", "about", "experience", "skills", "services", "process", "projects", "ai", "contact"],
+  }
+  const menuItems = orderByAudience[audience ?? "default"].map((id) => allItems[id]).filter(Boolean)
 
   const handleMenuClick = (id: string) => {
     setIsMenuOpen(false)
@@ -156,6 +167,25 @@ export function Navbar({
                   <span>{lang === "es" ? "Idioma" : "Language"}</span>
                   <span>
                     {lang.toUpperCase()} → {lang === "es" ? "EN" : "ES"}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMenuOpen(false)
+                    clearAudience()
+                  }}
+                  className="flex w-full items-center justify-between px-3 py-2 text-left font-mono text-xs uppercase tracking-[0.22em] text-muted-foreground transition-colors hover:bg-foreground hover:text-background"
+                >
+                  <span>{lang === "es" ? "Perfil" : "Profile"}</span>
+                  <span>
+                    {audience === "client"
+                      ? lang === "es" ? "CLIENTE" : "CLIENT"
+                      : audience === "recruiter"
+                        ? lang === "es" ? "RECLUTADOR" : "RECRUITER"
+                        : "—"}
+                    {" · "}
+                    {lang === "es" ? "CAMBIAR" : "SWITCH"}
                   </span>
                 </button>
               </motion.div>
