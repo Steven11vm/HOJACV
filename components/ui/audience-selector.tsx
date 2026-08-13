@@ -7,7 +7,10 @@ import type { Lang } from "@/lib/translations"
 
 interface Props {
   lang: Lang
-  /** Delay antes de aparecer (para no chocar con el splash). Default 2100ms. */
+  /**
+   * Delay antes de aparecer en la primera visita. Debe ser >= duracion del
+   * splash (2000ms) + su exit animation (700ms) para no montarse encima.
+   */
   delay?: number
 }
 
@@ -17,7 +20,7 @@ interface Props {
  * del splash. La eleccion condiciona el orden de secciones, copys de Hero y
  * CTAs de Contact. Se puede reabrir desde el Navbar (menu > "Cambiar perfil").
  */
-export function AudienceSelector({ lang, delay = 2100 }: Props) {
+export function AudienceSelector({ lang, delay = 2800 }: Props) {
   const { audience, setAudience, ready } = useAudience()
   const [visible, setVisible] = useState(false)
   const [firstRunDone, setFirstRunDone] = useState(false)
@@ -101,7 +104,7 @@ export function AudienceSelector({ lang, delay = 2100 }: Props) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0, transition: { duration: 0.4 } }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="fixed inset-0 z-[190] flex items-center justify-center bg-background/95 px-6 backdrop-blur-md sm:px-10"
+          className="fixed inset-0 z-[210] flex items-center justify-center bg-background/95 px-6 backdrop-blur-md sm:px-10"
           role="dialog"
           aria-modal="true"
           aria-labelledby="audience-title"
