@@ -21,14 +21,14 @@ interface ProjectsGridProps {
  * Genera una URL de screenshot on-the-fly con thum.io (servicio gratuito
  * sin API key). Cachea del lado de thum.io tras la primera visita.
  *
- * width/1200 y crop/1500 → aspect 4/5 (más alta que el contenedor 4/3),
- * lo que deja "chicha" vertical para simular el scroll-pan en hover.
- * noanimate/ evita GIFs; wait/5/ da tiempo a que se caiga el splash y a
- * que la SPA hidrate el hero real antes de capturar.
+ * width/1200 y crop/1500 → aspect 4/5. wait/3/ da tiempo a que hidraten
+ * la mayoría de SPAs sin volverse insoportablemente lento (era 5s antes).
+ * noanimate/ evita GIFs. Solo se usa cuando el proyecto NO trae `image`
+ * local — la imagen local siempre gana (instant, sin round-trip).
  */
 function screenshotUrl(link: string): string {
   const clean = link.replace(/^https?:\/\//, "https://")
-  return `https://image.thum.io/get/width/1200/crop/1500/noanimate/wait/5/${clean}`
+  return `https://image.thum.io/get/width/1200/crop/1500/noanimate/wait/3/${clean}`
 }
 
 /** Placeholder cinematográfico SVG cuando no hay link ni imagen. */
@@ -118,11 +118,13 @@ function ProjectCard({
   const hasLink = Boolean(project.link && project.link !== "#")
   const isExternal = hasLink && project.link!.startsWith("http")
 
-  const primaryImg = isExternal
-    ? screenshotUrl(project.link!)
-    : project.image ?? placeholderFor(project.title, index)
+  // Prioridad: imagen local del proyecto > screenshot en vivo > placeholder.
+  // La imagen local siempre gana porque es instant (sin llamada externa).
+  const primaryImg =
+    project.image ??
+    (isExternal ? screenshotUrl(project.link!) : placeholderFor(project.title, index))
 
-  const fallbackImg = project.image ?? placeholderFor(project.title, index)
+  const fallbackImg = placeholderFor(project.title, index)
   const [src, setSrc] = useState(primaryImg)
   const [loaded, setLoaded] = useState(false)
 
