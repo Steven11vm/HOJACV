@@ -1,5 +1,5 @@
 "use client"
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { motion } from "framer-motion"
 import { ArrowUpRight, Lock } from "lucide-react"
 import { type Lang, translations } from "@/lib/translations"
@@ -126,6 +126,30 @@ function ProjectCard({
   const [src, setSrc] = useState(primaryImg)
   const [loaded, setLoaded] = useState(false)
 
+  // Live preview: al hacer hover, monta un <iframe> con el sitio real por
+  // encima de la screenshot. Delay 250ms para no cargar iframes si el mouse
+  // solo pasa. Se desmonta al salir para liberar recursos.
+  const [hovering, setHovering] = useState(false)
+  const [iframeReady, setIframeReady] = useState(false)
+  const enterTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    if (!hovering) setIframeReady(false)
+  }, [hovering])
+
+  const onEnter = () => {
+    if (!isExternal) return
+    if (enterTimeoutRef.current) clearTimeout(enterTimeoutRef.current)
+    enterTimeoutRef.current = setTimeout(() => setHovering(true), 250)
+  }
+  const onLeave = () => {
+    if (enterTimeoutRef.current) {
+      clearTimeout(enterTimeoutRef.current)
+      enterTimeoutRef.current = null
+    }
+    setHovering(false)
+  }
+
   const cardContent = (
     <>
       <div className="relative aspect-[4/3] w-full overflow-hidden border border-hairline bg-muted">
@@ -156,21 +180,46 @@ function ProjectCard({
               setLoaded(true)
             }
           }}
-          style={{
-            objectPosition: "50% 0%",
-            transition: "object-position 5s linear, opacity 0.7s ease",
-          }}
-          className={`h-full w-full object-cover ${
+          style={{ objectPosition: "50% 0%" }}
+          className={`h-full w-full object-cover transition-opacity duration-700 ${
             loaded ? "opacity-100" : "opacity-0"
-          } group-hover:[object-position:50%_100%]`}
+          }`}
         />
-        {/* Micro-HUD "cargando sitio…" mientras el hover simula el scroll */}
-        <div className="pointer-events-none absolute left-4 top-4 flex items-center gap-2 border border-white/25 bg-black/60 px-2.5 py-1 font-mono text-[9px] uppercase tracking-[0.28em] text-white opacity-0 backdrop-blur-md transition-opacity duration-300 group-hover:opacity-100">
+
+        {/* LIVE IFRAME — se monta solo cuando hovering=true. El iframe se
+            escala 50% para que quepan 2x del ancho real en el mismo card,
+            así se ve más del sitio. pointer-events-none: el click del card
+            sigue navegando al href del <a> padre. */}
+        {isExternal && hovering && (
+          <iframe
+            src={project.link}
+            title={`${project.title} — live preview`}
+            loading="lazy"
+            sandbox="allow-scripts allow-same-origin"
+            referrerPolicy="no-referrer"
+            onLoad={() => setIframeReady(true)}
+            className={`absolute inset-0 pointer-events-none transition-opacity duration-500 ${
+              iframeReady ? "opacity-100" : "opacity-0"
+            }`}
+            style={{
+              width: "200%",
+              height: "200%",
+              transform: "scale(0.5)",
+              transformOrigin: "top left",
+              border: "0",
+              background: "#fff",
+            }}
+            aria-hidden
+          />
+        )}
+
+        {/* Micro-HUD "Live preview" con dot verde ping */}
+        <div className="pointer-events-none absolute left-4 top-4 z-10 flex items-center gap-2 border border-white/25 bg-black/70 px-2.5 py-1 font-mono text-[9px] uppercase tracking-[0.28em] text-white opacity-0 backdrop-blur-md transition-opacity duration-300 group-hover:opacity-100">
           <span className="relative inline-flex h-1.5 w-1.5">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/70" />
             <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
           </span>
-          <span>Live preview</span>
+          <span>{hovering && !iframeReady ? "Abriendo…" : hovering ? "En vivo" : "Live preview"}</span>
         </div>
         {/* Overlay hover */}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-black/0 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
@@ -226,7 +275,18 @@ function ProjectCard({
 
   if (isExternal) {
     return (
-      <motion.a {...motionProps} href={project.link} target="_blank" rel="noopener noreferrer" className={wrapperCls} aria-label={`${project.title} — ${lang === "es" ? "Abrir en nueva pestaña" : "Open in new tab"}`}>
+      <motion.a
+        {...motionProps}
+        href={project.link}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={wrapperCls}
+        aria-label={`${project.title} — ${lang === "es" ? "Abrir en nueva pestaña" : "Open in new tab"}`}
+        onMouseEnter={onEnter}
+        onMouseLeave={onLeave}
+        onFocus={onEnter}
+        onBlur={onLeave}
+      >
         {cardContent}
       </motion.a>
     )
