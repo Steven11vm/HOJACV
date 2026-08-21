@@ -8,7 +8,6 @@ import { Skills } from "@/components/sections/Skills"
 import { Services } from "@/components/sections/Services"
 import { Process } from "@/components/sections/Process"
 import { ProjectsGrid } from "@/components/sections/ProjectsGrid"
-import { AiAssistant } from "@/components/sections/AiAssistant"
 import { Manifesto } from "@/components/sections/Manifesto"
 import { Contact } from "@/components/sections/Contact"
 import { AudienceOnly } from "@/lib/audience"
@@ -22,7 +21,6 @@ const HOME_SECTION_IDS = [
   "services",
   "process",
   "projects",
-  "ai",
   "manifesto",
   "contact",
 ]
@@ -47,7 +45,6 @@ export default function CVPage() {
           </AudienceOnly>
           <Process lang={lang} />
           <ProjectsGrid lang={lang} />
-          <AiAssistant lang={lang} onOpenChat={openChat} />
           <Manifesto lang={lang} />
           <Contact lang={lang} />
         </>

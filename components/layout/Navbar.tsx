@@ -73,16 +73,15 @@ export function Navbar({
     services: { id: "services", label: (t.nav.services || "").toUpperCase() },
     process: { id: "process", label: (t.nav.process || "").toUpperCase() },
     projects: { id: "projects", label: (t.nav.projects || "").toUpperCase() },
-    ai: { id: "ai", label: "AI" },
     contact: { id: "contact", label: (t.nav.contact || "").toUpperCase() },
   }
 
   // Orden segun audiencia: cliente prioriza propuesta comercial;
   // reclutador prioriza evidencia profesional (experiencia, stack, CV).
   const orderByAudience: Record<"client" | "recruiter" | "default", string[]> = {
-    client: ["intro", "services", "process", "projects", "ai", "about", "experience", "skills", "contact"],
-    recruiter: ["intro", "experience", "skills", "projects", "about", "ai", "services", "process", "contact"],
-    default: ["intro", "about", "experience", "skills", "services", "process", "projects", "ai", "contact"],
+    client: ["intro", "services", "process", "projects", "about", "experience", "skills", "contact"],
+    recruiter: ["intro", "experience", "skills", "projects", "about", "services", "process", "contact"],
+    default: ["intro", "about", "experience", "skills", "services", "process", "projects", "contact"],
   }
   const menuItems = orderByAudience[audience ?? "default"].map((id) => allItems[id]).filter(Boolean)
 
