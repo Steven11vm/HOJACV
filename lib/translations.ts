@@ -548,29 +548,6 @@ export const translations = {
         },
       },
       {
-        title: "Barbería Orion",
-        subtitle: "Sistema de reservas para barbería",
-        description:
-          "Plataforma de gestión de citas con experiencia mobile-first y micro-interacciones que refuerzan la marca premium del negocio.",
-        tech: ["React", "Tailwind CSS", "Framer Motion"],
-        link: "#",
-        featured: false,
-        doc: {
-          architecture: [
-            "Aplicación React con vistas de servicios, disponibilidad y reservas.",
-            "Estilos con Tailwind y animaciones con Framer Motion para UX fluida.",
-          ],
-          technicalDecisions: [
-            "Framer Motion para transiciones y micro-interacciones que refuercen la marca.",
-            "Diseño responsivo primero para uso en móvil en punto de venta o por clientes.",
-          ],
-          problemsSolved: [
-            "Visualización clara de horarios y servicios para reducir no-shows.",
-            "Experiencia de reserva rápida y accesible desde cualquier dispositivo.",
-          ],
-        },
-      },
-      {
         title: "Digital CV",
         subtitle: "Portafolio interactivo (este sitio)",
         description:
@@ -685,30 +662,6 @@ export const translations = {
             "Consistencia editorial por nicho: el agente respeta el mismo lenguaje visual entre videos.",
             "Ciclo de aprendizaje objetivo: retención medida > opinión humana sobre 'qué funciona'.",
             "Escalar múltiples canales en paralelo desde una sola infraestructura.",
-          ],
-        },
-      },
-      {
-        title: "Enterprise Private Projects",
-        subtitle: "Sistemas a medida bajo NDA",
-        description:
-          "Sistemas empresariales con visualización en tiempo real, integraciones internas y procesamiento de datos a escala. Cubiertos por acuerdos de confidencialidad.",
-        tech: ["Python", "JavaScript", "MySQL", "WebSockets"],
-        link: undefined,
-        featured: false,
-        doc: {
-          architecture: [
-            "Backend en Python (Flask/Django o similar) para lógica y APIs.",
-            "Frontend en JavaScript para dashboards y visualización en tiempo real.",
-            "MySQL como almacenamiento transaccional y para reportes.",
-          ],
-          technicalDecisions: [
-            "Python para integraciones, scripts y procesamiento de datos empresariales.",
-            "Visualización en tiempo real mediante WebSockets o polling según requisitos.",
-          ],
-          problemsSolved: [
-            "Datos en tiempo real para monitoreo y toma de decisiones.",
-            "Sistemas a medida que se integran con procesos internos del cliente.",
           ],
         },
       },
@@ -1277,29 +1230,6 @@ export const translations = {
         },
       },
       {
-        title: "Barbería Orion",
-        subtitle: "Barbershop booking system",
-        description:
-          "Appointment management platform with mobile-first experience and micro-interactions that reinforce the premium brand.",
-        tech: ["React", "Tailwind CSS", "Framer Motion"],
-        link: "#",
-        featured: false,
-        doc: {
-          architecture: [
-            "React application with service, availability and booking views.",
-            "Tailwind styles and Framer Motion animations for fluid UX.",
-          ],
-          technicalDecisions: [
-            "Framer Motion for transitions and micro-interactions that reinforce the brand.",
-            "Mobile-first responsive design for point-of-sale or customer use.",
-          ],
-          problemsSolved: [
-            "Clear display of schedules and services to reduce no-shows.",
-            "Fast and accessible booking experience from any device.",
-          ],
-        },
-      },
-      {
         title: "Digital CV",
         subtitle: "Interactive portfolio (this site)",
         description:
@@ -1414,30 +1344,6 @@ export const translations = {
             "Editorial consistency per niche: the agent keeps the same visual language across videos.",
             "Objective learning loop: measured retention > human opinion of 'what works'.",
             "Scaling multiple channels in parallel from a single infrastructure.",
-          ],
-        },
-      },
-      {
-        title: "Enterprise Private Projects",
-        subtitle: "Custom systems under NDA",
-        description:
-          "Enterprise systems with real-time visualization, internal integrations and large-scale data processing. Covered by confidentiality agreements.",
-        tech: ["Python", "JavaScript", "MySQL", "WebSockets"],
-        link: undefined,
-        featured: false,
-        doc: {
-          architecture: [
-            "Python backend (Flask/Django or similar) for logic and APIs.",
-            "JavaScript frontend for dashboards and real-time visualization.",
-            "MySQL as transactional storage and for reports.",
-          ],
-          technicalDecisions: [
-            "Python for integrations, scripts and enterprise data processing.",
-            "Real-time visualization via WebSockets or polling depending on requirements.",
-          ],
-          problemsSolved: [
-            "Real-time data for monitoring and decision making.",
-            "Custom systems that integrate with client internal processes.",
           ],
         },
       },

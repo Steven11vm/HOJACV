@@ -21,12 +21,14 @@ interface ProjectsGridProps {
  * Genera una URL de screenshot on-the-fly con thum.io (servicio gratuito
  * sin API key). Cachea del lado de thum.io tras la primera visita.
  *
- * width/1200 y crop/900 dan 4:3 real; noanimate/ evita GIFs; wait/2/ le da
- * a la SPA 2s para hidratar y capturar el "arriba del fold" pintado.
+ * width/1200 y crop/1500 → aspect 4/5 (más alta que el contenedor 4/3),
+ * lo que deja "chicha" vertical para simular el scroll-pan en hover.
+ * noanimate/ evita GIFs; wait/5/ da tiempo a que se caiga el splash y a
+ * que la SPA hidrate el hero real antes de capturar.
  */
 function screenshotUrl(link: string): string {
   const clean = link.replace(/^https?:\/\//, "https://")
-  return `https://image.thum.io/get/width/1200/crop/900/noanimate/wait/2/${clean}`
+  return `https://image.thum.io/get/width/1200/crop/1500/noanimate/wait/5/${clean}`
 }
 
 /** Placeholder cinematográfico SVG cuando no hay link ni imagen. */
@@ -154,10 +156,22 @@ function ProjectCard({
               setLoaded(true)
             }
           }}
-          className={`h-full w-full object-cover object-top transition-all duration-700 ${
+          style={{
+            objectPosition: "50% 0%",
+            transition: "object-position 5s linear, opacity 0.7s ease",
+          }}
+          className={`h-full w-full object-cover ${
             loaded ? "opacity-100" : "opacity-0"
-          } group-hover:scale-[1.03]`}
+          } group-hover:[object-position:50%_100%]`}
         />
+        {/* Micro-HUD "cargando sitio…" mientras el hover simula el scroll */}
+        <div className="pointer-events-none absolute left-4 top-4 flex items-center gap-2 border border-white/25 bg-black/60 px-2.5 py-1 font-mono text-[9px] uppercase tracking-[0.28em] text-white opacity-0 backdrop-blur-md transition-opacity duration-300 group-hover:opacity-100">
+          <span className="relative inline-flex h-1.5 w-1.5">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/70" />
+            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
+          </span>
+          <span>Live preview</span>
+        </div>
         {/* Overlay hover */}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-black/0 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
         {/* Badge esquina */}
