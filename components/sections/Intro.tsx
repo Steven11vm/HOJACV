@@ -5,7 +5,7 @@ import { motion } from "framer-motion"
 import { type Lang, translations } from "@/lib/translations"
 import ShutterText from "@/components/ui/shutter-text"
 import { ShineBorder } from "@/components/ui/shine-border"
-import formalImage from "@/imagenes/image.png"
+import formalImage from "@/imagenes/stevenelegante.png"
 
 interface IntroProps {
   lang: Lang
