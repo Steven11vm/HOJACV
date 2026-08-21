@@ -5,7 +5,6 @@ import { type Lang, LANG_KEY } from "@/lib/translations"
 import { Navbar } from "@/components/layout/Navbar"
 import { Footer } from "@/components/layout/Footer"
 import { HeroWave } from "@/components/ui/dynamic-wave-canvas-background"
-import { FloatingChat } from "@/components/ui/floating-chat"
 import { SplashScreen } from "@/components/ui/splash-screen"
 import { AudienceProvider } from "@/lib/audience"
 import { AudienceSelector } from "@/components/ui/audience-selector"
@@ -36,7 +35,6 @@ export function SiteShell({ children, observeSectionIds, showSplash = true }: Si
   const [isDark, setIsDark] = useState(true)
   const [isVisible, setIsVisible] = useState(false)
   const [lang, setLang] = useState<Lang>("es")
-  const [chatOpen, setChatOpen] = useState(false)
 
   useEffect(() => {
     setIsVisible(true)
@@ -117,11 +115,10 @@ export function SiteShell({ children, observeSectionIds, showSplash = true }: Si
         />
 
         <main className="relative z-10">
-          {children({ lang, openChat: () => setChatOpen(true) })}
+          {children({ lang, openChat: () => {} })}
         </main>
 
         <Footer />
-        <FloatingChat lang={lang} open={chatOpen} onOpenChange={setChatOpen} />
       </div>
     </AudienceProvider>
   )
