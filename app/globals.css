@@ -314,6 +314,35 @@ body {
   }
 }
 
+/* ===========================================
+   PageLoader — pure CSS, server-safe animations
+   =========================================== */
+@keyframes loader-fade {
+  0%   { opacity: 0; filter: blur(10px); transform: scale(0.94); }
+  100% { opacity: 1; filter: blur(0);    transform: scale(1); }
+}
+@keyframes loader-dot {
+  0%, 60%, 100% { opacity: 0.25; transform: translateY(0); }
+  30%           { opacity: 1;    transform: translateY(-2px); }
+}
+@keyframes loader-bar {
+  0%   { transform: translateX(-120%); }
+  60%  { transform: translateX(220%); }
+  100% { transform: translateX(220%); }
+}
+.animate-loader-fade { animation: loader-fade 900ms cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.animate-loader-dot  { animation: loader-dot 1200ms ease-in-out infinite; }
+.animate-loader-bar  { animation: loader-bar 1600ms cubic-bezier(0.65, 0, 0.35, 1) infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-loader-fade,
+  .animate-loader-dot,
+  .animate-loader-bar {
+    animation: none !important;
+  }
+  .animate-loader-fade { opacity: 1; filter: none; transform: none; }
+}
+
 /* Screen-reader only — keep for a11y */
 .sr-only {
   position: absolute;

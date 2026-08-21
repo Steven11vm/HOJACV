@@ -24,7 +24,7 @@ export function PillarsTabs({ lang }: PillarsTabsProps) {
               description:
                 "React, Next.js, Node y SQL. Frontends rápidos, backends limpios y despliegues automatizados. Sin frameworks de moda: solo lo que resiste tráfico real.",
               buttonText: "Ver proyectos",
-              buttonHref: "/proyectos",
+              buttonHref: "#projects",
             },
             {
               value: "ai",
@@ -62,7 +62,7 @@ export function PillarsTabs({ lang }: PillarsTabsProps) {
               description:
                 "React, Next.js, Node and SQL. Fast frontends, clean backends and automated deploys. No trendy frameworks — only what survives real traffic.",
               buttonText: "See projects",
-              buttonHref: "/proyectos",
+              buttonHref: "#projects",
             },
             {
               value: "ai",

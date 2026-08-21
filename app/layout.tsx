@@ -7,6 +7,7 @@ import { Inter, Playfair_Display, JetBrains_Mono } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
 import "./globals.css"
+import { PageLoader } from "@/components/ui/page-loader"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans", display: "swap" })
 const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-serif", display: "swap" })
@@ -62,13 +63,7 @@ export default function RootLayout({
             __html: `(function(){try{var t=localStorage.getItem('theme');if(t==='light'){document.documentElement.classList.remove('dark')}else{document.documentElement.classList.add('dark')}}catch(e){document.documentElement.classList.add('dark')}})();`,
           }}
         />
-        <Suspense
-          fallback={
-            <div className="flex min-h-screen items-center justify-center bg-background text-foreground">
-              <span className="text-sm font-mono text-muted-foreground">Loading…</span>
-            </div>
-          }
-        >
+        <Suspense fallback={<PageLoader variant="full" />}>
           {children}
         </Suspense>
         <Analytics />

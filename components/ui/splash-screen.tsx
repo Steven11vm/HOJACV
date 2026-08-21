@@ -3,18 +3,20 @@ import { useEffect, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 
 const SCRIPT_FONT = "'Brush Script MT','Lucida Handwriting','Snell Roundhand','Apple Chancery',cursive"
-// Tamaño con piso robusto en movil: usa el mayor lado (vmax) para no encogerse
-// en pantallas estrechas, y limita en desktop.
 const S_SIZE =
   "text-[min(70vw,55vh)] sm:text-[min(45vw,55vh)] md:text-[min(32vw,55vh)] lg:text-[min(26vw,55vh)]"
 const S_LEADING = "leading-[1.35]"
 
+const DURATION_MS = 1900
+
 /**
  * SplashScreen — pagina de bienvenida al cargar/recargar la web.
- * La firma "S" (marca personal) aparece con el mismo efecto shutter que uso
- * en el Intro para "STEVEN/VILLAMIZAR": una capa principal con blur→0 y
- * tres slice-layers que atraviesan por clip-path.
- * Se auto-descarta a los ~2s y hace fade+scale-out sobre el contenido real.
+ *
+ * Marca personal: firma "S" (script) que se ensambla con un shutter de tres
+ * slices horizontales sobre la letra principal (blur→0). Envuelto en un chrome
+ * editorial (corner-accents, metadata top-left, byline pie) y con una barra
+ * de progreso hairline abajo que anima 0→100% en `DURATION_MS`. Al terminar,
+ * exit compuesto (opacity + scale + clip-path barrido) sobre el contenido real.
  */
 export function SplashScreen() {
   const [visible, setVisible] = useState(true)
@@ -23,7 +25,7 @@ export function SplashScreen() {
     // Bloquea el scroll mientras el splash esta arriba
     const prev = document.body.style.overflow
     document.body.style.overflow = "hidden"
-    const t = setTimeout(() => setVisible(false), 2000)
+    const t = setTimeout(() => setVisible(false), DURATION_MS)
     return () => {
       clearTimeout(t)
       document.body.style.overflow = prev
@@ -31,10 +33,7 @@ export function SplashScreen() {
   }, [])
 
   useEffect(() => {
-    if (!visible) {
-      // Restaurar scroll cuando desaparece
-      document.body.style.overflow = ""
-    }
+    if (!visible) document.body.style.overflow = ""
   }, [visible])
 
   return (
@@ -43,7 +42,12 @@ export function SplashScreen() {
         <motion.div
           key="splash"
           initial={{ opacity: 1 }}
-          exit={{ opacity: 0, scale: 1.05, transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] } }}
+          exit={{
+            opacity: 0,
+            scale: 1.04,
+            clipPath: "inset(0 0 100% 0)",
+            transition: { duration: 0.85, ease: [0.16, 1, 0.3, 1] },
+          }}
           className="fixed inset-0 z-[200] flex items-center justify-center bg-background"
           aria-hidden
         >
@@ -53,9 +57,20 @@ export function SplashScreen() {
           <div className="pointer-events-none absolute bottom-6 left-6 h-10 w-10 border-b border-l border-hairline sm:bottom-10 sm:left-10 sm:h-14 sm:w-14" />
           <div className="pointer-events-none absolute bottom-6 right-6 h-10 w-10 border-b border-r border-hairline sm:bottom-10 sm:right-10 sm:h-14 sm:w-14" />
 
+          {/* Metadata top: Nº · MMXXV en el centro, LOCACIÓN a los lados en desktop */}
+          <motion.div
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15, duration: 0.6 }}
+            className="pointer-events-none absolute inset-x-0 top-14 flex items-center justify-between px-10 font-mono text-[10px] uppercase tracking-[0.4em] text-muted-foreground/70 sm:top-20 sm:px-20"
+          >
+            <span className="hidden sm:inline">Medellín · CO</span>
+            <span className="mx-auto sm:mx-0">Nº 01 · MMXXV</span>
+            <span className="hidden sm:inline">Portfolio</span>
+          </motion.div>
+
           {/* Firma "S" con shutter */}
           <div className={`relative inline-block overflow-hidden px-[0.15em] py-[0.12em] ${S_LEADING}`}>
-            {/* Capa principal */}
             <motion.span
               initial={{ opacity: 0, filter: "blur(14px)", scale: 0.9 }}
               animate={{ opacity: 1, filter: "blur(0px)", scale: 1 }}
@@ -65,7 +80,6 @@ export function SplashScreen() {
             >
               S
             </motion.span>
-            {/* Top slice */}
             <motion.span
               initial={{ x: "-100%", opacity: 0 }}
               animate={{ x: "100%", opacity: [0, 1, 0] }}
@@ -75,7 +89,6 @@ export function SplashScreen() {
             >
               S
             </motion.span>
-            {/* Middle slice */}
             <motion.span
               initial={{ x: "100%", opacity: 0 }}
               animate={{ x: "-100%", opacity: [0, 1, 0] }}
@@ -85,7 +98,6 @@ export function SplashScreen() {
             >
               S
             </motion.span>
-            {/* Bottom slice */}
             <motion.span
               initial={{ x: "-100%", opacity: 0 }}
               animate={{ x: "100%", opacity: [0, 1, 0] }}
@@ -97,16 +109,29 @@ export function SplashScreen() {
             </motion.span>
           </div>
 
-          {/* Metadatos al pie */}
+          {/* Byline al pie */}
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.2, duration: 0.6 }}
-            className="pointer-events-none absolute inset-x-0 bottom-16 flex items-center justify-center gap-4 font-mono text-[10px] uppercase tracking-[0.4em] text-muted-foreground sm:bottom-20"
+            transition={{ delay: 1.05, duration: 0.55 }}
+            className="pointer-events-none absolute inset-x-0 bottom-20 flex flex-col items-center gap-5 sm:bottom-24"
           >
-            <span>Steven Villamizar</span>
-            <span aria-hidden>·</span>
-            <span>MMXXV</span>
+            <div className="flex items-center gap-4 font-mono text-[10px] uppercase tracking-[0.4em] text-muted-foreground">
+              <span>Steven Villamizar</span>
+              <span aria-hidden>·</span>
+              <span>Full Stack &amp; AI</span>
+            </div>
+
+            {/* Barra de progreso: fill lineal de 0 a 100% durante DURATION_MS */}
+            <div className="relative h-px w-40 overflow-hidden bg-hairline sm:w-56">
+              <motion.span
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: 1 }}
+                transition={{ duration: DURATION_MS / 1000, ease: [0.4, 0, 0.2, 1] }}
+                style={{ transformOrigin: "left" }}
+                className="absolute inset-y-0 left-0 w-full bg-foreground/80"
+              />
+            </div>
           </motion.div>
         </motion.div>
       )}
