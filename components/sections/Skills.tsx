@@ -118,51 +118,72 @@ export function Skills({ lang }: { lang: Lang }) {
   return (
     <section
       id="skills"
-      className="relative border-t border-hairline px-6 py-28 sm:px-10 sm:py-36 lg:px-16"
+      className="relative border-t border-hairline px-6 py-24 sm:px-10 sm:py-32 lg:px-16"
     >
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-100px" }}
-        transition={{ duration: 0.8, ease: [0.2, 0.8, 0.2, 1] }}
-        className="mx-auto flex w-full max-w-3xl flex-col items-center text-center"
-      >
-        <p className="inline-flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
-          <span aria-hidden className="inline-block h-px w-6 bg-muted-foreground/60" />
-          <span>03 · Stack</span>
-          <span aria-hidden className="inline-block h-px w-6 bg-muted-foreground/60" />
-        </p>
+      <div className="mx-auto max-w-6xl">
+        {/* Eyebrow superior editorial — igual que About */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.7, ease: [0.2, 0.8, 0.2, 1] }}
+          className="mb-16 flex flex-wrap items-baseline justify-between gap-6 border-b border-hairline pb-6"
+        >
+          <p className="inline-flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
+            <span aria-hidden className="inline-block h-px w-6 bg-muted-foreground/60" />
+            <span>03 · Stack</span>
+          </p>
+          <p className="font-mono text-[10px] uppercase tracking-[0.5em] text-muted-foreground/60">
+            Nº 04 · MMXXV
+          </p>
+        </motion.div>
 
-        <p className="mt-6 hidden font-mono text-[10px] uppercase tracking-[0.5em] text-muted-foreground/60 sm:block">
-          Nº 04 · MMXXV
-        </p>
+        {/* GRID HORIZONTAL — texto izquierda, IconCloud derecha */}
+        <div className="grid gap-14 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:items-center lg:gap-20">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8, ease: [0.2, 0.8, 0.2, 1] }}
+            className="flex flex-col"
+          >
+            <h2 className="font-display text-4xl leading-[1.05] text-foreground sm:text-5xl md:text-6xl">
+              {t.skills.title}
+            </h2>
+            <div aria-hidden className="mt-8 h-px w-16 bg-foreground/40" />
+            <p className="mt-8 max-w-xl text-base leading-relaxed text-muted-foreground md:text-lg">
+              {lang === "es"
+                ? "Herramientas con las que llevo software real a producción — arrastra la nube para explorarlas."
+                : "Tools I use to ship real software into production — drag the cloud to explore them."}
+            </p>
+            <p className="mt-6 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
+              {lang === "es"
+                ? `${STACK_SLUGS.length} tecnologías activas · 7 dominios`
+                : `${STACK_SLUGS.length} active technologies · 7 domains`}
+            </p>
+          </motion.div>
 
-        <h2 className="mt-8 font-display text-4xl leading-tight text-foreground sm:mt-10 sm:text-5xl md:text-6xl">
-          {t.skills.title}
-        </h2>
+          {/* IconCloud flotante a la derecha */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 1.2, delay: 0.3 }}
+            className="relative mx-auto w-full max-w-md lg:mx-0"
+          >
+            <div
+              aria-hidden
+              className="pointer-events-none absolute -right-6 -top-6 font-display text-[120px] leading-none text-foreground/[0.04] sm:text-[160px]"
+              style={{ fontStyle: "italic", fontWeight: 900 }}
+            >
+              04
+            </div>
+            <IconCloud iconSlugs={STACK_SLUGS} />
+          </motion.div>
+        </div>
 
-        <div aria-hidden className="mt-10 h-px w-16 bg-foreground/40" />
-
-        <p className="mt-8 max-w-xl text-[15px] leading-relaxed text-muted-foreground sm:text-base">
-          {lang === "es"
-            ? "Herramientas con las que llevo software real a producción — arrastra la nube para explorarlas."
-            : "Tools I use to ship real software into production — drag the cloud to explore them."}
-        </p>
-      </motion.div>
-
-      {/* IconCloud con altura reservada */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true, margin: "-100px" }}
-        transition={{ duration: 1.2, delay: 0.3 }}
-        className="mx-auto mt-6 w-full max-w-lg"
-      >
-        <IconCloud iconSlugs={STACK_SLUGS} />
-      </motion.div>
-
-      {/* Grilla textual — SIEMPRE visible, no depende de que el cloud cargue */}
-      <div className="mx-auto mt-16 w-full max-w-3xl border-y border-hairline">
+        {/* Grilla textual horizontal — SIEMPRE visible, no depende del cloud */}
+        <div className="mt-20 border-y border-hairline">
         {STACK_GROUPS.map((group, idx) => (
           <motion.div
             key={group.label.en}
@@ -192,11 +213,12 @@ export function Skills({ lang }: { lang: Lang }) {
         ))}
       </div>
 
-      <p className="mx-auto mt-8 max-w-xl text-center font-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
-        {lang === "es"
-          ? `Simple Icons · ${STACK_SLUGS.length} tecnologías activas`
-          : `Simple Icons · ${STACK_SLUGS.length} active technologies`}
-      </p>
+        <p className="mt-8 font-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
+          {lang === "es"
+            ? `Simple Icons · ${STACK_SLUGS.length} tecnologías activas`
+            : `Simple Icons · ${STACK_SLUGS.length} active technologies`}
+        </p>
+      </div>
     </section>
   )
 }
