@@ -598,6 +598,94 @@ export const translations = {
         },
       },
       {
+        title: "STRVGE Archive",
+        subtitle: "Archivo editorial de una marca streetwear",
+        description:
+          "Portafolio digital minimalista que documenta drops, colecciones y campañas de la marca STRVGE. Estética archive/editorial con navegación tipo revista, imágenes a full-bleed y tratamiento tipográfico serio: la ropa se ve como pieza, no como producto de e-commerce genérico.",
+        tech: ["Next.js", "React", "TypeScript", "Framer Motion", "Tailwind CSS"],
+        link: "https://strvge-archive.vercel.app",
+        featured: false,
+        accent: "#111827",
+        doc: {
+          architecture: [
+            "Next.js con rendering estático de las páginas de archivo y colecciones.",
+            "Framer Motion para transiciones editoriales entre secciones y hover states.",
+            "Sistema tipográfico serio (display serif + mono utility) para diferenciar la marca de un Shopify estándar.",
+            "Imágenes optimizadas y responsive con Next/Image, con art-direction por breakpoint.",
+          ],
+          technicalDecisions: [
+            "Priorizar velocidad de carga sobre WebGL/3D: streetwear vive de la foto, no de efectos.",
+            "Archive-first: cada drop se preserva como pieza permanente, no como listing que caduca.",
+            "Sin carrito integrado — el sitio vende narrativa; la conversión sucede en el canal DTC externo.",
+          ],
+          problemsSolved: [
+            "Diferenciar una marca de nicho del look genérico Shopify/Wix.",
+            "Preservar historial de drops como valor coleccionable, no como catálogo caduco.",
+            "Comunicar identidad editorial en 3 segundos para pescar al usuario correcto.",
+          ],
+        },
+      },
+      {
+        title: "Emuna Salud",
+        subtitle: "Plataforma de servicios de salud",
+        description:
+          "Sitio institucional y de gestión para servicios de salud: información de planes, agendamiento de citas, portal de pacientes y comunicación directa vía WhatsApp. UX enfocada en confianza y velocidad de conversión: mínimos clicks entre 'quiero atención' y 'estoy agendado'.",
+        tech: ["Next.js", "React", "TypeScript", "Node.js", "Tailwind CSS"],
+        link: "https://emuna-salud.online/",
+        featured: false,
+        accent: "#10b981",
+        doc: {
+          architecture: [
+            "Next.js App Router con páginas institucionales estáticas y rutas dinámicas para portal de paciente.",
+            "Formulario de agendamiento con validación en cliente y notificaciones al backend por webhook.",
+            "Integración con WhatsApp Business para canal directo desde CTAs.",
+            "Estilos con Tailwind y sistema de tokens propio para paleta salud/confianza.",
+          ],
+          technicalDecisions: [
+            "Contenido institucional estático para SEO y velocidad; solo el portal es dinámico.",
+            "WhatsApp como canal primario porque el paciente colombiano confía más en él que en formularios.",
+            "Formularios cortos (nombre + tipo de consulta + hora) — pedir menos datos aumenta conversión.",
+          ],
+          problemsSolved: [
+            "Fricción del agendamiento tradicional (llamar a un teléfono en horario laboral).",
+            "Falta de confianza en clínicas independientes: web propia + info clara + WhatsApp verificado.",
+            "Baja conversión por formularios largos: cortos y directos al servicio específico.",
+          ],
+        },
+      },
+      {
+        title: "YouTube Shorts AI",
+        subtitle: "Generador autónomo de Shorts virales con IA",
+        description:
+          "Backend Python/FastAPI que descubre tendencias por nicho, genera guión con Claude, produce el video vertical con Motion (video AI) + ElevenLabs (voz off), publica automáticamente en YouTube y aprende de las métricas de retención para el siguiente. Meta-optimización viral por nicho — un canal editorial operado por un agente.",
+        tech: ["Python", "FastAPI", "Claude API", "Motion", "ElevenLabs", "YouTube API"],
+        link: undefined,
+        featured: false,
+        accent: "#ef4444",
+        doc: {
+          architecture: [
+            "FastAPI como orquestador: descubrimiento de trends → guión → video → voz → publicación → analytics.",
+            "Claude como cerebro del brief: reescribe el guión al 'brief perfecto de Motion' según el nicho.",
+            "Motion (motion.so) genera el video vertical 9:16 con timing preciso a la voz.",
+            "ElevenLabs sintetiza voz off en español latino, tono energético calibrado por playbook del nicho.",
+            "Scheduler propio decide cuándo publicar según ventanas de mayor engagement por nicho.",
+            "Loop de aprendizaje: métricas de retención de cada Short alimentan el playbook para el siguiente.",
+          ],
+          technicalDecisions: [
+            "REST directo a Motion API (bypass MCP) para control fino del pipeline y logs auditables.",
+            "Prompt engineering explícito por nicho (playbook) en vez de prompt genérico: cada temática tiene sus tropes visuales, hooks y ritmo.",
+            "Sistema de reglas duras de viralidad (subtítulos tercio inferior, 10+ planos, hook 0-2s) hardcoded para evitar drift creativo del LLM.",
+            "Publicación con retry idempotente contra YouTube API + verificación post-upload.",
+          ],
+          problemsSolved: [
+            "Producir Shorts de calidad broadcast a costo marginal — imposible manualmente al ritmo requerido para crecer un canal.",
+            "Consistencia editorial por nicho: el agente respeta el mismo lenguaje visual entre videos.",
+            "Ciclo de aprendizaje objetivo: retención medida > opinión humana sobre 'qué funciona'.",
+            "Escalar múltiples canales en paralelo desde una sola infraestructura.",
+          ],
+        },
+      },
+      {
         title: "Enterprise Private Projects",
         subtitle: "Sistemas a medida bajo NDA",
         description:
@@ -1232,6 +1320,94 @@ export const translations = {
             "Display many projects without clutter: featured + secondary grid and tech doc on demand.",
             "Mobile performance: CSS/RAF animations and lazy images with Next/Image.",
             "Accessibility: light/dark theme, mobile menu and buttons with labels.",
+          ],
+        },
+      },
+      {
+        title: "STRVGE Archive",
+        subtitle: "Editorial archive for a streetwear brand",
+        description:
+          "Minimalist digital portfolio that documents drops, collections and campaigns for the STRVGE brand. Archive/editorial aesthetic with magazine-style navigation, full-bleed imagery and serious typography: the clothing reads as pieces, not as generic e-commerce products.",
+        tech: ["Next.js", "React", "TypeScript", "Framer Motion", "Tailwind CSS"],
+        link: "https://strvge-archive.vercel.app",
+        featured: false,
+        accent: "#111827",
+        doc: {
+          architecture: [
+            "Next.js with static rendering of archive and collection pages.",
+            "Framer Motion for editorial transitions between sections and hover states.",
+            "Serious typographic system (display serif + mono utility) to set the brand apart from a stock Shopify look.",
+            "Optimized responsive imagery via Next/Image with art-direction per breakpoint.",
+          ],
+          technicalDecisions: [
+            "Prioritize loading speed over WebGL/3D: streetwear lives on photos, not effects.",
+            "Archive-first: each drop is preserved as a permanent piece, not a listing that expires.",
+            "No integrated cart — the site sells narrative; conversion happens on the external DTC channel.",
+          ],
+          problemsSolved: [
+            "Set a niche brand apart from the generic Shopify/Wix look.",
+            "Preserve drop history as collectible value, not as an expiring catalog.",
+            "Communicate editorial identity in 3 seconds to hook the right user.",
+          ],
+        },
+      },
+      {
+        title: "Emuna Salud",
+        subtitle: "Healthcare services platform",
+        description:
+          "Institutional and service-management site for healthcare: plan info, appointment booking, patient portal and direct WhatsApp channel. UX focused on trust and conversion speed: minimum clicks between 'I need care' and 'I'm booked'.",
+        tech: ["Next.js", "React", "TypeScript", "Node.js", "Tailwind CSS"],
+        link: "https://emuna-salud.online/",
+        featured: false,
+        accent: "#10b981",
+        doc: {
+          architecture: [
+            "Next.js App Router with static institutional pages and dynamic routes for the patient portal.",
+            "Booking form with client-side validation and backend notifications via webhook.",
+            "WhatsApp Business integration as a direct channel from CTAs.",
+            "Tailwind styling with a custom token system for a health/trust palette.",
+          ],
+          technicalDecisions: [
+            "Static institutional content for SEO and speed; only the portal is dynamic.",
+            "WhatsApp as primary channel because Colombian patients trust it more than web forms.",
+            "Short forms (name + consultation type + slot) — asking for less data increases conversion.",
+          ],
+          problemsSolved: [
+            "Friction of traditional booking (calling a phone during business hours).",
+            "Low trust in independent clinics: own web + clear info + verified WhatsApp.",
+            "Low conversion from long forms: short, direct-to-service instead.",
+          ],
+        },
+      },
+      {
+        title: "YouTube Shorts AI",
+        subtitle: "Autonomous AI generator for viral Shorts",
+        description:
+          "Python/FastAPI backend that discovers per-niche trends, drafts scripts with Claude, produces vertical video via Motion (video AI) + ElevenLabs (voiceover), publishes automatically to YouTube and learns from retention metrics for the next iteration. Per-niche viral meta-optimization — an editorial channel run by an agent.",
+        tech: ["Python", "FastAPI", "Claude API", "Motion", "ElevenLabs", "YouTube API"],
+        link: undefined,
+        featured: false,
+        accent: "#ef4444",
+        doc: {
+          architecture: [
+            "FastAPI as the orchestrator: trend discovery → script → video → voice → publish → analytics.",
+            "Claude as the brief brain: rewrites the script into the 'perfect Motion brief' per niche.",
+            "Motion (motion.so) renders the 9:16 vertical video with precise timing to the voiceover.",
+            "ElevenLabs synthesizes the Latin-Spanish voiceover, energy tone calibrated by niche playbook.",
+            "Custom scheduler picks publishing windows by per-niche peak engagement.",
+            "Learning loop: retention metrics of each Short feed the playbook for the next one.",
+          ],
+          technicalDecisions: [
+            "Direct REST to Motion API (bypassing MCP) for fine pipeline control and auditable logs.",
+            "Explicit per-niche prompt engineering (playbook) instead of a generic prompt: each topic has its visual tropes, hooks and rhythm.",
+            "Hard viral rules (subtitles in the lower third, 10+ shots, 0-2s hook) hardcoded to prevent LLM creative drift.",
+            "Publishing with idempotent retry against YouTube API + post-upload verification.",
+          ],
+          problemsSolved: [
+            "Producing broadcast-quality Shorts at marginal cost — impossible manually at the pace needed to grow a channel.",
+            "Editorial consistency per niche: the agent keeps the same visual language across videos.",
+            "Objective learning loop: measured retention > human opinion of 'what works'.",
+            "Scaling multiple channels in parallel from a single infrastructure.",
           ],
         },
       },
