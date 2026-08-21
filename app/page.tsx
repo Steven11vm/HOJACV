@@ -4,14 +4,14 @@ import { type Lang, LANG_KEY } from "@/lib/translations"
 import { Navbar } from "@/components/layout/Navbar"
 import { Footer } from "@/components/layout/Footer"
 import { Intro } from "@/components/sections/Intro"
-import { Hero } from "@/components/sections/Hero"
+import { PillarsTabs } from "@/components/sections/PillarsTabs"
 import { HeroWave } from "@/components/ui/dynamic-wave-canvas-background"
 import { About } from "@/components/sections/About"
 import { Experience } from "@/components/sections/Experience"
 import { Skills } from "@/components/sections/Skills"
 import { Services } from "@/components/sections/Services"
 import { Process } from "@/components/sections/Process"
-import { Projects } from "@/components/sections/Projects"
+import { ProjectsParallax } from "@/components/sections/ProjectsParallax"
 import { AiAssistant } from "@/components/sections/AiAssistant"
 import { Manifesto } from "@/components/sections/Manifesto"
 import { Contact } from "@/components/sections/Contact"
@@ -104,13 +104,13 @@ export default function CVPage() {
 
         <main className="relative z-10">
           <Intro lang={lang} scrollToSection={scrollToSection} />
-          <Hero lang={lang} />
+          <PillarsTabs lang={lang} />
           <About lang={lang} />
           <Experience lang={lang} />
           <Skills lang={lang} />
           <Services lang={lang} />
           <Process lang={lang} />
-          <Projects lang={lang} />
+          <ProjectsParallax lang={lang} />
           <AiAssistant lang={lang} onOpenChat={() => setChatOpen(true)} />
           <Manifesto lang={lang} />
           <Contact lang={lang} />
