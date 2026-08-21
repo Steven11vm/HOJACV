@@ -202,10 +202,12 @@ export function HeroCarousel({
             alt=""
             aria-hidden
             draggable={false}
+            loading="eager"
+            decoding="async"
             className="absolute inset-0 h-full w-full object-cover"
-            initial={{ scale: reduced ? 1.28 : 1.42 }}
-            animate={{ scale: 1.28 }}
-            transition={reduced ? { duration: 0 } : { duration: 6, ease: "linear" }}
+            initial={{ scale: reduced ? 1.2 : 1.32 }}
+            animate={{ scale: 1.2 }}
+            transition={reduced ? { duration: 0 } : { duration: 8, ease: "linear" }}
           />
           <div
             className="absolute inset-0"
@@ -369,6 +371,8 @@ export function HeroCarousel({
                 src={item.image}
                 alt=""
                 draggable={false}
+                loading={Math.abs(i - index) <= 1 ? "eager" : "lazy"}
+                decoding="async"
                 className="h-full w-full object-cover"
                 style={{ objectPosition: "50% 26%" }}
               />
