@@ -53,3 +53,26 @@ export function useAudience() {
   if (!c) throw new Error("useAudience must be used within AudienceProvider")
   return c
 }
+
+/**
+ * Renderiza `children` solo cuando el audience seleccionado coincide con `only`
+ * (uno o varios). Mientras el provider hidrata desde localStorage renderiza
+ * `fallback` (por defecto `null`) para evitar mostrar el bloque y luego
+ * esconderlo cuando el audience real llegue. Útil para secciones que solo
+ * aplican a un perfil, p. ej. Servicios comerciales para clientes.
+ */
+export function AudienceOnly({
+  only,
+  children,
+  fallback = null,
+}: {
+  only: Audience | Audience[]
+  children: ReactNode
+  fallback?: ReactNode
+}) {
+  const { audience, ready } = useAudience()
+  if (!ready) return <>{fallback}</>
+  const allowed = Array.isArray(only) ? only : [only]
+  if (!audience || !allowed.includes(audience)) return <>{fallback}</>
+  return <>{children}</>
+}

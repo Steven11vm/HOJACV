@@ -10,11 +10,12 @@ import { Process } from "@/components/sections/Process"
 import { AiAssistant } from "@/components/sections/AiAssistant"
 import { Manifesto } from "@/components/sections/Manifesto"
 import { Contact } from "@/components/sections/Contact"
+import { AudienceOnly } from "@/lib/audience"
 
 const HOME_SECTION_IDS = [
   "intro",
-  "hero",
   "about",
+  "hero",
   "experience",
   "skills",
   "services",
@@ -35,11 +36,13 @@ export default function CVPage() {
             const y = el.getBoundingClientRect().top + window.scrollY - 72
             window.scrollTo({ top: y, behavior: "smooth" })
           }} />
-          <PillarsTabs lang={lang} />
           <About lang={lang} />
+          <PillarsTabs lang={lang} />
           <Experience lang={lang} />
           <Skills lang={lang} />
-          <Services lang={lang} />
+          <AudienceOnly only="client">
+            <Services lang={lang} />
+          </AudienceOnly>
           <Process lang={lang} />
           <AiAssistant lang={lang} onOpenChat={openChat} />
           <Manifesto lang={lang} />
