@@ -13,6 +13,7 @@
  */
 import { NextResponse } from "next/server"
 import { rateLimit, getClientIp } from "@/lib/rate-limit"
+import { insertLead } from "@/lib/leads-db"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -139,8 +140,12 @@ export async function POST(req: Request) {
     plan?: string
     currency?: string
     monthLabel?: string
+    clientBrief?: string
     summary?: string
     lang?: string
+    commit1?: boolean
+    commit2?: boolean
+    commit3?: boolean
     honeypot?: string
   }
   try {
@@ -157,8 +162,19 @@ export async function POST(req: Request) {
   const plan = sanitize(String(body.plan ?? "-"))
   const currency = sanitize(String(body.currency ?? "-"))
   const monthLabel = sanitize(String(body.monthLabel ?? "-"))
+  const clientBrief = sanitize(String(body.clientBrief ?? ""))
   const summary = sanitize(String(body.summary ?? ""))
   const lang = sanitize(String(body.lang ?? "es")).slice(0, 4)
+  const commit1 = typeof body.commit1 === "boolean" ? body.commit1 : null
+  const commit2 = typeof body.commit2 === "boolean" ? body.commit2 : null
+  const commit3 = typeof body.commit3 === "boolean" ? body.commit3 : null
+
+  // Persistir en Postgres (si está configurada; sino fallback silencioso).
+  const referer = req.headers.get("referer") ?? "-"
+  const persisted = await insertLead({
+    projectType, plan, currency, monthLabel, clientBrief, summary,
+    lang, ip, referer, commit1, commit2, commit3,
+  })
 
   const now = new Date().toISOString()
   const subject = `[Nuevo lead] ${projectType} · ${plan} · ${currency}`
@@ -168,25 +184,29 @@ export async function POST(req: Request) {
     `Fecha (UTC): ${now}`,
     `Idioma: ${lang}`,
     `IP: ${ip}`,
-    `Referer: ${req.headers.get("referer") ?? "-"}`,
+    `Referer: ${referer}`,
     ``,
     `— Tipo de proyecto: ${projectType}`,
     `— Plan elegido:    ${plan}`,
     `— Moneda:          ${currency}`,
     `— Mes actual:      ${monthLabel}`,
     ``,
+    `--- Qué escribió el cliente (texto libre) ---`,
+    clientBrief || "(sin brief libre)",
+    `----------------------------------------------`,
+    ``,
     `--- Resumen que verá el cliente al enviar por WhatsApp/email ---`,
     summary,
     `----------------------------------------------------------------`,
     ``,
-    `Este lead se guardó automáticamente al completar los 3 sí del funnel.`,
-    `Si el cliente además hace click en 'Enviar por WhatsApp', tú también lo recibirás allá.`,
+    `Persistido en DB: ${persisted ? "sí" : "no (POSTGRES_URL no configurado)"}`,
+    `Dashboard: /admin (protegido con ADMIN_PASSWORD)`,
   ].join("\n")
 
   const telegramMsg = `🎯 NUEVO LEAD\n\nTipo: ${projectType}\nPlan: ${plan}\nMoneda: ${currency}\n\n${summary}`
 
   // Log siempre (visible en Vercel dashboard > Logs)
-  console.log(`[LEAD] ${subject} | ${projectType} | ${plan} | ${currency} | IP:${ip}`)
+  console.log(`[LEAD] ${subject} | persisted:${persisted} | IP:${ip}`)
 
   // Cascada de canales.
   const [emailed, telegramSent] = await Promise.all([
@@ -195,7 +215,7 @@ export async function POST(req: Request) {
   ])
 
   return NextResponse.json(
-    { ok: true, channels: { email: emailed, telegram: telegramSent, log: true } },
+    { ok: true, channels: { db: persisted, email: emailed, telegram: telegramSent, log: true } },
     { headers: { "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff" } },
   )
 }

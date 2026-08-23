@@ -22,12 +22,13 @@ const SLOTS_TOTAL = 3
 interface Answers {
   projectType: string
   plan: string
+  clientBrief: string
   commit1: boolean | null
   commit2: boolean | null
   commit3: boolean | null
 }
 
-const EMPTY: Answers = { projectType: "", plan: "", commit1: null, commit2: null, commit3: null }
+const EMPTY: Answers = { projectType: "", plan: "", clientBrief: "", commit1: null, commit2: null, commit3: null }
 
 const EASE = [0.2, 0.8, 0.2, 1] as const
 
@@ -45,7 +46,11 @@ export function SalesFunnel({ lang }: { lang: Lang }) {
     switch (step) {
       case 0: return a.projectType.length > 0
       case 4: return a.plan.length > 0
-      case 6: return a.commit1 !== null && a.commit2 !== null && a.commit3 !== null
+      case 6:
+        return (
+          a.clientBrief.trim().length >= 20 &&
+          a.commit1 !== null && a.commit2 !== null && a.commit3 !== null
+        )
       default: return true
     }
   }, [step, a])
@@ -72,12 +77,16 @@ export function SalesFunnel({ lang }: { lang: Lang }) {
         plan: a.plan,
         currency: currency ?? "USD",
         monthLabel,
+        clientBrief: a.clientBrief,
         summary,
         lang,
+        commit1: a.commit1,
+        commit2: a.commit2,
+        commit3: a.commit3,
         honeypot: "",
       }),
     }).catch(() => { /* silent — no bloquear UX si el lead falla */ })
-  }, [a.commit1, a.commit2, a.commit3, a.projectType, a.plan, currency, monthLabel, summary, lang])
+  }, [a.commit1, a.commit2, a.commit3, a.projectType, a.plan, a.clientBrief, currency, monthLabel, summary, lang])
 
   const currentStep = t.steps[step]
 
@@ -257,7 +266,12 @@ export function SalesFunnel({ lang }: { lang: Lang }) {
                         {pb.isCop ? t.anchor.whyCop : t.anchor.why}
                       </p>
                       <FieldLabel>{t.q.projectType}</FieldLabel>
-                      <ChipGroup options={t.projectTypes} value={a.projectType} onChange={(v) => update({ projectType: v })} />
+                      <ChipGroup
+                        options={t.projectTypes}
+                        value={a.projectType}
+                        onChange={(v) => update({ projectType: v })}
+                        showActiveHint
+                      />
                     </StaggerChildren>
                   )}
 
@@ -377,6 +391,28 @@ export function SalesFunnel({ lang }: { lang: Lang }) {
                   {step === 6 && (
                     <StaggerChildren delay={0.6}>
                       <p className="text-base leading-[1.75] text-foreground/85 sm:text-lg">{t.commit.intro}</p>
+
+                      {/* Textarea de descripción libre — llega a la DB y al email */}
+                      <div className="flex flex-col gap-2">
+                        <FieldLabel>{t.commit.briefLabel}</FieldLabel>
+                        <textarea
+                          value={a.clientBrief}
+                          onChange={(e) => update({ clientBrief: e.target.value })}
+                          rows={5}
+                          maxLength={1500}
+                          placeholder={t.commit.briefPlaceholder}
+                          className="w-full border border-hairline bg-transparent px-4 py-3 text-[15px] leading-[1.65] text-foreground transition-colors placeholder:text-muted-foreground/60 focus:border-foreground focus:outline-none"
+                        />
+                        <div className="flex items-baseline justify-between font-mono text-[10px] text-muted-foreground">
+                          <span className={a.clientBrief.trim().length < 20 ? "text-muted-foreground/70" : "text-emerald-400"}>
+                            {a.clientBrief.trim().length < 20
+                              ? t.commit.briefMin.replace("{n}", String(20 - a.clientBrief.trim().length))
+                              : t.commit.briefOk}
+                          </span>
+                          <span>{a.clientBrief.length} / 1500</span>
+                        </div>
+                      </div>
+
                       <div className="flex flex-col gap-4">
                         <YesNoRow question={t.commit.q1} value={a.commit1} onChange={(v) => update({ commit1: v })} yes={t.yes} no={t.no} />
                         <YesNoRow
@@ -540,28 +576,61 @@ function FieldLabel({ children, className = "" }: { children: React.ReactNode; c
   )
 }
 
-function ChipGroup({ options, value, onChange }: { options: readonly string[]; value: string; onChange: (v: string) => void }) {
+type ChipOption = string | { label: string; description?: string }
+
+function ChipGroup({
+  options,
+  value,
+  onChange,
+  showActiveHint = false,
+}: {
+  options: readonly ChipOption[]
+  value: string
+  onChange: (v: string) => void
+  /** Si true, muestra un panel debajo con la descripción del chip activo. */
+  showActiveHint?: boolean
+}) {
+  const activeOption = options.find((o) => (typeof o === "string" ? o : o.label) === value)
+  const activeDesc = activeOption && typeof activeOption !== "string" ? activeOption.description : undefined
+
   return (
-    <div className="flex flex-wrap gap-2">
-      {options.map((opt) => {
-        const active = opt === value
-        return (
-          <motion.button
-            key={opt}
-            type="button"
-            onClick={() => onChange(opt)}
-            whileHover={{ y: -2 }}
-            whileTap={{ scale: 0.97 }}
-            className={`border px-4 py-2 font-mono text-[11px] uppercase tracking-[0.2em] transition-colors ${
-              active
-                ? "border-foreground bg-foreground text-background"
-                : "border-hairline text-muted-foreground hover:border-foreground/60 hover:text-foreground"
-            }`}
-          >
-            {opt}
-          </motion.button>
-        )
-      })}
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-wrap gap-2">
+        {options.map((opt) => {
+          const label = typeof opt === "string" ? opt : opt.label
+          const desc = typeof opt === "string" ? undefined : opt.description
+          const active = label === value
+          return (
+            <motion.button
+              key={label}
+              type="button"
+              onClick={() => onChange(label)}
+              whileHover={{ y: -2 }}
+              whileTap={{ scale: 0.97 }}
+              title={desc}
+              aria-label={desc ? `${label} — ${desc}` : label}
+              className={`border px-4 py-2 font-mono text-[11px] uppercase tracking-[0.2em] transition-colors ${
+                active
+                  ? "border-foreground bg-foreground text-background"
+                  : "border-hairline text-muted-foreground hover:border-foreground/60 hover:text-foreground"
+              }`}
+            >
+              {label}
+            </motion.button>
+          )
+        })}
+      </div>
+      {showActiveHint && activeDesc && (
+        <motion.p
+          key={value}
+          initial={{ opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, ease: EASE }}
+          className="border-l-2 border-foreground/40 pl-4 text-[13px] leading-[1.55] text-muted-foreground"
+        >
+          {activeDesc}
+        </motion.p>
+      )}
     </div>
   )
 }
@@ -702,6 +771,10 @@ function buildSummary(a: Answers, lang: Lang, monthLabel: string): string {
         ``,
         `— Tipo de proyecto: ${a.projectType || "-"}`,
         `— Plan seleccionado: ${a.plan || "-"}`,
+        ``,
+        `— Lo que quiero / mi problema:`,
+        a.clientBrief || "(sin descripcion)",
+        ``,
         `— Sabe que tienes ${SLOTS_TOTAL - SLOTS_TAKEN} slot(s) en ${monthLabel}.`,
         `— Compromisos: approach ${a.commit1 ? "OK" : "?"} · rango ${a.commit2 ? "OK" : "?"} · timing este mes ${a.commit3 ? "OK" : "?"}.`,
         ``,
@@ -712,6 +785,10 @@ function buildSummary(a: Answers, lang: Lang, monthLabel: string): string {
         ``,
         `— Project type: ${a.projectType || "-"}`,
         `— Selected plan: ${a.plan || "-"}`,
+        ``,
+        `— What I want / my problem:`,
+        a.clientBrief || "(no description)",
+        ``,
         `— Knows you have ${SLOTS_TOTAL - SLOTS_TAKEN} slot(s) in ${monthLabel}.`,
         `— Commitments: approach ${a.commit1 ? "OK" : "?"} · range ${a.commit2 ? "OK" : "?"} · this month ${a.commit3 ? "OK" : "?"}.`,
         ``,
@@ -734,7 +811,15 @@ const TXT = {
     no: "No",
     restart: "Volver a empezar",
     q: { projectType: "¿Qué tipo de proyecto tienes en mente?" },
-    projectTypes: ["Landing / Sitio", "E-commerce", "Dashboard", "SaaS a medida", "Integración IA", "App móvil", "Otro"],
+    projectTypes: [
+      { label: "Landing / Sitio", description: "Página web que presenta tu marca o producto (típicamente 1–5 secciones). Ideal para captar clientes, mostrar un evento o vender un producto único." },
+      { label: "E-commerce", description: "Tienda online: catálogo de productos, carrito, pagos con tarjeta y panel para gestionar pedidos. Como Shopify pero a tu medida." },
+      { label: "Dashboard", description: "Panel interno de control con gráficos y datos en tiempo real. Para operar tu negocio: ventas, stock, usuarios, métricas." },
+      { label: "SaaS a medida", description: "Software por suscripción con login, funciones custom y facturación recurrente. Para vender un servicio digital a múltiples clientes." },
+      { label: "Integración IA", description: "Chatbot inteligente, automatización con IA, o agente que responde emails/WhatsApp. Ahorra tiempo repetitivo del equipo." },
+      { label: "App móvil", description: "App para Android (o iOS) conectada a un backend web. Para tener presencia en Play Store con notificaciones push." },
+      { label: "Otro", description: "Cuéntame en la descripción libre más abajo qué necesitas. Todo se puede construir." },
+    ] as const,
     steps: [
       { tag: "Ancla",         principle: "Ancla cognitiva",           title: "El mercado cotiza esto entre US$ 3k y US$ 15k.",  sub: "Referencia real para calibrar tu percepción antes de ver mi precio." },
       { tag: "Escasez",       principle: "Escasez",                    title: "Solo 3 proyectos por mes.",                        sub: "No es marketing — es la única forma de mantener calidad end-to-end." },
@@ -805,7 +890,11 @@ const TXT = {
       creds: "Tecnólogo ADSO · SENA · Miembro comunidad Anthropic",
     },
     commit: {
-      intro: "Tres preguntas cortas — cada sí hace más probable el siguiente:",
+      intro: "Antes de cerrar, cuéntame en 2–3 líneas qué necesitas — y después responde 3 preguntas cortas. Cada sí hace más probable el siguiente.",
+      briefLabel: "Cuéntame qué quieres o qué problema tienes",
+      briefPlaceholder: "Ejemplo: mi equipo pierde 4h diarias cargando pedidos a mano. Necesito automatizarlo con un panel donde el cliente haga el pedido y llegue directo al sistema, con notificaciones a WhatsApp cuando esté listo.",
+      briefMin: "Faltan {n} caracteres — sé específico: qué haces, qué duele, quién lo usará.",
+      briefOk: "✓ Perfecto, con eso llego a la call con propuesta lista.",
       q1: "¿Te hace sentido el approach que viste hasta aquí?",
       q2: "¿El rango de precio ({range}) te funciona?",
       q3: "¿Quieres tener producto en manos antes de fin de mes?",
@@ -833,7 +922,15 @@ const TXT = {
     no: "No",
     restart: "Start over",
     q: { projectType: "What kind of project do you have in mind?" },
-    projectTypes: ["Landing / Site", "E-commerce", "Dashboard", "Custom SaaS", "AI Integration", "Mobile app", "Other"],
+    projectTypes: [
+      { label: "Landing / Site", description: "Web page that presents your brand or product (1–5 sections typically). Great for lead capture, an event page or a single product." },
+      { label: "E-commerce", description: "Online shop: catalog, cart, card payments and admin panel to manage orders. Like Shopify but tailored." },
+      { label: "Dashboard", description: "Internal control panel with charts and real-time data. To operate the business: sales, stock, users, metrics." },
+      { label: "Custom SaaS", description: "Subscription software with login, custom features and recurring billing. Sells a digital service to multiple customers." },
+      { label: "AI Integration", description: "Smart chatbot, AI automation, or agent that answers emails/WhatsApp. Saves your team's repetitive time." },
+      { label: "Mobile app", description: "Android (or iOS) app connected to a web backend. For Play Store presence with push notifications." },
+      { label: "Other", description: "Tell me in the free description below. Anything can be built." },
+    ] as const,
     steps: [
       { tag: "Anchor",       principle: "Cognitive anchor",           title: "The market prices this at US$ 3k–15k.",              sub: "A real reference to calibrate your perception before you see my price." },
       { tag: "Scarcity",     principle: "Scarcity",                    title: "Only 3 projects per month.",                          sub: "Not marketing — the only way to keep quality end-to-end." },
@@ -904,7 +1001,11 @@ const TXT = {
       creds: "Software Analyst · SENA · Anthropic community member",
     },
     commit: {
-      intro: "Three short questions — each yes makes the next more likely:",
+      intro: "Before closing, tell me in 2–3 lines what you need — then answer 3 short questions. Each yes makes the next more likely.",
+      briefLabel: "Tell me what you want or what problem you have",
+      briefPlaceholder: "Example: my team loses 4h daily entering orders by hand. I need to automate it with a panel where clients place orders straight into the system, with WhatsApp notifications when ready.",
+      briefMin: "{n} more characters — be specific: what you do, what hurts, who will use it.",
+      briefOk: "✓ Perfect, that's enough to show up at the call with a proposal.",
       q1: "Does the approach make sense so far?",
       q2: "Does the price range ({range}) work for you?",
       q3: "Do you want product in your hands before month-end?",
