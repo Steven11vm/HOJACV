@@ -1,0 +1,365 @@
+<title>Steven Brand Mark</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:wght@700;900&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap">
+
+<style>
+  :root {
+    --ground: #f4f2ee;
+    --ink: #0b0b0b;
+    --panel: #ffffff;
+    --panel-2: #0b0b0b;
+    --muted: #6c6863;
+    --hairline: #d9d4cc;
+    --accent: #ff4114;
+  }
+  :root[data-theme="dark"] {
+    --ground: #0b0b0b;
+    --ink: #f5f2ee;
+    --panel: #131313;
+    --panel-2: #f5f2ee;
+    --muted: #8b8680;
+    --hairline: #242422;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { background: var(--ground); color: var(--ink); }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    margin: 0;
+    padding: 56px 24px 96px;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    letter-spacing: -0.005em;
+  }
+
+  .wrap { max-width: 1080px; margin: 0 auto; display: flex; flex-direction: column; gap: 56px; }
+
+  /* HEADER */
+  header.meta {
+    display: flex; flex-direction: column; gap: 18px;
+    padding-bottom: 28px; border-bottom: 1px solid var(--hairline);
+  }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 14px;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px; letter-spacing: 0.32em; text-transform: uppercase;
+    color: var(--muted);
+  }
+  .eyebrow .rule { display: block; width: 32px; height: 1px; background: var(--muted); opacity: 0.6; }
+  h1 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 900;
+    font-size: clamp(38px, 5.5vw, 60px);
+    line-height: 0.98;
+    letter-spacing: -0.03em;
+    margin: 0;
+    text-wrap: balance;
+  }
+  h1 em { font-style: italic; color: var(--muted); font-weight: 700; }
+  h1 .dot { color: var(--accent); font-style: normal; }
+  .lede {
+    font-size: 16px; line-height: 1.6;
+    color: var(--muted);
+    max-width: 640px;
+    margin: 0;
+  }
+
+  /* SECTION headers */
+  h2 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 800;
+    font-size: 26px;
+    letter-spacing: -0.02em;
+    margin: 0 0 6px;
+  }
+  h2 .num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; letter-spacing: 0.32em; text-transform: uppercase;
+    color: var(--accent);
+    margin-right: 12px; vertical-align: middle;
+  }
+  .section-sub { margin: 0 0 18px; font-size: 14px; color: var(--muted); line-height: 1.55; }
+
+  /* MARK GRID */
+  .marks {
+    display: grid;
+    gap: 20px;
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 720px) { .marks { grid-template-columns: 1fr 1fr; } }
+
+  .card {
+    position: relative;
+    border: 1px solid var(--hairline);
+    background: var(--panel);
+    padding: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .card header {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--hairline);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: 0.28em; text-transform: uppercase;
+    color: var(--muted);
+  }
+  .card .stage {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .card.light .stage { background: #ffffff; color: #0b0b0b; }
+  .card.dark  .stage { background: #0b0b0b; color: #f5f2ee; }
+  .card.avatar .stage { background: #0b0b0b; color: #f5f2ee; }
+  .card.wordmark .stage { background: #ffffff; color: #0b0b0b; }
+
+  .s-glyph {
+    font-family: 'Great Vibes', 'Brush Script MT', 'Lucida Handwriting', 'Snell Roundhand', cursive;
+    font-size: 320px;
+    line-height: 0.85;
+    letter-spacing: -0.02em;
+    user-select: none;
+  }
+
+  .card.avatar .s-glyph { font-size: 220px; }
+
+  /* Corner accents opcionales para variante avatar */
+  .card.avatar .stage::before,
+  .card.avatar .stage::after,
+  .card.avatar .stage > .tl,
+  .card.avatar .stage > .tr,
+  .card.avatar .stage > .bl,
+  .card.avatar .stage > .br {
+    content: "";
+    position: absolute;
+    width: 24px; height: 24px;
+    pointer-events: none;
+  }
+  .card.avatar .tl { top: 20px; left: 20px; border-top: 1px solid rgba(255,255,255,0.3); border-left: 1px solid rgba(255,255,255,0.3); }
+  .card.avatar .tr { top: 20px; right: 20px; border-top: 1px solid rgba(255,255,255,0.3); border-right: 1px solid rgba(255,255,255,0.3); }
+  .card.avatar .bl { bottom: 20px; left: 20px; border-bottom: 1px solid rgba(255,255,255,0.3); border-left: 1px solid rgba(255,255,255,0.3); }
+  .card.avatar .br { bottom: 20px; right: 20px; border-bottom: 1px solid rgba(255,255,255,0.3); border-right: 1px solid rgba(255,255,255,0.3); }
+
+  .card.wordmark .stage {
+    flex-direction: column;
+    gap: 4px;
+  }
+  .card.wordmark .s-glyph { font-size: 180px; margin-bottom: -20px; }
+  .card.wordmark .name {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .card.wordmark .role {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: #6c6863;
+    margin-top: 6px;
+  }
+
+  .card footer {
+    padding: 12px 16px;
+    border-top: 1px solid var(--hairline);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: flex; justify-content: space-between; align-items: baseline;
+    background: var(--panel);
+  }
+
+  /* HOW TO EXPORT */
+  .how {
+    display: grid; gap: 14px;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    padding: 24px;
+    border: 1px dashed var(--hairline);
+    background: var(--panel);
+  }
+  .how h3 {
+    margin: 0 0 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: 0.32em; text-transform: uppercase;
+    color: var(--muted); font-weight: 500;
+  }
+  .how p { margin: 0; font-size: 14px; line-height: 1.55; color: var(--ink); }
+  .kbd {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 2px 7px;
+    border: 1px solid var(--hairline);
+    border-radius: 3px;
+    background: transparent;
+  }
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    padding: 1px 6px;
+    background: rgba(255, 65, 20, 0.08);
+    color: var(--accent);
+    border-radius: 3px;
+  }
+
+  /* GUIDELINES */
+  .guides {
+    display: grid; gap: 14px 24px;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    padding: 24px;
+    border: 1px solid var(--hairline);
+    background: var(--panel);
+  }
+  .guides dt {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: 0.28em; text-transform: uppercase;
+    color: var(--muted);
+  }
+  .guides dd { margin: 4px 0 0; font-size: 14px; line-height: 1.55; color: var(--ink); }
+
+  footer.foot {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding-top: 24px; border-top: 1px solid var(--hairline);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: 0.32em; text-transform: uppercase;
+    color: var(--muted);
+    gap: 12px; flex-wrap: wrap;
+  }
+</style>
+
+<div class="wrap">
+  <header class="meta">
+    <p class="eyebrow">
+      <span class="rule" aria-hidden></span>
+      <span>Brand Mark · MMXXV</span>
+      <span aria-hidden>·</span>
+      <span>4 variantes</span>
+    </p>
+    <h1>La <em>S</em> como marca personal<span class="dot">.</span></h1>
+    <p class="lede">
+      Cuatro variantes listas para exportar. Font "Great Vibes" (Google Fonts) — misma silueta script que usas en la web pero renderizable en cualquier dispositivo, sin depender de fuentes del sistema. Todas están a resolución 1:1 y pueden capturarse a alta calidad.
+    </p>
+  </header>
+
+  <section>
+    <h2><span class="num">01</span>Variantes</h2>
+    <p class="section-sub">Escoge la que necesites según el contexto. Todas comparten la misma "S" central.</p>
+    <div class="marks">
+      <div class="card light" id="mark-light">
+        <header><span>Light · Print</span><span>1:1</span></header>
+        <div class="stage"><span class="s-glyph">S</span></div>
+        <footer><span>#0b0b0b sobre #ffffff</span><span>Print · Tarjetas</span></footer>
+      </div>
+
+      <div class="card dark" id="mark-dark">
+        <header><span>Dark · Screen</span><span>1:1</span></header>
+        <div class="stage"><span class="s-glyph">S</span></div>
+        <footer><span>#f5f2ee sobre #0b0b0b</span><span>Web · Redes</span></footer>
+      </div>
+
+      <div class="card avatar" id="mark-avatar">
+        <header><span>Avatar · Corner accents</span><span>1:1</span></header>
+        <div class="stage">
+          <span class="tl" aria-hidden></span>
+          <span class="tr" aria-hidden></span>
+          <span class="bl" aria-hidden></span>
+          <span class="br" aria-hidden></span>
+          <span class="s-glyph">S</span>
+        </div>
+        <footer><span>Con marco editorial</span><span>PFP · LinkedIn · X</span></footer>
+      </div>
+
+      <div class="card wordmark" id="mark-wordmark">
+        <header><span>Wordmark · Firma completa</span><span>1:1</span></header>
+        <div class="stage">
+          <span class="s-glyph">S</span>
+          <span class="name">Steven Villamizar</span>
+          <span class="role">Full Stack &amp; AI · Medellín</span>
+        </div>
+        <footer><span>Composición completa</span><span>Firma · Header</span></footer>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">02</span>Exportar como imagen</h2>
+    <p class="section-sub">Cualquiera de las tres opciones te da un PNG a alta resolución listo para usar.</p>
+    <div class="how">
+      <div>
+        <h3>A · Snipping Tool</h3>
+        <p><span class="kbd">Win</span> + <span class="kbd">Shift</span> + <span class="kbd">S</span>, encuadras solo la card (sin el header/footer) y guardas. Rápido y 1:1.</p>
+      </div>
+      <div>
+        <h3>B · DevTools node screenshot</h3>
+        <p>Abre con <span class="kbd">F12</span>, en Elements busca <code>id="mark-dark"</code> (o el que quieras), click derecho → <em>Capture node screenshot</em>. Sale exportado sin escalado, con transparencia posible.</p>
+      </div>
+      <div>
+        <h3>C · Zoom + captura</h3>
+        <p>Zoom del navegador <span class="kbd">Ctrl</span> + <span class="kbd">+</span> hasta que ocupe la pantalla, luego captura completa. Ideal si necesitas un PNG grande para print.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">03</span>Guidelines de uso</h2>
+    <p class="section-sub">Reglas mínimas para que la marca aguante en cualquier contexto y no se degrade.</p>
+    <dl class="guides">
+      <div>
+        <dt>Safe area</dt>
+        <dd>Deja alrededor al menos el ancho de la "S" en espacio libre. Nada de logos, texto o bordes tocándola.</dd>
+      </div>
+      <div>
+        <dt>Tamaño mínimo</dt>
+        <dd>32 px de alto en pantalla. Por debajo la ligadura del script se aplasta y pierde legibilidad.</dd>
+      </div>
+      <div>
+        <dt>Color</dt>
+        <dd>Solo negro (<code>#0b0b0b</code>) o crema (<code>#f5f2ee</code>). No aplicar el acento vermilion al glifo mismo — es acento del sistema, no del logo.</dd>
+      </div>
+      <div>
+        <dt>Fondo</dt>
+        <dd>Blanco puro (<code>#ffffff</code>) o negro warm (<code>#0b0b0b</code>). Evitar gradientes o fotos detrás del glifo.</dd>
+      </div>
+      <div>
+        <dt>No inclinar / distorsionar</dt>
+        <dd>Nunca oblicua o extiendas. Si necesitas otra proporción, usa la variante Wordmark.</dd>
+      </div>
+      <div>
+        <dt>No añadir sombra</dt>
+        <dd>La marca es plana, editorial. Sombras la vuelven web 2.0 y le quitan permanencia.</dd>
+      </div>
+    </dl>
+  </section>
+
+  <section>
+    <h2><span class="num">04</span>Siguiente paso — vectorizar</h2>
+    <p class="section-sub">Para que sea marca real (ownable, sin depender de Google Fonts), convierte el PNG a vector SVG:</p>
+    <div class="how">
+      <div>
+        <h3>Opción A · Figma</h3>
+        <p>Pega la "S" en Figma con font Great Vibes, click derecho → <em>Outline stroke</em> / <em>Flatten</em>. Ahora es un shape editable. Export SVG.</p>
+      </div>
+      <div>
+        <h3>Opción B · Inkscape (gratis)</h3>
+        <p>Import el PNG → <em>Path → Trace Bitmap</em>. Ajusta threshold hasta que salga limpio. Export como SVG optimizado.</p>
+      </div>
+      <div>
+        <h3>Opción C · Redibujar</h3>
+        <p>La forma es simple — con Bézier en Figma/Illustrator sacas una versión "tuya" en 20 min. Recomendado si es marca oficial de largo plazo.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <span>Steven Villamizar · MMXXV</span>
+    <span>S. mark · Font: Great Vibes</span>
+  </footer>
+</div>
