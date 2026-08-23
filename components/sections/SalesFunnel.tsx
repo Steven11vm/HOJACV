@@ -202,26 +202,18 @@ export function SalesFunnel({ lang }: { lang: Lang }) {
                 transition={{ duration: 0.5, ease: EASE }}
                 className="flex flex-col gap-8"
               >
-                {/* Header del step: pill izq + principio der */}
-                <div className="flex flex-wrap items-baseline justify-between gap-4">
-                  <motion.p
-                    initial={{ opacity: 0, x: -8 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.5, delay: 0.1 }}
-                    className="font-mono text-[11px] uppercase tracking-[0.36em] text-muted-foreground"
-                  >
-                    Paso {String(step + 1).padStart(2, "0")}
-                  </motion.p>
-                  <motion.p
-                    initial={{ opacity: 0, x: 8 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.5, delay: 0.15 }}
-                    className="inline-flex items-center gap-2 border border-foreground/50 bg-background px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.32em] text-foreground"
-                  >
-                    <TrendingUp className="h-3 w-3" strokeWidth={2} />
-                    <span>{currentStep.principle}</span>
-                  </motion.p>
-                </div>
+                {/* Header del step: solo el numero de paso.
+                    (Antes había un pill "TREND · <principle>" a la derecha,
+                    pero mostrar 'Ancla cognitiva' / 'Escasez' revelaba la
+                    técnica al cliente y anulaba la persuasión.) */}
+                <motion.p
+                  initial={{ opacity: 0, x: -8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5, delay: 0.1 }}
+                  className="font-mono text-[11px] uppercase tracking-[0.36em] text-muted-foreground"
+                >
+                  Paso {String(step + 1).padStart(2, "0")}
+                </motion.p>
 
                 {/* Título del step — GIGANTE con reveal word-by-word */}
                 <WordReveal
