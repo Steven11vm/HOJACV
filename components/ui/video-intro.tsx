@@ -99,6 +99,16 @@ export function VideoIntro({ src, poster, onDone }: VideoIntroProps) {
             className="absolute inset-0 h-full w-full object-cover"
           />
 
+          {/* Overlay clickeable — cualquier click sobre el video lo cierra.
+              z-[5] queda debajo de los controles (z-10) para que Skip/Mute
+              tengan prioridad de gesto. */}
+          <button
+            type="button"
+            onClick={finish}
+            aria-label="Saltar video"
+            className="absolute inset-0 z-[5] cursor-pointer bg-transparent"
+          />
+
           {/* Vignette + degradado inferior para legibilidad del skip */}
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/25 via-transparent to-black/45" />
 
@@ -119,12 +129,15 @@ export function VideoIntro({ src, poster, onDone }: VideoIntroProps) {
             <span>Portfolio Reel · MMXXV</span>
           </motion.div>
 
-          {/* Controles top-right: mute/unmute + skip */}
+          {/* Controles top-right: mute/unmute + skip. z-10 sobre el overlay
+              clickeable para que los botones respondan a su click propio.
+              Skip visible desde el frame 1 (no espera ready) para que el
+              usuario pueda saltar en cualquier momento. */}
           <motion.div
             initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: ready ? 1 : 0, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.5 }}
-            className="absolute right-14 top-14 flex items-center gap-2 sm:right-20 sm:top-20"
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15, duration: 0.4 }}
+            className="absolute right-14 top-14 z-10 flex items-center gap-2 sm:right-20 sm:top-20"
           >
             <button
               type="button"
@@ -156,16 +169,24 @@ export function VideoIntro({ src, poster, onDone }: VideoIntroProps) {
             </button>
           </motion.div>
 
-          {/* Byline pie */}
+          {/* Byline pie + hint para cerrar. pointer-events-none para que el
+              overlay clickeable siga recibiendo el gesto detrás. */}
           <motion.div
             initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: ready ? 1 : 0, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.6 }}
-            className="pointer-events-none absolute inset-x-0 bottom-14 flex items-center justify-center gap-4 font-mono text-[10px] uppercase tracking-[0.4em] text-white/70 sm:bottom-20"
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35, duration: 0.55 }}
+            className="pointer-events-none absolute inset-x-0 bottom-14 flex flex-col items-center gap-3 font-mono text-[10px] uppercase tracking-[0.4em] text-white/70 sm:bottom-20"
           >
-            <span>Steven Villamizar</span>
-            <span aria-hidden>·</span>
-            <span>Full Stack &amp; AI</span>
+            <div className="flex items-center gap-4">
+              <span>Steven Villamizar</span>
+              <span aria-hidden>·</span>
+              <span>Full Stack &amp; AI</span>
+            </div>
+            <div className="flex items-center gap-3 text-[9px] tracking-[0.32em] text-white/50">
+              <span>Click en cualquier lado o</span>
+              <span className="border border-white/40 px-2 py-0.5">ESC</span>
+              <span>para saltar</span>
+            </div>
           </motion.div>
         </motion.div>
       )}
