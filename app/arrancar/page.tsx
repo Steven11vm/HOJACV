@@ -5,6 +5,8 @@ import { ArrowLeft } from "lucide-react"
 import { type Lang, LANG_KEY } from "@/lib/translations"
 import { SalesFunnel } from "@/components/sections/SalesFunnel"
 import { SignatureLogo } from "@/components/ui/signature-logo"
+import { CurrencyProvider } from "@/lib/currency"
+import { CurrencySelector } from "@/components/ui/currency-selector"
 
 /**
  * /arrancar — página en foco total para el funnel de ventas.
@@ -32,7 +34,10 @@ export default function ArrancarPage() {
   }
 
   return (
+    <CurrencyProvider>
     <div className="relative min-h-screen bg-background text-foreground selection:bg-primary/30">
+      {/* En /arrancar el selector aparece rápido — no hay splash ni audience selector previo */}
+      <CurrencySelector lang={lang} delay={600} />
       <header className="fixed inset-x-0 top-0 z-50 border-b border-hairline bg-background/75 backdrop-blur-md">
         <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4 sm:px-10 lg:px-16">
           <Link
@@ -71,5 +76,6 @@ export default function ArrancarPage() {
         </div>
       </footer>
     </div>
+    </CurrencyProvider>
   )
 }

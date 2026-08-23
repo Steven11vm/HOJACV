@@ -19,6 +19,8 @@ import { VideoIntro } from "@/components/ui/video-intro"
 const INTRO_VIDEO_SRC = "/video.mp4"
 import { AudienceProvider } from "@/lib/audience"
 import { AudienceSelector } from "@/components/ui/audience-selector"
+import { CurrencyProvider } from "@/lib/currency"
+import { CurrencySelector } from "@/components/ui/currency-selector"
 
 interface SiteShellProps {
   children: (ctx: { lang: Lang; openChat: () => void }) => ReactNode
@@ -115,12 +117,14 @@ export function SiteShell({ children, observeSectionIds, showSplash = true }: Si
 
   return (
     <AudienceProvider>
+      <CurrencyProvider>
       <div className="relative min-h-screen bg-background text-foreground selection:bg-primary/30">
         {showSplash && introPhase === "video" && INTRO_VIDEO_SRC && (
           <VideoIntro src={INTRO_VIDEO_SRC} onDone={() => setIntroPhase("splash")} />
         )}
         {showSplash && introPhase === "splash" && <SplashScreen />}
         <AudienceSelector lang={lang} />
+        <CurrencySelector lang={lang} />
         <HeroWave />
 
         <Navbar
@@ -139,6 +143,7 @@ export function SiteShell({ children, observeSectionIds, showSplash = true }: Si
 
         <Footer />
       </div>
+      </CurrencyProvider>
     </AudienceProvider>
   )
 }

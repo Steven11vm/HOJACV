@@ -1,8 +1,9 @@
 "use client"
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { ArrowLeft, ArrowRight, Check, MessageCircle, Mail, Calendar, Sparkles, Shield, Zap, TrendingUp, Award } from "lucide-react"
 import type { Lang } from "@/lib/translations"
+import { useCurrency, fmtSingle, fmtRange } from "@/lib/currency"
 
 /**
  * SalesFunnel — 7 pasos aplicando Cialdini + Kahneman.
@@ -34,6 +35,8 @@ export function SalesFunnel({ lang }: { lang: Lang }) {
   const [step, setStep] = useState(0)
   const [a, setA] = useState<Answers>(EMPTY)
   const t = TXT[lang]
+  const { currency } = useCurrency()
+  const leadSentRef = useRef(false)
 
   const update = (patch: Partial<Answers>) => setA((prev) => ({ ...prev, ...patch }))
 
@@ -50,7 +53,30 @@ export function SalesFunnel({ lang }: { lang: Lang }) {
   const now = new Date()
   const monthLabel = now.toLocaleDateString(lang === "es" ? "es-CO" : "en-US", { month: "long", year: "numeric" })
   const summary = useMemo(() => buildSummary(a, lang, monthLabel), [a, lang, monthLabel])
-  const restart = () => { setA(EMPTY); setStep(0) }
+  const restart = () => { setA(EMPTY); setStep(0); leadSentRef.current = false }
+
+  // Fire-and-forget lead capture: cuando el cliente marca los 3 SI en el
+  // paso 7, envia auto-silencioso al backend para que Steven lo reciba
+  // aunque el cliente NO haga click en el CTA de WhatsApp/email.
+  useEffect(() => {
+    if (leadSentRef.current) return
+    if (!(a.commit1 && a.commit2 && a.commit3)) return
+    leadSentRef.current = true
+    void fetch("/api/lead", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      keepalive: true,
+      body: JSON.stringify({
+        projectType: a.projectType,
+        plan: a.plan,
+        currency: currency ?? "USD",
+        monthLabel,
+        summary,
+        lang,
+        honeypot: "",
+      }),
+    }).catch(() => { /* silent — no bloquear UX si el lead falla */ })
+  }, [a.commit1, a.commit2, a.commit3, a.projectType, a.plan, currency, monthLabel, summary, lang])
 
   const currentStep = t.steps[step]
 
@@ -230,9 +256,9 @@ export function SalesFunnel({ lang }: { lang: Lang }) {
                     <StaggerChildren delay={0.6}>
                       <p className="text-base leading-[1.75] text-foreground/85 sm:text-lg">{t.anchor.intro}</p>
                       <div className="grid gap-4 sm:grid-cols-3">
-                        <PricePill dim label={t.anchor.agency} amount="US$ 8k–15k" note={t.anchor.agencyNote} />
-                        <PricePill dim label={t.anchor.usFreelance} amount="US$ 3k–6k" note={t.anchor.usNote} />
-                        <PricePill highlighted label={t.anchor.steven} amount="desde US$ 400" note={t.anchor.stevenNote} />
+                        <PricePill dim label={t.anchor.agency} amount={fmtRange(8000, 15000, currency)} note={t.anchor.agencyNote} />
+                        <PricePill dim label={t.anchor.usFreelance} amount={fmtRange(3000, 6000, currency)} note={t.anchor.usNote} />
+                        <PricePill highlighted label={t.anchor.steven} amount={`${t.anchor.from} ${fmtSingle(400, currency)}`} note={t.anchor.stevenNote} />
                       </div>
                       <p className="text-base italic leading-[1.7] text-muted-foreground sm:text-lg">{t.anchor.why}</p>
                       <FieldLabel>{t.q.projectType}</FieldLabel>
@@ -324,9 +350,9 @@ export function SalesFunnel({ lang }: { lang: Lang }) {
                     <StaggerChildren delay={0.6}>
                       <p className="text-base leading-[1.75] text-foreground/85 sm:text-lg">{t.contrast.intro}</p>
                       <div className="grid gap-4 md:grid-cols-3">
-                        <PlanCard name={t.contrast.p1Name} price="US$ 400" time={t.contrast.p1Time} bullets={t.contrast.p1Bullets} active={a.plan === t.contrast.p1Name} onClick={() => update({ plan: t.contrast.p1Name })} />
-                        <PlanCard featured badge={t.contrast.mostChosen} name={t.contrast.p2Name} price="US$ 1 200" time={t.contrast.p2Time} bullets={t.contrast.p2Bullets} active={a.plan === t.contrast.p2Name} onClick={() => update({ plan: t.contrast.p2Name })} />
-                        <PlanCard name={t.contrast.p3Name} price="US$ 2 200" time={t.contrast.p3Time} bullets={t.contrast.p3Bullets} active={a.plan === t.contrast.p3Name} onClick={() => update({ plan: t.contrast.p3Name })} />
+                        <PlanCard name={t.contrast.p1Name} price={fmtSingle(400, currency)} time={t.contrast.p1Time} bullets={t.contrast.p1Bullets} active={a.plan === t.contrast.p1Name} onClick={() => update({ plan: t.contrast.p1Name })} />
+                        <PlanCard featured badge={t.contrast.mostChosen} name={t.contrast.p2Name} price={fmtSingle(1200, currency)} time={t.contrast.p2Time} bullets={t.contrast.p2Bullets} active={a.plan === t.contrast.p2Name} onClick={() => update({ plan: t.contrast.p2Name })} />
+                        <PlanCard name={t.contrast.p3Name} price={fmtSingle(2200, currency)} time={t.contrast.p3Time} bullets={t.contrast.p3Bullets} active={a.plan === t.contrast.p3Name} onClick={() => update({ plan: t.contrast.p3Name })} />
                       </div>
                       <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-muted-foreground">{t.contrast.note}</p>
                     </StaggerChildren>
@@ -726,6 +752,7 @@ const TXT = {
       usNote: "US$ 60-100/h · 60h típicas",
       steven: "Con Steven",
       stevenNote: "Mismo output · sin agencias",
+      from: "desde",
       why: "Cobro esto porque estoy construyendo cartera propia. En 6 meses no volverás a ver estos precios en mi CV.",
     },
     scarcity: {
@@ -779,7 +806,7 @@ const TXT = {
     commit: {
       intro: "Tres preguntas cortas — cada sí hace más probable el siguiente:",
       q1: "¿Te hace sentido el approach que viste hasta aquí?",
-      q2: "¿El rango de precio (US$ 400 – US$ 2 200) te funciona?",
+      q2: `¿El rango de precio (${fmtSingle(400, currency)} – ${fmtSingle(2200, currency)}) te funciona?`,
       q3: "¿Quieres tener producto en manos antes de fin de mes?",
       readyTag: "Estás dentro",
       readyBody: "Tres sí. Con ese contexto llego a la call con propuesta preliminar sobre la mesa — no te hago perder tiempo repitiendo lo que ya cerramos aquí.",
@@ -823,6 +850,7 @@ const TXT = {
       usNote: "US$ 60-100/h · typical 60h",
       steven: "With Steven",
       stevenNote: "Same output · no agency",
+      from: "from",
       why: "I charge this because I'm building my client base. Six months from now these prices won't be on my CV anymore.",
     },
     scarcity: {
@@ -876,7 +904,7 @@ const TXT = {
     commit: {
       intro: "Three short questions — each yes makes the next more likely:",
       q1: "Does the approach make sense so far?",
-      q2: "Does the price range (US$ 400 – US$ 2,200) work for you?",
+      q2: `Does the price range (${fmtSingle(400, currency)} – ${fmtSingle(2200, currency)}) work for you?`,
       q3: "Do you want product in your hands before month-end?",
       readyTag: "You're in",
       readyBody: "Three yesses. With that context I show up at the call with a preliminary proposal on the table — no wasting your time re-covering what we already agreed here.",
