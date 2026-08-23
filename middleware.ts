@@ -30,24 +30,57 @@ function isLikelyBot(ua: string) {
   return BAD_UA.some((re) => re.test(ua))
 }
 
+function stripCache(res: NextResponse) {
+  res.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate")
+  res.headers.set("Pragma", "no-cache")
+  res.headers.set("Expires", "0")
+  res.headers.set("X-Robots-Tag", "noindex, nofollow")
+}
+
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
+  const ua = req.headers.get("user-agent") ?? ""
 
-  // Restrict /api/chat further at the edge
+  // /api/chat — chat pública blindada
   if (pathname === "/api/chat") {
     if (req.method !== "POST" && req.method !== "OPTIONS") {
       return NextResponse.json({ error: "method_not_allowed" }, { status: 405 })
     }
-    const ua = req.headers.get("user-agent") ?? ""
     if (isLikelyBot(ua)) {
       return NextResponse.json({ error: "forbidden" }, { status: 403 })
     }
-    // Strict no-cache for chat endpoint
     const res = NextResponse.next()
-    res.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate")
-    res.headers.set("Pragma", "no-cache")
-    res.headers.set("Expires", "0")
-    res.headers.set("X-Robots-Tag", "noindex, nofollow")
+    stripCache(res)
+    return res
+  }
+
+  // /api/estudio/* — panel privado, bots bloqueados a nivel edge
+  if (pathname.startsWith("/api/estudio")) {
+    if (isLikelyBot(ua)) {
+      return NextResponse.json({ error: "forbidden" }, { status: 403 })
+    }
+    const res = NextResponse.next()
+    stripCache(res)
+    return res
+  }
+
+  // /api/lead — captura de leads, bots bloqueados
+  if (pathname === "/api/lead") {
+    if (req.method !== "POST" && req.method !== "OPTIONS") {
+      return NextResponse.json({ error: "method_not_allowed" }, { status: 405 })
+    }
+    if (isLikelyBot(ua)) {
+      return NextResponse.json({ error: "forbidden" }, { status: 403 })
+    }
+    const res = NextResponse.next()
+    stripCache(res)
+    return res
+  }
+
+  // /estudio* — página del panel, no cachear y noindex
+  if (pathname === "/estudio" || pathname.startsWith("/estudio/")) {
+    const res = NextResponse.next()
+    stripCache(res)
     return res
   }
 
@@ -55,5 +88,12 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/api/chat", "/api/chat/:path*"],
+  matcher: [
+    "/api/chat",
+    "/api/chat/:path*",
+    "/api/estudio/:path*",
+    "/api/lead",
+    "/estudio",
+    "/estudio/:path*",
+  ],
 }

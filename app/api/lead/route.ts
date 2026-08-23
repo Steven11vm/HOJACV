@@ -200,7 +200,7 @@ export async function POST(req: Request) {
     `----------------------------------------------------------------`,
     ``,
     `Persistido en DB: ${persisted ? "sí" : "no (POSTGRES_URL no configurado)"}`,
-    `Dashboard: /admin (protegido con ADMIN_PASSWORD)`,
+    `Dashboard: /estudio (cookie firmada · AUTH_SECRET + ADMIN_PASSWORD)`,
   ].join("\n")
 
   const telegramMsg = `🎯 NUEVO LEAD\n\nTipo: ${projectType}\nPlan: ${plan}\nMoneda: ${currency}\n\n${summary}`

@@ -81,6 +81,41 @@ export function rateLimit(key: string): RateLimitResult {
   }
 }
 
+/**
+ * Rate limit específico para intentos de login del panel privado — mucho
+ * más estricto que el genérico. 5 intentos por IP en 15 min → bloqueo
+ * de 30 minutos. Independiente del bucket general.
+ */
+const LOGIN_WINDOW_MS = 15 * 60_000
+const LOGIN_LIMIT = 5
+const LOGIN_BLOCK_MS = 30 * 60_000
+
+const loginBuckets = new Map<string, { attempts: number[]; blockedUntil: number }>()
+
+export function rateLimitLogin(key: string): RateLimitResult {
+  const now = Date.now()
+  let b = loginBuckets.get(key)
+  if (!b) {
+    b = { attempts: [], blockedUntil: 0 }
+    loginBuckets.set(key, b)
+  }
+  if (b.blockedUntil > now) {
+    return { ok: false, retryAfter: Math.ceil((b.blockedUntil - now) / 1000), remainingShort: 0, remainingLong: 0 }
+  }
+  b.attempts = b.attempts.filter((t) => now - t < LOGIN_WINDOW_MS)
+  if (b.attempts.length >= LOGIN_LIMIT) {
+    b.blockedUntil = now + LOGIN_BLOCK_MS
+    return { ok: false, retryAfter: Math.ceil(LOGIN_BLOCK_MS / 1000), remainingShort: 0, remainingLong: 0 }
+  }
+  b.attempts.push(now)
+  return {
+    ok: true,
+    retryAfter: 0,
+    remainingShort: Math.max(0, LOGIN_LIMIT - b.attempts.length),
+    remainingLong: Math.max(0, LOGIN_LIMIT - b.attempts.length),
+  }
+}
+
 export function getClientIp(req: Request): string {
   const headers = req.headers
   const xff = headers.get("x-forwarded-for")
