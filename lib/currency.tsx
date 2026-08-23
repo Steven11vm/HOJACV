@@ -70,9 +70,7 @@ export function useCurrency(): CurrencyCtx {
 }
 
 /**
- * Formatea un valor USD según la moneda elegida:
- *  fmtSingle(400, "USD") → "US$ 400"
- *  fmtSingle(400, "COP") → "$ 1.680.000"
+ * Formatea un valor USD según la moneda elegida (utility legacy).
  */
 export function fmtSingle(usd: number, currency: Currency | null): string {
   const c: Currency = currency ?? "USD"
@@ -82,9 +80,7 @@ export function fmtSingle(usd: number, currency: Currency | null): string {
 }
 
 /**
- * Formatea un rango USD según la moneda elegida:
- *  fmtRange(8000, 15000, "USD") → "US$ 8k – 15k"
- *  fmtRange(8000, 15000, "COP") → "$ 34 – 63 M"
+ * Formatea un rango USD según la moneda elegida (utility legacy).
  */
 export function fmtRange(minUsd: number, maxUsd: number, currency: Currency | null): string {
   const c: Currency = currency ?? "USD"
@@ -95,4 +91,44 @@ export function fmtRange(minUsd: number, maxUsd: number, currency: Currency | nu
   const minM = Math.round((minUsd * USD_TO_COP) / 1_000_000)
   const maxM = Math.round((maxUsd * USD_TO_COP) / 1_000_000)
   return `$ ${minM} – ${maxM} M`
+}
+
+/**
+ * Pricebook — precios INDEPENDIENTES por moneda, NO conversión matemática.
+ *
+ * En COP los precios son intencionalmente más bajos que la conversión
+ * directa USD → COP (donde $600 000 COP ≈ US$ 143, muy por debajo del
+ * conversion baseline de US$ 400). Motivo: Steven prioriza construir
+ * cartera de clientes colombianos primero, y los cobra a "precio vecino"
+ * sin markup por diferencial de tasa de cambio.
+ *
+ * USD conserva el pricing internacional para el visitante que compara
+ * contra freelance USA o agencias LATAM.
+ */
+export function pricebook(currency: Currency | null) {
+  const isCop = currency === "COP"
+  if (isCop) {
+    return {
+      starter:  "$ 600.000",
+      growth:   "$ 1.800.000",
+      complete: "$ 3.800.000",
+      rangeLo:  "$ 600.000",
+      rangeHi:  "$ 3.800.000",
+      anchorSteven: "desde $ 600.000",
+      anchorAgency: "$ 30 – 60 M",
+      anchorUsFree: "$ 12 – 25 M",
+      isCop: true as const,
+    }
+  }
+  return {
+    starter:  "US$ 400",
+    growth:   "US$ 1 200",
+    complete: "US$ 2 200",
+    rangeLo:  "US$ 400",
+    rangeHi:  "US$ 2 200",
+    anchorSteven: "desde US$ 400",
+    anchorAgency: "US$ 8k – 15k",
+    anchorUsFree: "US$ 3k – 6k",
+    isCop: false as const,
+  }
 }

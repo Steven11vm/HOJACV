@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { ArrowLeft, ArrowRight, Check, MessageCircle, Mail, Calendar, Sparkles, Shield, Zap, TrendingUp, Award } from "lucide-react"
 import type { Lang } from "@/lib/translations"
-import { useCurrency, fmtSingle, fmtRange } from "@/lib/currency"
+import { useCurrency, pricebook } from "@/lib/currency"
 
 /**
  * SalesFunnel — 7 pasos aplicando Cialdini + Kahneman.
@@ -36,6 +36,7 @@ export function SalesFunnel({ lang }: { lang: Lang }) {
   const [a, setA] = useState<Answers>(EMPTY)
   const t = TXT[lang]
   const { currency } = useCurrency()
+  const pb = pricebook(currency)
   const leadSentRef = useRef(false)
 
   const update = (patch: Partial<Answers>) => setA((prev) => ({ ...prev, ...patch }))
@@ -350,9 +351,9 @@ export function SalesFunnel({ lang }: { lang: Lang }) {
                     <StaggerChildren delay={0.6}>
                       <p className="text-base leading-[1.75] text-foreground/85 sm:text-lg">{t.contrast.intro}</p>
                       <div className="grid gap-4 md:grid-cols-3">
-                        <PlanCard name={t.contrast.p1Name} price={fmtSingle(400, currency)} time={t.contrast.p1Time} bullets={t.contrast.p1Bullets} active={a.plan === t.contrast.p1Name} onClick={() => update({ plan: t.contrast.p1Name })} />
-                        <PlanCard featured badge={t.contrast.mostChosen} name={t.contrast.p2Name} price={fmtSingle(1200, currency)} time={t.contrast.p2Time} bullets={t.contrast.p2Bullets} active={a.plan === t.contrast.p2Name} onClick={() => update({ plan: t.contrast.p2Name })} />
-                        <PlanCard name={t.contrast.p3Name} price={fmtSingle(2200, currency)} time={t.contrast.p3Time} bullets={t.contrast.p3Bullets} active={a.plan === t.contrast.p3Name} onClick={() => update({ plan: t.contrast.p3Name })} />
+                        <PlanCard name={t.contrast.p1Name} price={pb.starter} time={t.contrast.p1Time} bullets={t.contrast.p1Bullets} active={a.plan === t.contrast.p1Name} onClick={() => update({ plan: t.contrast.p1Name })} />
+                        <PlanCard featured badge={t.contrast.mostChosen} name={t.contrast.p2Name} price={pb.growth} time={t.contrast.p2Time} bullets={t.contrast.p2Bullets} active={a.plan === t.contrast.p2Name} onClick={() => update({ plan: t.contrast.p2Name })} />
+                        <PlanCard name={t.contrast.p3Name} price={pb.complete} time={t.contrast.p3Time} bullets={t.contrast.p3Bullets} active={a.plan === t.contrast.p3Name} onClick={() => update({ plan: t.contrast.p3Name })} />
                       </div>
                       <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-muted-foreground">{t.contrast.note}</p>
                     </StaggerChildren>
@@ -385,7 +386,7 @@ export function SalesFunnel({ lang }: { lang: Lang }) {
                       <div className="flex flex-col gap-4">
                         <YesNoRow question={t.commit.q1} value={a.commit1} onChange={(v) => update({ commit1: v })} yes={t.yes} no={t.no} />
                         <YesNoRow
-                          question={t.commit.q2.replace("{range}", `${fmtSingle(400, currency)} – ${fmtSingle(2200, currency)}`)}
+                          question={t.commit.q2.replace("{range}", `${pb.rangeLo} – ${pb.rangeHi}`)}
                           value={a.commit2}
                           onChange={(v) => update({ commit2: v })}
                           yes={t.yes} no={t.no}
@@ -756,9 +757,10 @@ const TXT = {
       usFreelance: "Freelance USA",
       usNote: "US$ 60-100/h · 60h típicas",
       steven: "Con Steven",
-      stevenNote: "Mismo output · sin agencias",
+      stevenNote: "Mismo output · trato directo",
       from: "desde",
       why: "Cobro esto porque estoy construyendo cartera propia. En 6 meses no volverás a ver estos precios en mi CV.",
+      whyCop: "En COP cobro precio-vecino, sin markup por tasa de cambio: si eres cliente en Colombia, no te vale lo mismo que a un cliente en USA — y no debería. Prioridad: ganar cartera local antes que maximizar margen. En 6 meses estos precios ya no existen.",
     },
     scarcity: {
       taken: "tomados",
@@ -854,9 +856,10 @@ const TXT = {
       usFreelance: "US Freelance",
       usNote: "US$ 60-100/h · typical 60h",
       steven: "With Steven",
-      stevenNote: "Same output · no agency",
+      stevenNote: "Same output · direct",
       from: "from",
       why: "I charge this because I'm building my client base. Six months from now these prices won't be on my CV anymore.",
+      whyCop: "In COP I charge local-neighbor pricing, no FX-markup: if you're a client in Colombia, the number shouldn't match what a US client pays. Priority: build LATAM portfolio first, maximize margin later. In 6 months these prices are gone.",
     },
     scarcity: {
       taken: "taken",
