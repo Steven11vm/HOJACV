@@ -1,7 +1,7 @@
 "use client"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { X } from "lucide-react"
+import { X, Volume2, VolumeX } from "lucide-react"
 
 interface VideoIntroProps {
   /** Ruta al mp4 dentro de /public. Debe empezar con "/". */
@@ -28,6 +28,23 @@ export function VideoIntro({ src, poster, onDone }: VideoIntroProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [visible, setVisible] = useState(true)
   const [ready, setReady] = useState(false)
+  // Empieza muted por política de autoplay del navegador. El usuario activa
+  // el sonido con un gesto (click) que satisface la restricción del browser.
+  const [muted, setMuted] = useState(true)
+
+  const toggleMute = useCallback(() => {
+    setMuted((prev) => {
+      const next = !prev
+      const v = videoRef.current
+      if (v) {
+        v.muted = next
+        // Al desmutear, algunos navegadores pausan si el gesto no basto —
+        // forzar play devuelve una Promise que ignoramos si es rejected.
+        if (!next) v.play().catch(() => {})
+      }
+      return next
+    })
+  }, [])
 
   const finish = useCallback(() => {
     setVisible(false)
@@ -73,7 +90,7 @@ export function VideoIntro({ src, poster, onDone }: VideoIntroProps) {
             src={src}
             poster={poster}
             autoPlay
-            muted
+            muted={muted}
             playsInline
             preload="auto"
             onCanPlay={() => setReady(true)}
@@ -102,19 +119,42 @@ export function VideoIntro({ src, poster, onDone }: VideoIntroProps) {
             <span>Portfolio Reel · MMXXV</span>
           </motion.div>
 
-          {/* Skip button top-right */}
-          <motion.button
-            type="button"
-            onClick={finish}
+          {/* Controles top-right: mute/unmute + skip */}
+          <motion.div
             initial={{ opacity: 0, y: -4 }}
             animate={{ opacity: ready ? 1 : 0, y: 0 }}
             transition={{ delay: 0.2, duration: 0.5 }}
-            className="absolute right-14 top-14 flex items-center gap-2 border border-white/30 bg-black/40 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.24em] text-white backdrop-blur-md transition-colors hover:border-white hover:bg-black/60 sm:right-20 sm:top-20"
-            aria-label="Saltar video de intro"
+            className="absolute right-14 top-14 flex items-center gap-2 sm:right-20 sm:top-20"
           >
-            <span>Skip</span>
-            <X className="h-3 w-3" strokeWidth={2} />
-          </motion.button>
+            <button
+              type="button"
+              onClick={toggleMute}
+              className="flex items-center gap-2 border border-white/30 bg-black/40 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.24em] text-white backdrop-blur-md transition-colors hover:border-white hover:bg-black/60"
+              aria-label={muted ? "Activar sonido" : "Silenciar"}
+              aria-pressed={!muted}
+            >
+              {muted ? (
+                <>
+                  <VolumeX className="h-3.5 w-3.5" strokeWidth={2} />
+                  <span>Sonido</span>
+                </>
+              ) : (
+                <>
+                  <Volume2 className="h-3.5 w-3.5" strokeWidth={2} />
+                  <span>On</span>
+                </>
+              )}
+            </button>
+            <button
+              type="button"
+              onClick={finish}
+              className="flex items-center gap-2 border border-white/30 bg-black/40 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.24em] text-white backdrop-blur-md transition-colors hover:border-white hover:bg-black/60"
+              aria-label="Saltar video de intro"
+            >
+              <span>Skip</span>
+              <X className="h-3 w-3" strokeWidth={2} />
+            </button>
+          </motion.div>
 
           {/* Byline pie */}
           <motion.div
