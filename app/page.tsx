@@ -8,6 +8,7 @@ import { Skills } from "@/components/sections/Skills"
 import { Services } from "@/components/sections/Services"
 import { Process } from "@/components/sections/Process"
 import { ProjectsGrid } from "@/components/sections/ProjectsGrid"
+import { QuoteForm } from "@/components/sections/QuoteForm"
 import { Manifesto } from "@/components/sections/Manifesto"
 import { Contact } from "@/components/sections/Contact"
 import { AudienceOnly } from "@/lib/audience"
@@ -45,6 +46,9 @@ export default function CVPage() {
           </AudienceOnly>
           <Process lang={lang} />
           <ProjectsGrid lang={lang} />
+          <AudienceOnly only="client">
+            <QuoteForm lang={lang} />
+          </AudienceOnly>
           <Manifesto lang={lang} />
           <Contact lang={lang} />
         </>
