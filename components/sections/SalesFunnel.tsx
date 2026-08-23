@@ -384,7 +384,12 @@ export function SalesFunnel({ lang }: { lang: Lang }) {
                       <p className="text-base leading-[1.75] text-foreground/85 sm:text-lg">{t.commit.intro}</p>
                       <div className="flex flex-col gap-4">
                         <YesNoRow question={t.commit.q1} value={a.commit1} onChange={(v) => update({ commit1: v })} yes={t.yes} no={t.no} />
-                        <YesNoRow question={t.commit.q2} value={a.commit2} onChange={(v) => update({ commit2: v })} yes={t.yes} no={t.no} />
+                        <YesNoRow
+                          question={t.commit.q2.replace("{range}", `${fmtSingle(400, currency)} – ${fmtSingle(2200, currency)}`)}
+                          value={a.commit2}
+                          onChange={(v) => update({ commit2: v })}
+                          yes={t.yes} no={t.no}
+                        />
                         <YesNoRow question={t.commit.q3} value={a.commit3} onChange={(v) => update({ commit3: v })} yes={t.yes} no={t.no} />
                       </div>
 
@@ -806,7 +811,7 @@ const TXT = {
     commit: {
       intro: "Tres preguntas cortas — cada sí hace más probable el siguiente:",
       q1: "¿Te hace sentido el approach que viste hasta aquí?",
-      q2: `¿El rango de precio (${fmtSingle(400, currency)} – ${fmtSingle(2200, currency)}) te funciona?`,
+      q2: "¿El rango de precio ({range}) te funciona?",
       q3: "¿Quieres tener producto en manos antes de fin de mes?",
       readyTag: "Estás dentro",
       readyBody: "Tres sí. Con ese contexto llego a la call con propuesta preliminar sobre la mesa — no te hago perder tiempo repitiendo lo que ya cerramos aquí.",
@@ -904,7 +909,7 @@ const TXT = {
     commit: {
       intro: "Three short questions — each yes makes the next more likely:",
       q1: "Does the approach make sense so far?",
-      q2: `Does the price range (${fmtSingle(400, currency)} – ${fmtSingle(2200, currency)}) work for you?`,
+      q2: "Does the price range ({range}) work for you?",
       q3: "Do you want product in your hands before month-end?",
       readyTag: "You're in",
       readyBody: "Three yesses. With that context I show up at the call with a preliminary proposal on the table — no wasting your time re-covering what we already agreed here.",

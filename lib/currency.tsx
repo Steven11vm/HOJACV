@@ -49,10 +49,24 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
   return <Ctx.Provider value={{ currency, setCurrency, clearCurrency, ready }}>{children}</Ctx.Provider>
 }
 
-export function useCurrency() {
+/**
+ * Devuelve el contexto de moneda si hay provider en el árbol, o un fallback
+ * seguro si no lo hay. Fallback:
+ *  - Necesario durante el pre-render estático de Next: los componentes se
+ *    renderizan primero como HTML sin el provider hidratado aún, y un
+ *    throw haría fallar el build.
+ *  - Cualquier setter/clear es no-op en el fallback (el estado se aplicará
+ *    cuando el cliente hidrate y encuentre el provider real).
+ */
+export function useCurrency(): CurrencyCtx {
   const c = useContext(Ctx)
-  if (!c) throw new Error("useCurrency must be used within CurrencyProvider")
-  return c
+  if (c) return c
+  return {
+    currency: null,
+    setCurrency: () => {},
+    clearCurrency: () => {},
+    ready: false,
+  }
 }
 
 /**
