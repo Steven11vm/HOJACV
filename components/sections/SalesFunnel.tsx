@@ -359,7 +359,17 @@ export function SalesFunnel({ lang }: { lang: Lang }) {
                     <StaggerChildren delay={0.6}>
                       <p className="text-base leading-[1.75] text-foreground/85 sm:text-lg">{t.contrast.intro}</p>
                       <div className="grid gap-4 md:grid-cols-3">
-                        <PlanCard name={t.contrast.p1Name} price={pb.starter} time={t.contrast.p1Time} bullets={t.contrast.p1Bullets} active={a.plan === t.contrast.p1Name} onClick={() => update({ plan: t.contrast.p1Name })} />
+                        <PlanCard
+                          name={t.contrast.p1Name}
+                          price={pb.starterFirst}
+                          oldPrice={pb.starter}
+                          saveLabel={pb.starterSave}
+                          discountBadge={t.contrast.firstDiscount}
+                          time={t.contrast.p1Time}
+                          bullets={t.contrast.p1Bullets}
+                          active={a.plan === t.contrast.p1Name}
+                          onClick={() => update({ plan: t.contrast.p1Name })}
+                        />
                         <PlanCard featured badge={t.contrast.mostChosen} name={t.contrast.p2Name} price={pb.growth} time={t.contrast.p2Time} bullets={t.contrast.p2Bullets} active={a.plan === t.contrast.p2Name} onClick={() => update({ plan: t.contrast.p2Name })} />
                         <PlanCard name={t.contrast.p3Name} price={pb.complete} time={t.contrast.p3Time} bullets={t.contrast.p3Bullets} active={a.plan === t.contrast.p3Name} onClick={() => update({ plan: t.contrast.p3Name })} />
                       </div>
@@ -678,9 +688,10 @@ function Stat({ n, label }: { n: string; label: string }) {
   )
 }
 
-function PlanCard({ name, price, time, bullets, active, featured, badge, onClick }: {
-  name: string; price: string; time: string; bullets: string[]; active: boolean; featured?: boolean; badge?: string; onClick: () => void
+function PlanCard({ name, price, oldPrice, saveLabel, discountBadge, time, bullets, active, featured, badge, onClick }: {
+  name: string; price: string; oldPrice?: string; saveLabel?: string; discountBadge?: string; time: string; bullets: string[]; active: boolean; featured?: boolean; badge?: string; onClick: () => void
 }) {
+  const hasDiscount = Boolean(oldPrice)
   return (
     <motion.button
       whileHover={{ y: -4 }}
@@ -690,9 +701,11 @@ function PlanCard({ name, price, time, bullets, active, featured, badge, onClick
       className={`relative flex flex-col gap-4 border p-6 text-left transition-all ${
         active
           ? "border-foreground bg-foreground/5"
-          : featured
-            ? "border-foreground/60 shadow-[0_24px_50px_-24px_rgba(255,65,20,0.4)]"
-            : "border-hairline hover:border-foreground/60"
+          : hasDiscount
+            ? "border-red-500/60 shadow-[0_24px_50px_-24px_rgba(239,68,68,0.45)]"
+            : featured
+              ? "border-foreground/60 shadow-[0_24px_50px_-24px_rgba(255,65,20,0.4)]"
+              : "border-hairline hover:border-foreground/60"
       }`}
     >
       {featured && badge && (
@@ -700,8 +713,42 @@ function PlanCard({ name, price, time, bullets, active, featured, badge, onClick
           {badge}
         </span>
       )}
+      {hasDiscount && discountBadge && (
+        <motion.span
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.2, ease: [0.2, 0.8, 0.2, 1] }}
+          className="absolute -top-3 right-4 border border-red-500 bg-red-500 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.24em] text-white shadow-[0_8px_20px_-6px_rgba(239,68,68,0.6)]"
+        >
+          {discountBadge}
+        </motion.span>
+      )}
       <p className="font-display text-2xl text-foreground">{name}</p>
-      <p className="font-display text-3xl leading-none text-foreground">{price}</p>
+
+      {hasDiscount ? (
+        <div className="flex flex-col gap-1">
+          <p className="font-mono text-[13px] uppercase tracking-[0.18em] text-muted-foreground line-through decoration-red-500/70">
+            {oldPrice}
+          </p>
+          <motion.p
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.1, ease: [0.2, 0.8, 0.2, 1] }}
+            className="font-display text-4xl leading-none text-red-500 sm:text-5xl"
+            style={{ textShadow: "0 0 24px rgba(239,68,68,0.35)" }}
+          >
+            {price}
+          </motion.p>
+          {saveLabel && (
+            <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-red-500">
+              {saveLabel}
+            </p>
+          )}
+        </div>
+      ) : (
+        <p className="font-display text-3xl leading-none text-foreground">{price}</p>
+      )}
+
       <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-muted-foreground">{time}</p>
       <ul className="mt-2 flex flex-col gap-2">
         {bullets.map((b, i) => (
@@ -867,6 +914,7 @@ const TXT = {
     contrast: {
       intro: "Los tres planes reales. Cualquiera se cotiza formal después de la call de discovery.",
       mostChosen: "Más elegido",
+      firstDiscount: "1er proyecto",
       p1Name: "Starter",
       p1Time: "5-10 días",
       p1Bullets: ["Landing o MVP simple", "Diseño responsive", "Deploy en Vercel", "Formulario + WhatsApp"],
@@ -978,6 +1026,7 @@ const TXT = {
     contrast: {
       intro: "The three real plans. Any of them gets a formal quote after the discovery call.",
       mostChosen: "Most chosen",
+      firstDiscount: "1st project",
       p1Name: "Starter",
       p1Time: "5-10 days",
       p1Bullets: ["Landing or simple MVP", "Responsive design", "Deploy on Vercel", "Form + WhatsApp"],

@@ -109,26 +109,30 @@ export function pricebook(currency: Currency | null) {
   const isCop = currency === "COP"
   if (isCop) {
     return {
-      starter:  "$ 600.000",
-      growth:   "$ 1.800.000",
-      complete: "$ 3.800.000",
-      rangeLo:  "$ 600.000",
-      rangeHi:  "$ 3.800.000",
-      anchorSteven: "desde $ 600.000",
+      starter:      "$ 600.000",
+      starterFirst: "$ 570.000",           // descuento primer landing
+      starterSave:  "− $ 30.000",          // ahorro visible
+      growth:       "$ 1.800.000",
+      complete:     "$ 3.800.000",
+      rangeLo:      "$ 570.000",
+      rangeHi:      "$ 3.800.000",
+      anchorSteven: "desde $ 570.000",
       anchorAgency: "$ 30 – 60 M",
       anchorUsFree: "$ 12 – 25 M",
-      isCop: true as const,
+      isCop:        true as const,
     }
   }
   return {
-    starter:  "US$ 400",
-    growth:   "US$ 1 200",
-    complete: "US$ 2 200",
-    rangeLo:  "US$ 400",
-    rangeHi:  "US$ 2 200",
-    anchorSteven: "desde US$ 400",
+    starter:      "US$ 400",
+    starterFirst: "US$ 380",               // descuento primer landing
+    starterSave:  "− US$ 20",              // ahorro visible
+    growth:       "US$ 1 200",
+    complete:     "US$ 2 200",
+    rangeLo:      "US$ 380",
+    rangeHi:      "US$ 2 200",
+    anchorSteven: "desde US$ 380",
     anchorAgency: "US$ 8k – 15k",
     anchorUsFree: "US$ 3k – 6k",
-    isCop: false as const,
+    isCop:        false as const,
   }
 }
