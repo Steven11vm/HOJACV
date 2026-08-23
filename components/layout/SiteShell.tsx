@@ -6,6 +6,17 @@ import { Navbar } from "@/components/layout/Navbar"
 import { Footer } from "@/components/layout/Footer"
 import { HeroWave } from "@/components/ui/dynamic-wave-canvas-background"
 import { SplashScreen } from "@/components/ui/splash-screen"
+import { VideoIntro } from "@/components/ui/video-intro"
+
+/**
+ * Ruta del reel cinematográfico dentro de /public. Si el archivo existe
+ * al arrancar la web, se reproduce como intro (reemplaza al SplashScreen).
+ * Si no carga (404 / codec / usuario sin internet), el onError del <video>
+ * dispara el fallback y el sitio se muestra normal — nunca queda encallado.
+ *
+ * Para desactivar la intro sin borrar el mp4: cambia esta constante a "".
+ */
+const INTRO_VIDEO_SRC = "/video.mp4"
 import { AudienceProvider } from "@/lib/audience"
 import { AudienceSelector } from "@/components/ui/audience-selector"
 
@@ -35,6 +46,11 @@ export function SiteShell({ children, observeSectionIds, showSplash = true }: Si
   const [isDark, setIsDark] = useState(true)
   const [isVisible, setIsVisible] = useState(false)
   const [lang, setLang] = useState<Lang>("es")
+  // Intro cinematográfica: si hay INTRO_VIDEO_SRC definido intenta el video.
+  // Cuando termina (o el navegador no puede cargarlo) fallback al SplashScreen.
+  const [introPhase, setIntroPhase] = useState<"video" | "splash">(
+    INTRO_VIDEO_SRC ? "video" : "splash",
+  )
 
   useEffect(() => {
     setIsVisible(true)
@@ -100,7 +116,10 @@ export function SiteShell({ children, observeSectionIds, showSplash = true }: Si
   return (
     <AudienceProvider>
       <div className="relative min-h-screen bg-background text-foreground selection:bg-primary/30">
-        {showSplash && <SplashScreen />}
+        {showSplash && introPhase === "video" && INTRO_VIDEO_SRC && (
+          <VideoIntro src={INTRO_VIDEO_SRC} onDone={() => setIntroPhase("splash")} />
+        )}
+        {showSplash && introPhase === "splash" && <SplashScreen />}
         <AudienceSelector lang={lang} />
         <HeroWave />
 
