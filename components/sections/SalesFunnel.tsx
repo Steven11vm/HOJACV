@@ -257,11 +257,13 @@ export function SalesFunnel({ lang }: { lang: Lang }) {
                     <StaggerChildren delay={0.6}>
                       <p className="text-base leading-[1.75] text-foreground/85 sm:text-lg">{t.anchor.intro}</p>
                       <div className="grid gap-4 sm:grid-cols-3">
-                        <PricePill dim label={t.anchor.agency} amount={fmtRange(8000, 15000, currency)} note={t.anchor.agencyNote} />
-                        <PricePill dim label={t.anchor.usFreelance} amount={fmtRange(3000, 6000, currency)} note={t.anchor.usNote} />
-                        <PricePill highlighted label={t.anchor.steven} amount={`${t.anchor.from} ${fmtSingle(400, currency)}`} note={t.anchor.stevenNote} />
+                        <PricePill dim label={t.anchor.agency} amount={pb.anchorAgency} note={t.anchor.agencyNote} />
+                        <PricePill dim label={t.anchor.usFreelance} amount={pb.anchorUsFree} note={t.anchor.usNote} />
+                        <PricePill highlighted label={t.anchor.steven} amount={pb.anchorSteven} note={t.anchor.stevenNote} />
                       </div>
-                      <p className="text-base italic leading-[1.7] text-muted-foreground sm:text-lg">{t.anchor.why}</p>
+                      <p className="text-base italic leading-[1.7] text-muted-foreground sm:text-lg">
+                        {pb.isCop ? t.anchor.whyCop : t.anchor.why}
+                      </p>
                       <FieldLabel>{t.q.projectType}</FieldLabel>
                       <ChipGroup options={t.projectTypes} value={a.projectType} onChange={(v) => update({ projectType: v })} />
                     </StaggerChildren>
