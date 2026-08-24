@@ -7,6 +7,10 @@ import { Footer } from "@/components/layout/Footer"
 import { HeroWave } from "@/components/ui/dynamic-wave-canvas-background"
 import { SplashScreen } from "@/components/ui/splash-screen"
 import { VideoIntro } from "@/components/ui/video-intro"
+import { useAudience } from "@/lib/audience"
+
+const CLIENT_VIDEO_SRC = "/videodesarrollos.mp4"
+const CLIENT_VIDEO_SEEN_KEY = "cv_client_video_seen"
 
 /**
  * Ruta del reel cinematográfico dentro de /public. Si el archivo existe
@@ -53,6 +57,9 @@ export function SiteShell({ children, observeSectionIds, showSplash = true }: Si
   const [introPhase, setIntroPhase] = useState<"video" | "splash">(
     INTRO_VIDEO_SRC ? "video" : "splash",
   )
+  // Video promocional para clientes — se dispara la PRIMERA vez que el
+  // visitor elige (o cambia) su perfil a "client".
+  const [clientVideoOpen, setClientVideoOpen] = useState(false)
 
   useEffect(() => {
     setIsVisible(true)
@@ -118,11 +125,21 @@ export function SiteShell({ children, observeSectionIds, showSplash = true }: Si
   return (
     <AudienceProvider>
       <CurrencyProvider>
+      <ClientVideoWatcher onFire={() => setClientVideoOpen(true)} />
       <div className="relative min-h-screen bg-background text-foreground selection:bg-primary/30">
         {showSplash && introPhase === "video" && INTRO_VIDEO_SRC && (
           <VideoIntro src={INTRO_VIDEO_SRC} onDone={() => setIntroPhase("splash")} />
         )}
         {showSplash && introPhase === "splash" && <SplashScreen />}
+        {clientVideoOpen && (
+          <VideoIntro
+            src={CLIENT_VIDEO_SRC}
+            onDone={() => {
+              setClientVideoOpen(false)
+              try { localStorage.setItem(CLIENT_VIDEO_SEEN_KEY, "1") } catch { /* silent */ }
+            }}
+          />
+        )}
         <AudienceSelector lang={lang} />
         <CurrencySelector lang={lang} />
         <HeroWave />
@@ -146,4 +163,27 @@ export function SiteShell({ children, observeSectionIds, showSplash = true }: Si
       </CurrencyProvider>
     </AudienceProvider>
   )
+}
+
+/**
+ * ClientVideoWatcher — observa el audience dentro del AudienceProvider y
+ * dispara `onFire` la primera vez que el visitor elige (o cambia a) "client".
+ * Se persiste en localStorage para no repetirlo en visitas siguientes.
+ * Sin JSX propio; solo lógica.
+ */
+function ClientVideoWatcher({ onFire }: { onFire: () => void }) {
+  const { audience, ready } = useAudience()
+
+  useEffect(() => {
+    if (!ready) return
+    if (audience !== "client") return
+    try {
+      if (localStorage.getItem(CLIENT_VIDEO_SEEN_KEY) === "1") return
+    } catch { /* silent */ }
+    // Delay corto para que se cierre suave el AudienceSelector antes de aparecer.
+    const t = window.setTimeout(() => onFire(), 350)
+    return () => window.clearTimeout(t)
+  }, [audience, ready, onFire])
+
+  return null
 }
