@@ -7,6 +7,7 @@ import { Footer } from "@/components/layout/Footer"
 import { HeroWave } from "@/components/ui/dynamic-wave-canvas-background"
 import { SplashScreen } from "@/components/ui/splash-screen"
 import { VideoIntro } from "@/components/ui/video-intro"
+import { QuoteFloatingButton } from "@/components/ui/quote-floating-button"
 import { useAudience } from "@/lib/audience"
 
 const CLIENT_VIDEO_SRC = "/videodesarrollos.mp4"
@@ -160,6 +161,7 @@ export function SiteShell({ children, observeSectionIds, showSplash = true }: Si
         </main>
 
         <Footer />
+        <QuoteFloatingButton />
       </div>
       </CurrencyProvider>
     </AudienceProvider>
