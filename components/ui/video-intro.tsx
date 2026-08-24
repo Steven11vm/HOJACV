@@ -10,6 +10,12 @@ interface VideoIntroProps {
   poster?: string
   /** Se dispara cuando termina, se hace skip, o el archivo no existe. */
   onDone?: () => void
+  /**
+   * "cover"   — el video llena toda la pantalla (16:9 landscape típico).
+   * "contain" — el video se centra sin recortarse (para reels 9:16).
+   * @default "cover"
+   */
+  fit?: "cover" | "contain"
 }
 
 /**
@@ -24,7 +30,7 @@ interface VideoIntroProps {
  * - Al terminar (onEnded) o al hacer skip → fade+scale out 0.7s.
  * - Si el archivo no carga (404 / codec) → onDone inmediato sin pantalla vacía.
  */
-export function VideoIntro({ src, poster, onDone }: VideoIntroProps) {
+export function VideoIntro({ src, poster, onDone, fit = "cover" }: VideoIntroProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [visible, setVisible] = useState(true)
   const [ready, setReady] = useState(false)
@@ -85,19 +91,42 @@ export function VideoIntro({ src, poster, onDone }: VideoIntroProps) {
           }}
           className="fixed inset-0 z-[200] flex items-center justify-center overflow-hidden bg-black"
         >
-          <video
-            ref={videoRef}
-            src={src}
-            poster={poster}
-            autoPlay
-            muted={muted}
-            playsInline
-            preload="auto"
-            onCanPlay={() => setReady(true)}
-            onEnded={finish}
-            onError={finish}
-            className="absolute inset-0 h-full w-full object-cover"
-          />
+          {fit === "cover" ? (
+            <video
+              ref={videoRef}
+              src={src}
+              poster={poster}
+              autoPlay
+              muted={muted}
+              playsInline
+              preload="auto"
+              onCanPlay={() => setReady(true)}
+              onEnded={finish}
+              onError={finish}
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+          ) : (
+            // Reel vertical (9:16): centrado con object-contain para que no
+            // se recorte. El fondo negro del contenedor hace letterbox en
+            // desktop (aire negro a los lados) y respeta el aspect ratio
+            // real del video.
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+              <video
+                ref={videoRef}
+                src={src}
+                poster={poster}
+                autoPlay
+                muted={muted}
+                playsInline
+                preload="auto"
+                onCanPlay={() => setReady(true)}
+                onEnded={finish}
+                onError={finish}
+                className="pointer-events-auto h-full max-h-[min(100vh,100dvh)] w-auto max-w-full object-contain"
+                style={{ aspectRatio: "9 / 16" }}
+              />
+            </div>
+          )}
 
           {/* Overlay clickeable — cualquier click sobre el video lo cierra.
               z-[5] queda debajo de los controles (z-10) para que Skip/Mute

@@ -134,6 +134,7 @@ export function SiteShell({ children, observeSectionIds, showSplash = true }: Si
         {clientVideoOpen && (
           <VideoIntro
             src={CLIENT_VIDEO_SRC}
+            fit="contain"
             onDone={() => {
               setClientVideoOpen(false)
               try { localStorage.setItem(CLIENT_VIDEO_SEEN_KEY, "1") } catch { /* silent */ }
