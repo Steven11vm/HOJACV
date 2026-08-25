@@ -938,7 +938,7 @@ const TXT = {
       creds: "Tecnólogo ADSO · SENA · Miembro comunidad Anthropic",
     },
     commit: {
-      intro: "Antes de cerrar, cuéntame en 2–3 líneas qué necesitas — y después responde 3 preguntas cortas. Cada sí hace más probable el siguiente.",
+      intro: "Antes de cerrar, cuéntame en 2–3 líneas qué necesitas — y después responde 3 preguntas cortas para alinear expectativas.",
       briefLabel: "Cuéntame qué quieres o qué problema tienes",
       briefPlaceholder: "Ejemplo: mi equipo pierde 4h diarias cargando pedidos a mano. Necesito automatizarlo con un panel donde el cliente haga el pedido y llegue directo al sistema, con notificaciones a WhatsApp cuando esté listo.",
       briefMin: "Faltan {n} caracteres — sé específico: qué haces, qué duele, quién lo usará.",
@@ -959,10 +959,10 @@ const TXT = {
     callMsg: "Hola Steven, quiero agendar la call gratuita de 30 min. ¿Qué horario tienes esta semana?",
   },
   en: {
-    eyebrow: "07 · 7-step method",
-    subEyebrow: "Cialdini · Kahneman",
+    eyebrow: "07 · Quote",
+    subEyebrow: "7 steps · MMXXV",
     title: "Let's start your project.",
-    lede: "Seven steps applying proven persuasion principles. At the end you land in my WhatsApp with full context, and we book the free 30 min call.",
+    lede: "Seven short steps to land in my WhatsApp with full context and book the free 30 min call. No long forms, no ballpark quotes in the air.",
     doneTag: "Profile ready",
     back: "Back",
     next: "Next",
@@ -1050,7 +1050,7 @@ const TXT = {
       creds: "Software Analyst · SENA · Anthropic community member",
     },
     commit: {
-      intro: "Before closing, tell me in 2–3 lines what you need — then answer 3 short questions. Each yes makes the next more likely.",
+      intro: "Before closing, tell me in 2–3 lines what you need — then answer 3 short questions to align expectations.",
       briefLabel: "Tell me what you want or what problem you have",
       briefPlaceholder: "Example: my team loses 4h daily entering orders by hand. I need to automate it with a panel where clients place orders straight into the system, with WhatsApp notifications when ready.",
       briefMin: "{n} more characters — be specific: what you do, what hurts, who will use it.",
