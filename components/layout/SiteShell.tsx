@@ -22,10 +22,27 @@ const CLIENT_VIDEO_SEEN_KEY = "cv_client_video_seen"
  * Para desactivar la intro sin borrar el mp4: cambia esta constante a "".
  */
 const INTRO_VIDEO_SRC = "/video.mp4"
+/** Key + TTL para no repetir el intro-video más de una vez cada 28h por visitante. */
+const INTRO_VIDEO_SEEN_KEY = "cv_intro_video_seen_at"
+const INTRO_VIDEO_TTL_MS = 28 * 60 * 60 * 1000 // 28h
+
+/** ¿Debe mostrarse el intro-video en este mount? Se lee UNA VEZ al arrancar. */
+function shouldPlayIntroVideo(): boolean {
+  if (typeof window === "undefined") return false
+  if (!INTRO_VIDEO_SRC) return false
+  try {
+    const last = window.localStorage.getItem(INTRO_VIDEO_SEEN_KEY)
+    if (!last) return true
+    const t = parseInt(last, 10)
+    if (!Number.isFinite(t)) return true
+    return Date.now() - t > INTRO_VIDEO_TTL_MS
+  } catch {
+    return true
+  }
+}
 import { AudienceProvider } from "@/lib/audience"
 import { AudienceSelector } from "@/components/ui/audience-selector"
 import { CurrencyProvider } from "@/lib/currency"
-import { CurrencySelector } from "@/components/ui/currency-selector"
 
 interface SiteShellProps {
   children: (ctx: { lang: Lang; openChat: () => void }) => ReactNode
@@ -53,11 +70,26 @@ export function SiteShell({ children, observeSectionIds, showSplash = true }: Si
   const [isDark, setIsDark] = useState(true)
   const [isVisible, setIsVisible] = useState(false)
   const [lang, setLang] = useState<Lang>("es")
-  // Intro cinematográfica: si hay INTRO_VIDEO_SRC definido intenta el video.
-  // Cuando termina (o el navegador no puede cargarlo) fallback al SplashScreen.
+  // Intro cinematográfica:
+  //   - Primera visita  → arranca en "video" y al terminar salta a "splash".
+  //   - Visitas siguientes dentro de 28h → arranca directo en "splash" (el
+  //     visitante ya lo vio; que no lo re-consuma).
+  //
+  // NOTA sobre SSR: el server no puede leer localStorage; siempre renderiza
+  // "video" para pintar el mismo HTML que el cliente antes de hidratar. Un
+  // useEffect corrige a "splash" inmediatamente si corresponde, evitando
+  // que se descargue el mp4 de 41 MB si no se va a mostrar.
   const [introPhase, setIntroPhase] = useState<"video" | "splash">(
     INTRO_VIDEO_SRC ? "video" : "splash",
   )
+
+  useEffect(() => {
+    if (introPhase === "video" && !shouldPlayIntroVideo()) {
+      setIntroPhase("splash")
+    }
+    // Solo al mount — no queremos re-evaluar cuando cambia otro estado.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   // Video promocional para clientes — se dispara la PRIMERA vez que el
   // visitor elige (o cambia) su perfil a "client".
   const [clientVideoOpen, setClientVideoOpen] = useState(false)
@@ -129,7 +161,13 @@ export function SiteShell({ children, observeSectionIds, showSplash = true }: Si
       <ClientVideoWatcher onFire={() => setClientVideoOpen(true)} />
       <div className="relative min-h-screen bg-background text-foreground selection:bg-primary/30">
         {showSplash && introPhase === "video" && INTRO_VIDEO_SRC && (
-          <VideoIntro src={INTRO_VIDEO_SRC} onDone={() => setIntroPhase("splash")} />
+          <VideoIntro
+            src={INTRO_VIDEO_SRC}
+            onDone={() => {
+              try { window.localStorage.setItem(INTRO_VIDEO_SEEN_KEY, String(Date.now())) } catch { /* silent */ }
+              setIntroPhase("splash")
+            }}
+          />
         )}
         {showSplash && introPhase === "splash" && <SplashScreen />}
         {clientVideoOpen && (
@@ -143,7 +181,6 @@ export function SiteShell({ children, observeSectionIds, showSplash = true }: Si
           />
         )}
         <AudienceSelector lang={lang} />
-        <CurrencySelector lang={lang} />
         <HeroWave />
 
         <Navbar
