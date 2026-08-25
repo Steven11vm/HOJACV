@@ -22,23 +22,27 @@ const CLIENT_VIDEO_SEEN_KEY = "cv_client_video_seen"
  * Para desactivar la intro sin borrar el mp4: cambia esta constante a "".
  */
 const INTRO_VIDEO_SRC = "/video.mp4"
-/** Key + TTL para no repetir el intro-video más de una vez cada 28h por visitante. */
+/** Key + TTL para no repetir el intro-video ni el splash más de una vez cada 28h. */
 const INTRO_VIDEO_SEEN_KEY = "cv_intro_video_seen_at"
+const SPLASH_SEEN_KEY = "cv_splash_seen_at"
 const INTRO_VIDEO_TTL_MS = 28 * 60 * 60 * 1000 // 28h
+const SPLASH_TTL_MS = 28 * 60 * 60 * 1000 // 28h
 
-/** ¿Debe mostrarse el intro-video en este mount? Se lee UNA VEZ al arrancar. */
-function shouldPlayIntroVideo(): boolean {
+function isFreshEnough(key: string, ttl: number): boolean {
   if (typeof window === "undefined") return false
-  if (!INTRO_VIDEO_SRC) return false
   try {
-    const last = window.localStorage.getItem(INTRO_VIDEO_SEEN_KEY)
-    if (!last) return true
+    const last = window.localStorage.getItem(key)
+    if (!last) return false
     const t = parseInt(last, 10)
-    if (!Number.isFinite(t)) return true
-    return Date.now() - t > INTRO_VIDEO_TTL_MS
+    if (!Number.isFinite(t)) return false
+    return Date.now() - t <= ttl
   } catch {
-    return true
+    return false
   }
+}
+
+function stampNow(key: string) {
+  try { window.localStorage.setItem(key, String(Date.now())) } catch { /* silent */ }
 }
 import { AudienceProvider } from "@/lib/audience"
 import { AudienceSelector } from "@/components/ui/audience-selector"
@@ -70,21 +74,27 @@ export function SiteShell({ children, observeSectionIds, showSplash = true }: Si
   const [isDark, setIsDark] = useState(true)
   const [isVisible, setIsVisible] = useState(false)
   const [lang, setLang] = useState<Lang>("es")
-  // Intro cinematográfica:
-  //   - Primera visita  → arranca en "video" y al terminar salta a "splash".
-  //   - Visitas siguientes dentro de 28h → arranca directo en "splash" (el
-  //     visitante ya lo vio; que no lo re-consuma).
+  // Intro cinematográfica en 3 fases + una fase final "done":
+  //   video → splash → done
   //
-  // NOTA sobre SSR: el server no puede leer localStorage; siempre renderiza
-  // "video" para pintar el mismo HTML que el cliente antes de hidratar. Un
-  // useEffect corrige a "splash" inmediatamente si corresponde, evitando
-  // que se descargue el mp4 de 41 MB si no se va a mostrar.
-  const [introPhase, setIntroPhase] = useState<"video" | "splash">(
+  // Cada fase se salta si el visitante YA la vio en las últimas 28h. En
+  // primera visita ambas se muestran; en re-visitas dentro de la ventana,
+  // arranca directo en "done" y ni el video ni el splash se pintan.
+  //
+  // NOTA SSR: el server no lee localStorage; renderiza "video" para que
+  // el HTML server y el cliente coincidan antes de hidratar. Un useEffect
+  // corrige la fase inmediatamente en el cliente para evitar que se
+  // descargue el mp4 de 41 MB o parpadee el splash cuando no aplica.
+  const [introPhase, setIntroPhase] = useState<"video" | "splash" | "done">(
     INTRO_VIDEO_SRC ? "video" : "splash",
   )
 
   useEffect(() => {
-    if (introPhase === "video" && !shouldPlayIntroVideo()) {
+    const skipVideo = isFreshEnough(INTRO_VIDEO_SEEN_KEY, INTRO_VIDEO_TTL_MS)
+    const skipSplash = isFreshEnough(SPLASH_SEEN_KEY, SPLASH_TTL_MS)
+    if (skipVideo && skipSplash) {
+      setIntroPhase("done")
+    } else if (skipVideo && !skipSplash) {
       setIntroPhase("splash")
     }
     // Solo al mount — no queremos re-evaluar cuando cambia otro estado.
@@ -164,12 +174,15 @@ export function SiteShell({ children, observeSectionIds, showSplash = true }: Si
           <VideoIntro
             src={INTRO_VIDEO_SRC}
             onDone={() => {
-              try { window.localStorage.setItem(INTRO_VIDEO_SEEN_KEY, String(Date.now())) } catch { /* silent */ }
-              setIntroPhase("splash")
+              stampNow(INTRO_VIDEO_SEEN_KEY)
+              // Si el splash ya fue visto en 28h, saltarlo también.
+              setIntroPhase(isFreshEnough(SPLASH_SEEN_KEY, SPLASH_TTL_MS) ? "done" : "splash")
             }}
           />
         )}
-        {showSplash && introPhase === "splash" && <SplashScreen />}
+        {showSplash && introPhase === "splash" && (
+          <SplashScreen onDone={() => stampNow(SPLASH_SEEN_KEY)} />
+        )}
         {clientVideoOpen && (
           <VideoIntro
             src={CLIENT_VIDEO_SRC}

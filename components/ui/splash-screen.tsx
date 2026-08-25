@@ -18,7 +18,7 @@ const DURATION_MS = 1900
  * de progreso hairline abajo que anima 0→100% en `DURATION_MS`. Al terminar,
  * exit compuesto (opacity + scale + clip-path barrido) sobre el contenido real.
  */
-export function SplashScreen() {
+export function SplashScreen({ onDone }: { onDone?: () => void } = {}) {
   const [visible, setVisible] = useState(true)
 
   useEffect(() => {
@@ -33,7 +33,11 @@ export function SplashScreen() {
   }, [])
 
   useEffect(() => {
-    if (!visible) document.body.style.overflow = ""
+    if (!visible) {
+      document.body.style.overflow = ""
+      onDone?.()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible])
 
   return (
