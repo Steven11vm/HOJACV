@@ -29,20 +29,14 @@ export default function ArrancarPage() {
   const [showVideo, setShowVideo] = useState(false)
   const [videoDone, setVideoDone] = useState(false)
 
-  // Init: leer idioma + decidir si mostrar video promo.
+  // Init: leer idioma. En /arrancar SIEMPRE se dispara el video promo,
+  // sin chequear flag — el visitor llegó explícitamente a cotizar y la
+  // promo forma parte del pitch. Si ya lo vio en otro contexto, puede
+  // skipear con un click; es mejor UX que esconderlo silenciosamente.
   useEffect(() => {
     const saved = (localStorage.getItem(LANG_KEY) as Lang | null) ?? null
     if (saved === "en" || saved === "es") setLang(saved)
-
-    let seen = false
-    try {
-      seen = localStorage.getItem(CLIENT_VIDEO_SEEN_KEY) === "1"
-    } catch { /* silent */ }
-    if (seen) {
-      setVideoDone(true)
-    } else {
-      setShowVideo(true)
-    }
+    setShowVideo(true)
   }, [])
 
   const finishVideo = () => {
