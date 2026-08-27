@@ -1,23 +1,59 @@
 /**
- * In-memory sliding-window rate limiter.
+ * In-memory sliding-window rate limiter con buckets separados por endpoint.
  *
  * Best-effort on serverless: warm instances share state, cold starts reset.
- * For stricter guarantees, swap with an external store (Upstash, Vercel KV).
+ * Para garantías estrictas (por ejemplo enforcement across regions), reemplazar
+ * con Upstash o Vercel KV. Este in-memory es suficiente para mitigar abuso
+ * automatizado en el edge.
  *
- * Two windows enforced simultaneously: short burst + long sustained.
+ * Cada bucket enforce dos ventanas simultáneas: short burst + long sustained.
+ * Los buckets se identifican por `${endpoint}:${ip}` para que abuso en
+ * /api/lead no consuma quota de /api/estudio/login.
  */
 
 type Bucket = {
-  short: number[] // timestamps within SHORT_WINDOW_MS
-  long: number[] // timestamps within LONG_WINDOW_MS
+  short: number[]
+  long: number[]
   blockedUntil: number
 }
 
-const SHORT_WINDOW_MS = 60_000 // 1 minute
-const SHORT_LIMIT = 10
-const LONG_WINDOW_MS = 60 * 60_000 // 1 hour
-const LONG_LIMIT = 60
-const BLOCK_MS = 5 * 60_000 // 5 minutes block after abuse
+type Policy = {
+  shortWindowMs: number
+  shortLimit: number
+  longWindowMs: number
+  longLimit: number
+  blockMs: number
+}
+
+const DEFAULT_POLICY: Policy = {
+  shortWindowMs: 60_000,        // 1 min
+  shortLimit: 10,
+  longWindowMs: 60 * 60_000,    // 1 h
+  longLimit: 60,
+  blockMs: 5 * 60_000,          // 5 min
+}
+
+const LOGIN_POLICY: Policy = {
+  shortWindowMs: 15 * 60_000,   // 15 min
+  shortLimit: 5,
+  longWindowMs: 60 * 60_000,    // 1 h
+  longLimit: 8,
+  blockMs: 30 * 60_000,         // 30 min block
+}
+
+const POLICIES: Record<string, Policy> = {
+  default: DEFAULT_POLICY,
+  login: LOGIN_POLICY,
+  admin: {                       // /api/estudio/leads GET/PATCH/DELETE
+    shortWindowMs: 60_000,
+    shortLimit: 30,
+    longWindowMs: 60 * 60_000,
+    longLimit: 300,
+    blockMs: 5 * 60_000,
+  },
+  lead: DEFAULT_POLICY,          // /api/lead
+  chat: DEFAULT_POLICY,          // /api/chat
+}
 
 const buckets = new Map<string, Bucket>()
 const MAX_BUCKETS = 5_000
@@ -25,8 +61,8 @@ const MAX_BUCKETS = 5_000
 function gc(now: number) {
   if (buckets.size <= MAX_BUCKETS) return
   for (const [key, b] of buckets) {
-    const liveShort = b.short.length > 0 && now - b.short[b.short.length - 1] < SHORT_WINDOW_MS
-    const liveLong = b.long.length > 0 && now - b.long[b.long.length - 1] < LONG_WINDOW_MS
+    const liveShort = b.short.length > 0 && now - b.short[b.short.length - 1] < 60 * 60_000
+    const liveLong = b.long.length > 0 && now - b.long[b.long.length - 1] < 60 * 60_000
     if (!liveShort && !liveLong && b.blockedUntil < now) buckets.delete(key)
     if (buckets.size <= MAX_BUCKETS / 2) break
   }
@@ -34,12 +70,14 @@ function gc(now: number) {
 
 export type RateLimitResult = {
   ok: boolean
-  retryAfter: number // seconds
+  retryAfter: number
   remainingShort: number
   remainingLong: number
 }
 
-export function rateLimit(key: string): RateLimitResult {
+export function rateLimit(ip: string, endpoint: keyof typeof POLICIES = "default"): RateLimitResult {
+  const policy = POLICIES[endpoint] ?? DEFAULT_POLICY
+  const key = `${endpoint}:${ip}`
   const now = Date.now()
   let b = buckets.get(key)
   if (!b) {
@@ -47,73 +85,28 @@ export function rateLimit(key: string): RateLimitResult {
     buckets.set(key, b)
     gc(now)
   }
-
-  if (b.blockedUntil > now) {
-    return {
-      ok: false,
-      retryAfter: Math.ceil((b.blockedUntil - now) / 1000),
-      remainingShort: 0,
-      remainingLong: 0,
-    }
-  }
-
-  b.short = b.short.filter((t) => now - t < SHORT_WINDOW_MS)
-  b.long = b.long.filter((t) => now - t < LONG_WINDOW_MS)
-
-  if (b.short.length >= SHORT_LIMIT || b.long.length >= LONG_LIMIT) {
-    b.blockedUntil = now + BLOCK_MS
-    return {
-      ok: false,
-      retryAfter: Math.ceil(BLOCK_MS / 1000),
-      remainingShort: 0,
-      remainingLong: 0,
-    }
-  }
-
-  b.short.push(now)
-  b.long.push(now)
-
-  return {
-    ok: true,
-    retryAfter: 0,
-    remainingShort: Math.max(0, SHORT_LIMIT - b.short.length),
-    remainingLong: Math.max(0, LONG_LIMIT - b.long.length),
-  }
-}
-
-/**
- * Rate limit específico para intentos de login del panel privado — mucho
- * más estricto que el genérico. 5 intentos por IP en 15 min → bloqueo
- * de 30 minutos. Independiente del bucket general.
- */
-const LOGIN_WINDOW_MS = 15 * 60_000
-const LOGIN_LIMIT = 5
-const LOGIN_BLOCK_MS = 30 * 60_000
-
-const loginBuckets = new Map<string, { attempts: number[]; blockedUntil: number }>()
-
-export function rateLimitLogin(key: string): RateLimitResult {
-  const now = Date.now()
-  let b = loginBuckets.get(key)
-  if (!b) {
-    b = { attempts: [], blockedUntil: 0 }
-    loginBuckets.set(key, b)
-  }
   if (b.blockedUntil > now) {
     return { ok: false, retryAfter: Math.ceil((b.blockedUntil - now) / 1000), remainingShort: 0, remainingLong: 0 }
   }
-  b.attempts = b.attempts.filter((t) => now - t < LOGIN_WINDOW_MS)
-  if (b.attempts.length >= LOGIN_LIMIT) {
-    b.blockedUntil = now + LOGIN_BLOCK_MS
-    return { ok: false, retryAfter: Math.ceil(LOGIN_BLOCK_MS / 1000), remainingShort: 0, remainingLong: 0 }
+  b.short = b.short.filter((t) => now - t < policy.shortWindowMs)
+  b.long = b.long.filter((t) => now - t < policy.longWindowMs)
+  if (b.short.length >= policy.shortLimit || b.long.length >= policy.longLimit) {
+    b.blockedUntil = now + policy.blockMs
+    return { ok: false, retryAfter: Math.ceil(policy.blockMs / 1000), remainingShort: 0, remainingLong: 0 }
   }
-  b.attempts.push(now)
+  b.short.push(now)
+  b.long.push(now)
   return {
     ok: true,
     retryAfter: 0,
-    remainingShort: Math.max(0, LOGIN_LIMIT - b.attempts.length),
-    remainingLong: Math.max(0, LOGIN_LIMIT - b.attempts.length),
+    remainingShort: Math.max(0, policy.shortLimit - b.short.length),
+    remainingLong: Math.max(0, policy.longLimit - b.long.length),
   }
+}
+
+/** Retrocompat: mantiene la API del rate limit login. */
+export function rateLimitLogin(ip: string): RateLimitResult {
+  return rateLimit(ip, "login")
 }
 
 export function getClientIp(req: Request): string {

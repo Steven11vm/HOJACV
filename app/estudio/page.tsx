@@ -3,6 +3,26 @@ import { useCallback, useEffect, useState } from "react"
 import Link from "next/link"
 import { ArrowLeft, RefreshCw, Trash2, Check, Circle, LogOut } from "lucide-react"
 
+/** Lee cookie por nombre desde document.cookie (para el CSRF token). */
+function readCookie(name: string): string | null {
+  if (typeof document === "undefined") return null
+  const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+  const match = document.cookie.match(new RegExp(`(?:^|; )${escaped}=([^;]+)`))
+  return match ? decodeURIComponent(match[1]) : null
+}
+
+function csrfName() {
+  // Debe coincidir con lib/auth-session.CSRF_COOKIE.
+  return typeof window !== "undefined" && window.location.protocol === "https:"
+    ? "__Host-sv_csrf"
+    : "sv_csrf"
+}
+
+function csrfHeaders(): HeadersInit {
+  const token = readCookie(csrfName())
+  return token ? { "X-CSRF-Token": token } : {}
+}
+
 interface Lead {
   id: number
   created_at: string
@@ -99,7 +119,7 @@ export default function EstudioPage() {
     await fetch("/api/estudio/leads", {
       method: "PATCH",
       credentials: "include",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...csrfHeaders() },
       body: JSON.stringify({ id, contacted }),
     })
   }
@@ -110,7 +130,7 @@ export default function EstudioPage() {
     await fetch("/api/estudio/leads", {
       method: "DELETE",
       credentials: "include",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...csrfHeaders() },
       body: JSON.stringify({ id }),
     })
   }

@@ -30,10 +30,12 @@ const securityHeaders = [
   { key: "X-DNS-Prefetch-Control", value: "on" },
   {
     key: "Permissions-Policy",
-    value: "camera=(), microphone=(), geolocation=(), browsing-topics=(), interest-cohort=()",
+    value: "camera=(), microphone=(), geolocation=(), browsing-topics=(), interest-cohort=(), payment=(), usb=()",
   },
   { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
   { key: "Cross-Origin-Resource-Policy", value: "same-origin" },
+  // Bloquea policy files legacy (crossdomain.xml de Flash/Adobe/Silverlight).
+  { key: "X-Permitted-Cross-Domain-Policies", value: "none" },
   // Embedder is intentionally NOT set to require-corp to avoid breaking 3rd-party images
 ]
 
