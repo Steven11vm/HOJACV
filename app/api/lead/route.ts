@@ -129,7 +129,7 @@ export async function POST(req: Request) {
   }
 
   const ip = getClientIp(req)
-  const rl = rateLimit(ip)
+  const rl = await rateLimit(ip, "lead")
   if (!rl.ok) {
     return NextResponse.json({ error: "rate_limited" }, { status: 429, headers: { "Retry-After": String(rl.retryAfter) } })
   }

@@ -38,10 +38,26 @@ export const SESSION_TTL_SECONDS = SESSION_TTL_MS / 1000
 const MIN_ADMIN_PW_LEN = 16
 const MIN_AUTH_SECRET_LEN = 32
 
+/**
+ * getSecrets — devuelve el secret CURRENT y opcionalmente el PREV.
+ * Multi-secret support para rotación sin downtime: sesiones firmadas con
+ * el secret viejo siguen válidas mientras AUTH_SECRET_PREV esté configurado.
+ * Al rotar: mover el valor actual de AUTH_SECRET a AUTH_SECRET_PREV, poner
+ * un nuevo AUTH_SECRET. Sesiones activas siguen aceptándose hasta que
+ * AUTH_SECRET_PREV se retire.
+ */
+function getSecrets(): { current: string | null; prev: string | null } {
+  const current = process.env.AUTH_SECRET
+  const prev = process.env.AUTH_SECRET_PREV
+  return {
+    current: current && current.length >= MIN_AUTH_SECRET_LEN ? current : null,
+    prev: prev && prev.length >= MIN_AUTH_SECRET_LEN ? prev : null,
+  }
+}
+
+/** Solo el current — para firmar tokens nuevos (los prev no se usan al crear). */
 function getSecret(): string | null {
-  const s = process.env.AUTH_SECRET
-  if (!s || s.length < MIN_AUTH_SECRET_LEN) return null
-  return s
+  return getSecrets().current
 }
 
 function timingEqualStr(a: string, b: string): boolean {
@@ -64,30 +80,40 @@ function hmac(input: string, secret: string): string {
 }
 
 // ---------- Revocation list (fix HIGH-3) ----------
-// Map<nonce, expTimestamp> — el nonce queda revocado hasta su exp absoluta.
-const revoked = new Map<string, number>()
+// Backed por Redis si UPSTASH configurado, sino Map in-memory con LRU.
+// Redis: key `sess:rev:<nonce>` con TTL = tiempo hasta exp absoluta.
+import { kvGet, kvSet } from "@/lib/kv"
 
-function gcRevoked() {
+const memRevoked = new Map<string, number>()
+
+function gcMemRevoked() {
   const now = Date.now()
-  if (revoked.size < 2000) return
-  for (const [nonce, exp] of revoked) {
-    if (exp < now) revoked.delete(nonce)
+  if (memRevoked.size < 2000) return
+  for (const [nonce, exp] of memRevoked) {
+    if (exp < now) memRevoked.delete(nonce)
   }
 }
 
-function isRevoked(nonce: string): boolean {
-  const exp = revoked.get(nonce)
-  if (!exp) return false
-  if (exp < Date.now()) {
-    revoked.delete(nonce)
-    return false
+async function isRevokedAsync(nonce: string): Promise<boolean> {
+  // Chequear Redis + mem — el que diga "revocado" gana.
+  const key = `sess:rev:${nonce}`
+  const [redisVal, memExp] = [await kvGet(key), memRevoked.get(nonce)]
+  if (redisVal) return true
+  if (memExp) {
+    if (memExp < Date.now()) {
+      memRevoked.delete(nonce)
+      return false
+    }
+    return true
   }
-  return true
+  return false
 }
 
-function revokeNonce(nonce: string, exp: number) {
-  revoked.set(nonce, exp)
-  gcRevoked()
+async function revokeNonceAsync(nonce: string, exp: number): Promise<void> {
+  const ttlSec = Math.max(1, Math.ceil((exp - Date.now()) / 1000))
+  await kvSet(`sess:rev:${nonce}`, "1", ttlSec)
+  memRevoked.set(nonce, exp)
+  gcMemRevoked()
 }
 
 // ---------- Session tokens ----------
@@ -103,39 +129,46 @@ export function createSessionToken(): string | null {
   return `${payload}.${hmac(payload, secret)}`
 }
 
-export function verifySessionToken(token: string | undefined | null):
+/**
+ * verifySessionToken ahora es async (por chequeo de revocación en Redis).
+ *
+ * Multi-secret: intenta firmar con current, si falla intenta con prev
+ * (para no invalidar sesiones activas durante una rotación de AUTH_SECRET).
+ * Ambos comparisons son timing-safe.
+ */
+export async function verifySessionToken(token: string | undefined | null): Promise<
   | { ok: true; iat: number; exp: number; nonce: string }
   | { ok: false; reason: "empty" | "malformed" | "no_secret" | "bad_sig" | "expired" | "idle" | "revoked" }
-{
+> {
   if (!token) return { ok: false, reason: "empty" }
-  const secret = getSecret()
-  if (!secret) return { ok: false, reason: "no_secret" }
+  const { current, prev } = getSecrets()
+  if (!current) return { ok: false, reason: "no_secret" }
   const parts = token.split(".")
   if (parts.length !== 4) return { ok: false, reason: "malformed" }
   const [iatStr, expStr, nonce, sig] = parts
   if (!iatStr || !expStr || !nonce || !sig) return { ok: false, reason: "malformed" }
   const payload = `${iatStr}.${expStr}.${nonce}`
-  const expectedSig = hmac(payload, secret)
-  if (!timingEqualStr(sig, expectedSig)) return { ok: false, reason: "bad_sig" }
+  let sigOk = timingEqualStr(sig, hmac(payload, current))
+  if (!sigOk && prev) {
+    sigOk = timingEqualStr(sig, hmac(payload, prev))
+  }
+  if (!sigOk) return { ok: false, reason: "bad_sig" }
   const iat = parseInt(iatStr, 10)
   const exp = parseInt(expStr, 10)
   if (!Number.isFinite(iat) || !Number.isFinite(exp)) return { ok: false, reason: "malformed" }
   const now = Date.now()
   if (now > exp) return { ok: false, reason: "expired" }
   if (now - iat > SESSION_IDLE_MS) return { ok: false, reason: "idle" }
-  if (isRevoked(nonce)) return { ok: false, reason: "revoked" }
+  if (await isRevokedAsync(nonce)) return { ok: false, reason: "revoked" }
   return { ok: true, iat, exp, nonce }
 }
 
-export function isSessionAuthed(req: Request): boolean {
-  return verifySessionToken(readSessionCookie(req)).ok
+export async function isSessionAuthed(req: Request): Promise<boolean> {
+  return (await verifySessionToken(readSessionCookie(req))).ok
 }
 
-/**
- * Marca la sesión actual como revocada (fix HIGH-3). Se llama desde logout.
- * Si el token es válido, el nonce se guarda como revocado hasta su exp.
- */
-export function revokeSession(req: Request): boolean {
+/** Marca la sesión actual como revocada — llamado desde logout. */
+export async function revokeSession(req: Request): Promise<boolean> {
   const token = readSessionCookie(req)
   if (!token) return false
   const parts = token.split(".")
@@ -143,7 +176,7 @@ export function revokeSession(req: Request): boolean {
   const [, expStr, nonce] = parts
   const exp = parseInt(expStr, 10)
   if (!Number.isFinite(exp)) return false
-  revokeNonce(nonce, exp)
+  await revokeNonceAsync(nonce, exp)
   return true
 }
 
@@ -162,9 +195,11 @@ export function verifyCsrf(req: Request): boolean {
   const csrfCookie = readCookie(req, CSRF_COOKIE)
   if (!csrfHeader || !csrfCookie) return false
   if (!timingEqualStr(csrfHeader, csrfCookie)) return false
-  const expected = csrfTokenFor(session)
-  if (!expected) return false
-  return timingEqualStr(csrfHeader, expected)
+  // Multi-secret: aceptar CSRF derivado del secret current O prev.
+  const { current, prev } = getSecrets()
+  if (current && timingEqualStr(csrfHeader, hmac(`csrf:${session}`, current))) return true
+  if (prev && timingEqualStr(csrfHeader, hmac(`csrf:${session}`, prev))) return true
+  return false
 }
 
 // ---------- Password / config ----------

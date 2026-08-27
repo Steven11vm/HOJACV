@@ -51,9 +51,8 @@ function bodyTooLarge(req: Request, max: number): boolean {
 export async function GET(req: Request) {
   const requestId = newRequestId()
   const ip = getClientIp(req)
-  // FIX MEDIUM-9: auth primero — un desconocido no puede quemar rate-limit admin.
-  if (!isSessionAuthed(req)) return unauth(requestId, "no_session", ip, "leads.list")
-  const rl = rateLimit(ip, "admin")
+  if (!(await isSessionAuthed(req))) return unauth(requestId, "no_session", ip, "leads.list")
+  const rl = await rateLimit(ip, "admin")
   if (!rl.ok) {
     return NextResponse.json({ error: "rate_limited" }, { status: 429, headers: { ...baseHeaders(requestId), "Retry-After": String(rl.retryAfter) } })
   }
@@ -68,9 +67,9 @@ export async function GET(req: Request) {
 export async function PATCH(req: Request) {
   const requestId = newRequestId()
   const ip = getClientIp(req)
-  if (!isSessionAuthed(req)) return unauth(requestId, "no_session", ip, "leads.patch")
+  if (!(await isSessionAuthed(req))) return unauth(requestId, "no_session", ip, "leads.patch")
   if (!verifyCsrf(req)) return unauth(requestId, "csrf_failed", ip, "leads.patch")
-  const rl = rateLimit(ip, "admin")
+  const rl = await rateLimit(ip, "admin")
   if (!rl.ok) {
     return NextResponse.json({ error: "rate_limited" }, { status: 429, headers: { ...baseHeaders(requestId), "Retry-After": String(rl.retryAfter) } })
   }
@@ -92,9 +91,9 @@ export async function PATCH(req: Request) {
 export async function DELETE(req: Request) {
   const requestId = newRequestId()
   const ip = getClientIp(req)
-  if (!isSessionAuthed(req)) return unauth(requestId, "no_session", ip, "leads.delete")
+  if (!(await isSessionAuthed(req))) return unauth(requestId, "no_session", ip, "leads.delete")
   if (!verifyCsrf(req)) return unauth(requestId, "csrf_failed", ip, "leads.delete")
-  const rl = rateLimit(ip, "admin")
+  const rl = await rateLimit(ip, "admin")
   if (!rl.ok) {
     return NextResponse.json({ error: "rate_limited" }, { status: 429, headers: { ...baseHeaders(requestId), "Retry-After": String(rl.retryAfter) } })
   }

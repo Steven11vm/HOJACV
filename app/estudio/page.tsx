@@ -44,6 +44,8 @@ interface Lead {
 export default function EstudioPage() {
   const [authed, setAuthed] = useState(false)
   const [password, setPassword] = useState("")
+  const [totp, setTotp] = useState("")
+  const [needsTotp, setNeedsTotp] = useState(false)
   const [leads, setLeads] = useState<Lead[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -83,11 +85,13 @@ export default function EstudioPage() {
     setRetryAfter(null)
     setLoading(true)
     try {
+      const body: Record<string, string> = { password, honeypot: "" }
+      if (totp) body.totp = totp
       const res = await fetch("/api/estudio/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ password, honeypot: "" }),
+        body: JSON.stringify(body),
       })
       if (res.status === 429) {
         const data = await res.json().catch(() => ({}))
@@ -96,10 +100,18 @@ export default function EstudioPage() {
         return
       }
       if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        if (data?.error === "totp_required") {
+          setNeedsTotp(true)
+          setError(totp ? "Código TOTP incorrecto" : "Ingresa el código de tu app de autenticador")
+          return
+        }
         setError("Credenciales inválidas")
         return
       }
       setPassword("")
+      setTotp("")
+      setNeedsTotp(false)
       await fetchLeads()
     } catch {
       setError("Error de red")
@@ -179,6 +191,20 @@ export default function EstudioPage() {
               autoFocus
               maxLength={256}
             />
+            {needsTotp && (
+              <input
+                type="text"
+                inputMode="numeric"
+                pattern="\d{6}"
+                value={totp}
+                onChange={(e) => setTotp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                placeholder="Código 2FA (6 dígitos)"
+                autoComplete="one-time-code"
+                className="w-full border border-hairline bg-transparent px-4 py-3 text-center font-mono text-lg tracking-[0.4em] text-foreground transition-colors focus:border-foreground focus:outline-none"
+                maxLength={6}
+                autoFocus
+              />
+            )}
             {error && (
               <p className="text-sm text-red-400">
                 {error}

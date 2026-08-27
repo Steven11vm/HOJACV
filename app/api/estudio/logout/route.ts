@@ -44,9 +44,7 @@ export async function POST(req: Request) {
     auditLog("warn", { action: "logout", ip, requestId, result: "denied", reason: "bad_origin" })
     return NextResponse.json({ error: "forbidden" }, { status: 403 })
   }
-  if (!isSessionAuthed(req)) {
-    // Sin sesión válida no hay nada que invalidar. Devolver 401 (no 200) —
-    // no queremos que evil.com sepa que el endpoint pasó por el "borrado".
+  if (!(await isSessionAuthed(req))) {
     auditLog("warn", { action: "logout", ip, requestId, result: "denied", reason: "no_session" })
     return NextResponse.json({ error: "unauthorized" }, { status: 401 })
   }
@@ -55,7 +53,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 })
   }
 
-  revokeSession(req)
+  await revokeSession(req)
   auditLog("info", { action: "logout", ip, requestId, result: "ok" })
 
   const headers = new Headers({

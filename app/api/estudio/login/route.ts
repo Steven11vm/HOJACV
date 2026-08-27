@@ -25,6 +25,7 @@ import {
   sessionCookieHeader,
   verifyAdminPassword,
 } from "@/lib/auth-session"
+import { totpVerify } from "@/lib/totp"
 import { auditLog, fingerprint, newRequestId } from "@/lib/audit-log"
 
 export const runtime = "nodejs"
@@ -35,6 +36,7 @@ const MAX_BODY_BYTES = 1024
 
 const LoginSchema = z.object({
   password: z.string().min(1).max(256),
+  totp: z.string().max(10).optional(),
   honeypot: z.string().max(64).optional(),
 })
 
@@ -107,7 +109,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "service_unavailable" }, { status: 503, headers: baseHeaders(requestId) })
   }
 
-  const rl = rateLimit(ip, "login")
+  const rl = await rateLimit(ip, "login")
   if (!rl.ok) {
     auditLog("warn", { action: "login", ip, ua, result: "rate_limited", retryAfter: rl.retryAfter, requestId })
     return NextResponse.json(
@@ -144,6 +146,16 @@ export async function POST(req: Request) {
     auditLog("warn", { action: "login", ip, ua, result: "invalid", requestId })
     await jitterSleep()
     return NextResponse.json({ error: "invalid" }, { status: 401, headers: baseHeaders(requestId) })
+  }
+
+  // 2FA TOTP — requerido si TOTP_SECRET está configurado.
+  const totpSecret = process.env.TOTP_SECRET
+  if (totpSecret && totpSecret.length >= 16) {
+    if (!parsed.totp || !totpVerify(totpSecret, parsed.totp)) {
+      auditLog("warn", { action: "login", ip, ua, result: "invalid", reason: "totp_failed", requestId })
+      await jitterSleep()
+      return NextResponse.json({ error: "totp_required" }, { status: 401, headers: baseHeaders(requestId) })
+    }
   }
 
   const token = createSessionToken()
