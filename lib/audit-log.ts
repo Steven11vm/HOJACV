@@ -18,11 +18,18 @@ interface AuditEvent {
   [key: string]: unknown
 }
 
+/**
+ * Emite un evento de auditoría como JSON de una sola línea (grep-friendly
+ * en Vercel Logs). FIX LOW-1: cualquier field `ua` se cap a 200 chars antes
+ * de emitir para evitar logs de 8 KB por request.
+ */
 export function auditLog(level: LogLevel, event: AuditEvent) {
+  const safeEvent: AuditEvent = { ...event }
+  if (typeof safeEvent.ua === "string") safeEvent.ua = safeEvent.ua.slice(0, 200)
   const entry = {
     ts: new Date().toISOString(),
     level,
-    ...event,
+    ...safeEvent,
   }
   const line = `[AUDIT] ${JSON.stringify(entry)}`
   if (level === "error") console.error(line)

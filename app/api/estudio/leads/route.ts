@@ -1,9 +1,14 @@
 /**
  * /api/estudio/leads — CRUD del dashboard privado.
  *
- * GET     — lista de leads.       Auth: cookie de sesión.
- * PATCH   — marca contactado.     Auth: cookie de sesión + CSRF token double-submit.
- * DELETE  — elimina lead.         Auth: cookie de sesión + CSRF token double-submit.
+ * GET     — lista leads.       Auth: cookie sesión.
+ * PATCH   — marca contactado.  Auth: cookie sesión + CSRF double-submit.
+ * DELETE  — elimina lead.       Auth: cookie sesión + CSRF double-submit.
+ *
+ * FIX MEDIUM-9: auth ANTES que rate-limit (un atacante compartiendo IP con
+ * el admin no puede quemarle el rate-limit sin credenciales válidas).
+ * FIX MEDIUM-5: cap explícito de Content-Length antes de req.json() en
+ * PATCH/DELETE — sesión secuestrada no puede subir 100MB en el body.
  */
 import { NextResponse } from "next/server"
 import { z } from "zod"
@@ -15,6 +20,8 @@ import { getClientIp, rateLimit } from "@/lib/rate-limit"
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
 export const maxDuration = 15
+
+const MAX_MUTATION_BODY_BYTES = 512
 
 const PatchSchema = z.object({ id: z.number().int().positive(), contacted: z.boolean() })
 const DeleteSchema = z.object({ id: z.number().int().positive() })
@@ -34,14 +41,22 @@ function unauth(requestId: string, reason: string, ip: string, action: string) {
   return NextResponse.json({ error: "unauthorized" }, { status: 401, headers: baseHeaders(requestId) })
 }
 
+/** Chequea Content-Length antes de leer el body — fix MEDIUM-5. */
+function bodyTooLarge(req: Request, max: number): boolean {
+  const cl = parseInt(req.headers.get("content-length") ?? "", 10)
+  if (!Number.isFinite(cl)) return true // sin CL, rechazamos
+  return cl < 1 || cl > max
+}
+
 export async function GET(req: Request) {
   const requestId = newRequestId()
   const ip = getClientIp(req)
+  // FIX MEDIUM-9: auth primero — un desconocido no puede quemar rate-limit admin.
+  if (!isSessionAuthed(req)) return unauth(requestId, "no_session", ip, "leads.list")
   const rl = rateLimit(ip, "admin")
   if (!rl.ok) {
     return NextResponse.json({ error: "rate_limited" }, { status: 429, headers: { ...baseHeaders(requestId), "Retry-After": String(rl.retryAfter) } })
   }
-  if (!isSessionAuthed(req)) return unauth(requestId, "no_session", ip, "leads.list")
   if (!dbAvailable()) {
     return NextResponse.json({ leads: [], warning: "POSTGRES_URL no configurado" }, { headers: baseHeaders(requestId) })
   }
@@ -53,12 +68,15 @@ export async function GET(req: Request) {
 export async function PATCH(req: Request) {
   const requestId = newRequestId()
   const ip = getClientIp(req)
+  if (!isSessionAuthed(req)) return unauth(requestId, "no_session", ip, "leads.patch")
+  if (!verifyCsrf(req)) return unauth(requestId, "csrf_failed", ip, "leads.patch")
   const rl = rateLimit(ip, "admin")
   if (!rl.ok) {
     return NextResponse.json({ error: "rate_limited" }, { status: 429, headers: { ...baseHeaders(requestId), "Retry-After": String(rl.retryAfter) } })
   }
-  if (!isSessionAuthed(req)) return unauth(requestId, "no_session", ip, "leads.patch")
-  if (!verifyCsrf(req)) return unauth(requestId, "csrf_failed", ip, "leads.patch")
+  if (bodyTooLarge(req, MAX_MUTATION_BODY_BYTES)) {
+    return NextResponse.json({ error: "payload_too_large" }, { status: 413, headers: baseHeaders(requestId) })
+  }
 
   let body: z.infer<typeof PatchSchema>
   try {
@@ -74,12 +92,15 @@ export async function PATCH(req: Request) {
 export async function DELETE(req: Request) {
   const requestId = newRequestId()
   const ip = getClientIp(req)
+  if (!isSessionAuthed(req)) return unauth(requestId, "no_session", ip, "leads.delete")
+  if (!verifyCsrf(req)) return unauth(requestId, "csrf_failed", ip, "leads.delete")
   const rl = rateLimit(ip, "admin")
   if (!rl.ok) {
     return NextResponse.json({ error: "rate_limited" }, { status: 429, headers: { ...baseHeaders(requestId), "Retry-After": String(rl.retryAfter) } })
   }
-  if (!isSessionAuthed(req)) return unauth(requestId, "no_session", ip, "leads.delete")
-  if (!verifyCsrf(req)) return unauth(requestId, "csrf_failed", ip, "leads.delete")
+  if (bodyTooLarge(req, MAX_MUTATION_BODY_BYTES)) {
+    return NextResponse.json({ error: "payload_too_large" }, { status: 413, headers: baseHeaders(requestId) })
+  }
 
   let body: z.infer<typeof DeleteSchema>
   try {

@@ -23,6 +23,11 @@ const MAX_BODY_BYTES = 4 * 1024
 const LEAD_TO_EMAIL = "Stevenvilla10@gmail.com"
 const LEAD_FROM_EMAIL = "leads@cv-steven.vercel.app"
 
+/**
+ * FIX MEDIUM-4: origin whitelist estricta contra host propio + VERCEL_URL,
+ * ya no acepta cualquier *.vercel.app (cualquiera podía registrar
+ * fake.vercel.app y bypass).
+ */
 function isOriginAllowed(req: Request) {
   const host = req.headers.get("host") ?? ""
   const origin = req.headers.get("origin") ?? ""
@@ -34,29 +39,33 @@ function isOriginAllowed(req: Request) {
     allowed.add(`https://${host}`)
     allowed.add(`http://${host}`)
   }
-  const vercelPreview = /^https?:\/\/[\w-]+\.vercel\.app$/i
-  if (origin && vercelPreview.test(origin)) return true
+  const ownVercel = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null
+  if (ownVercel) allowed.add(ownVercel)
+
+  if (origin && allowed.has(origin)) return true
   if (!origin && referer) {
     try {
-      const refOrigin = new URL(referer).origin
-      if (vercelPreview.test(refOrigin)) return true
-      if (allowed.has(refOrigin)) return true
+      if (allowed.has(new URL(referer).origin)) return true
     } catch {
       return false
     }
   }
-  if (origin && allowed.has(origin)) return true
   if (process.env.NODE_ENV !== "production") {
     if (origin.startsWith("http://localhost") || referer.startsWith("http://localhost")) return true
   }
   return false
 }
 
+/**
+ * FIX MEDIUM-3: sanitize filtra TODOS los control chars incluyendo \r y \n
+ * (antes preservábamos \n para textareas, pero el field iba directo al audit
+ * log y permitía inyectar líneas [AUDIT] falsas).
+ */
 function sanitize(text: string): string {
   let out = ""
   for (const ch of text) {
     const code = ch.codePointAt(0) ?? 0
-    if (code < 0x20 && code !== 9 && code !== 10) continue
+    if (code < 0x20 && code !== 9) continue  // solo TAB pasa; \n \r se dropean
     if (code === 0x7f) continue
     if (code >= 0x200b && code <= 0x200f) continue
     if (code >= 0x202a && code <= 0x202e) continue
