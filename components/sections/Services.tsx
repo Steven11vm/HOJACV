@@ -9,47 +9,71 @@ export function Services({ lang }: { lang: Lang }) {
   return (
     <section
       id="services"
-      className="relative border-t border-hairline px-6 py-28 sm:px-10 sm:py-36 lg:px-16"
+      className="relative border-t border-hairline px-6 py-24 sm:px-10 sm:py-32 lg:px-16"
     >
-      {/* HEADER — mismo lenguaje editorial que Hero/About/Skills/Process/Experience */}
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-100px" }}
-        transition={{ duration: 0.8, ease: [0.2, 0.8, 0.2, 1] }}
-        className="mx-auto flex w-full max-w-3xl flex-col items-center text-center"
-      >
-        <p className="inline-flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
-          <span aria-hidden className="inline-block h-px w-6 bg-muted-foreground/60" />
-          <span>04 · {lang === "es" ? "Servicios" : "Services"}</span>
-          <span aria-hidden className="inline-block h-px w-6 bg-muted-foreground/60" />
-        </p>
+      <div className="mx-auto max-w-6xl">
+        {/* Eyebrow superior editorial — mismo lenguaje que About/Skills/Experience */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.7, ease: [0.2, 0.8, 0.2, 1] }}
+          className="mb-16 flex flex-wrap items-baseline justify-between gap-6 border-b border-hairline pb-6"
+        >
+          <p className="inline-flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
+            <span aria-hidden className="inline-block h-px w-6 bg-muted-foreground/60" />
+            <span>04 · {lang === "es" ? "Servicios" : "Services"}</span>
+          </p>
+          <p className="font-mono text-[10px] uppercase tracking-[0.5em] text-muted-foreground/60">
+            Nº 07 · MMXXV
+          </p>
+        </motion.div>
 
-        <p className="mt-6 hidden font-mono text-[10px] uppercase tracking-[0.5em] text-muted-foreground/60 sm:block">
-          Nº 07 · MMXXV
-        </p>
+        {/* GRID HORIZONTAL — titulo izq, meta+quote der */}
+        <div className="grid gap-14 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:items-end lg:gap-20">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8, ease: [0.2, 0.8, 0.2, 1] }}
+            className="flex flex-col"
+          >
+            <h2 className="font-display text-4xl leading-[1.05] text-foreground sm:text-5xl md:text-6xl">
+              {t.services.title}
+            </h2>
+            <div aria-hidden className="mt-8 h-px w-16 bg-foreground/40" />
+            <p className="mt-8 max-w-xl text-base leading-relaxed text-muted-foreground md:text-lg">
+              {t.services.subtitle}
+            </p>
+          </motion.div>
 
-        <h2 className="mt-8 font-display text-4xl leading-tight text-foreground sm:mt-10 sm:text-5xl md:text-6xl">
-          {t.services.title}
-        </h2>
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.7, delay: 0.15 }}
+            className="flex flex-col gap-6 lg:items-end"
+          >
+            <p className="flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
+              <span>
+                {items.length} {lang === "es" ? "servicios" : "services"}
+              </span>
+              <span aria-hidden>·</span>
+              <span>{lang === "es" ? "Full stack + DevOps + IA" : "Full stack + DevOps + AI"}</span>
+            </p>
+            <p
+              className="max-w-sm text-balance text-lg leading-relaxed text-foreground/90 sm:text-xl lg:text-right"
+              style={{ fontFamily: "var(--font-serif), Georgia, serif", fontStyle: "italic" }}
+            >
+              {lang === "es"
+                ? "Precios cerrados, calendario claro, sin costos ocultos."
+                : "Fixed pricing, clear timeline, no hidden costs."}
+            </p>
+          </motion.div>
+        </div>
 
-        <div aria-hidden className="mt-10 h-px w-16 bg-foreground/40" />
-
-        <p className="mt-8 max-w-xl text-[15px] leading-relaxed text-muted-foreground sm:text-base">
-          {t.services.subtitle}
-        </p>
-
-        <p className="mt-6 flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground/70">
-          <span>
-            {items.length} {lang === "es" ? "servicios" : "services"}
-          </span>
-          <span aria-hidden>·</span>
-          <span>{lang === "es" ? "Full stack + DevOps + IA" : "Full stack + DevOps + AI"}</span>
-        </p>
-      </motion.div>
-
-      {/* SERVICIOS — chapter cards */}
-      <div className="mx-auto mt-20 w-full max-w-4xl border-t border-hairline">
+        {/* SERVICIOS — chapter cards */}
+        <div className="mt-20 border-t border-hairline">
         {items.map((service, idx) => (
           <motion.article
             key={idx}
@@ -97,18 +121,6 @@ export function Services({ lang }: { lang: Lang }) {
         ))}
       </div>
 
-      {/* Cierre editorial */}
-      <div className="mx-auto mt-16 flex max-w-2xl flex-col items-center gap-6 px-4 text-center">
-        <span aria-hidden className="h-px w-12 bg-foreground/40" />
-        <p
-          className="text-balance text-lg leading-relaxed text-foreground sm:text-xl"
-          style={{ fontFamily: "var(--font-serif), Georgia, serif", fontStyle: "italic" }}
-        >
-          {lang === "es"
-            ? "Precios cerrados, calendario claro, sin costos ocultos."
-            : "Fixed pricing, clear timeline, no hidden costs."}
-        </p>
-        <span aria-hidden className="h-px w-12 bg-foreground/40" />
       </div>
     </section>
   )
